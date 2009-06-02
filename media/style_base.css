@@ -1,0 +1,64 @@
+/* CSS base-document */
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	background-repeat: repeat
+}
+p {
+	padding: 0.3125em;
+	margin: 0em;
+	text-align:justify;
+}
+
+h1 {
+	padding: 0.3125em;
+	margin: 0.3125em;	
+	font-size: x-large;
+
+}
+
+h2 {
+	padding: 0.3125em;
+        margin: 0.3125em;
+        font-size: smaller;
+}
+
+h3 {
+	padding: 0.3125em;
+        margin: 0.3125;
+        font-size: smaller;
+}
+
+h4 {
+	padding: 0.3125;
+	margin: 0.3125;
+       	font-size: smaller;
+}
+
+#top_bar {
+	position:absolute;
+	margin: 0px auto;
+	left:0.3125em;
+	width:56.25em;
+	height:4.6875em;
+	z-index:2;
+	background-color:#0099CC;
+}
+#text {
+	position:absolute;
+	margin: 0px auto;
+	left:0.3125em;
+	top:4.6875em;
+	width:56.25em;
+	height:37.5em;
+	z-index:3;
+	background-color:#E8E8E8;
+	text-align:justify;
+}
+
+#wrap {
+	text-align: left;
+	width: 31.25em;
+	margin-left:0em auto;
+	margin-right:0em auto;
+}

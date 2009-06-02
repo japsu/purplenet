@@ -1,0 +1,14 @@
+{% extends "base/base.html" %}
+{% block content %}
+<div id="auth">
+  <h2>User Login</h2>
+<p>Please submit your login information below.</p>
+    <form method="post" action=".">
+      <p><label for="id_username">Username: </label><br /><input type="text"
+name="username"></p>
+      <p><label for="id_password">Password: </label><br /><input
+type="password" name="password"></p><br />
+      <input type="submit" value="login" />
+    </form>
+</div>
+{% endblock content %}

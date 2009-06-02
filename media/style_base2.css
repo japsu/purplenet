@@ -1,0 +1,122 @@
+/* CSS base-document */
+
+body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-repeat: repeat
+}
+
+p {
+        padding: 0.3125em;
+        margin: 0em;
+        text-align:justify;
+	font-size: 0.8em;
+	line-height:1.5em;
+}
+
+h1 {
+        padding: 0.3125em;
+        margin: 0.3125em;
+        font-size: 1.3em;
+	font-weight:bold;
+	color:#006;
+	line-height:2em;
+}
+
+h2 {
+        padding: 0.3125em;
+        margin: 0.3125em;
+        font-size: 1.1em;
+	font-weight:bold;
+	line-height:1.75em;
+	color:#003;
+}
+
+h3 {
+        padding: 0.3125em;
+        margin: 0.3125em;
+        font-size: 1em;
+	font-weight:bold;
+	line-height:1.75;
+}
+
+h4 {
+        padding: 0.3125em;
+        margin: 0.3125em;
+        font-size: 0.9em;
+	font-weight:bold;
+}
+
+table {
+	padding:0.3125em;
+	border: 0.063em solid #666;
+	min-width: 20em;
+	margin-left: 4em;
+}
+
+th {
+	text-align:center;
+	font:bold;
+	min-height:2em;
+	min-width:4em;
+}
+
+td {
+	text-align:left;
+	min-height:2em;
+	min-width:4em;
+}
+
+#top_bar {
+        min-width:30em;
+        min-height:4em;
+        z-index:2;
+        background-color:#BAE0D1;
+}
+
+#text {
+        top:4em;
+        min-width:30em;
+        min-height:30em;
+        z-index:2;
+        background-color:#E8E8E8;
+        text-align:justify;
+}
+	
+
+#wrap {
+        min-width:30em;
+	min-height:34em;
+        margin:1.5em 12em 1.5em 12em;
+        border: 0.063em solid #ccc;
+	background-color:#E8E8E8;
+	z-index:1;
+}
+
+#auth {
+	text-align:left;
+	padding:0.4375em;
+	left:28.125em;
+	margin:0.5em auto;
+        width:16em;
+        min-height:11em;
+	border: 0.063em solid #666;
+	background-color:#DDD9DB;
+	z-index:3;	
+}
+
+.submit input {
+	size:0em;
+	margin-left:2em;
+	margin-right:2em;
+	border: 2px outset #d7b9c9;
+}
+
+#message {
+	text-align:center;
+	left:28.125em;
+	margin:4em auto;
+	min-width:2em;
+	min-height:2em;
+	border:0.4em;
+	color:#F00;
+}

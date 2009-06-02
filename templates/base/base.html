@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    	<title> {% block title %} OpenVPN {% endblock title %} </title>
+</head>
+<body>
+<div id="wrap">
+<link href="/openvpn/media/style_base2.css" rel="stylesheet" />
+
+<div id="top_bar">
+{% block navigation %}
+    <h1>OpenVPN user interface</h1>
+
+<p>
+{% if user.is_authenticated %}
+welcome, {{ user.username }}
+(<a href="/openvpn/logout">logout</a>)
+{% else %}
+<a href="/openvpn/">login</a>
+{% endif %}
+</p>
+{% endblock navigation %}
+
+</div>
+
+<div id="text">
+
+{% block content %}
+
+<div id="error">
+
+{% block message %}
+{% if messages %}
+  {% for message in messages %}
+        {{ message }}
+  {% endfor %}
+{% endif %}
+{% endblock message %}
+</div>
+
+<p>This is the place where the content will be shown.</p>
+{% endblock content %}
+
+
+{% block message_login %}
+<div id="message"> 
+  {{ message_login }}
+</div>
+{% endblock message_login %}
+
+</div>
+</div>
+</body>
+</html>

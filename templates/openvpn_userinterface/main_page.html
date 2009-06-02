@@ -1,0 +1,64 @@
+{% extends "base/base.html" %}
+
+
+{% block content %}
+
+
+  {% if user.username %}
+<!-- XXX lots of hard-coded urls -->
+<h3>From this page you can download certificates simply by pressing the download button. You are also able 
+to remove current certificates.</h3> 
+    <h2>Available networks:</h2>
+      {% if organisations %}
+        <ul>
+	  {% for org in organisations %}
+	    <h2>{{ org.name }}: </h2>
+	     {% for network in org.network_set.all %}
+	       <table><tr>
+			<th>{{ network.name }}</th>
+			<th>
+			<form method="post" action="/openvpn/openvpn/order/">
+			<input type="hidden" name="net_id" value= "{{network.id }}" />
+			<p class="submit">
+			  <input type="submit" value="Order" {% if session.cert_id %}disabled{% endif %}/>
+			</p>
+			</form></th><th> </th>
+			</tr>
+			{% for certs in certificates.items %}
+			 {% ifequal certs.0 network.id %}
+			  {% for cert in certs.1 %}
+			 <tr><td> {{ cert.common_name }}</td>
+			  <td>{% ifequal cert.revoked 0 %}
+			  <form method="post" action="/openvpn/openvpn/revoke/">
+			  <input type="hidden" name="cert_id" value="{{cert.id}}" />
+			  <p class="submit"><input type="submit" value="Remove" {% if session.cert_id %}disabled{% endif %}/></p>
+			  </form>
+			  {% else %}
+			  <p>Revoked @ {{ cert.timestamp }}</p>
+			  {% endifequal %}</td>
+			 {% ifequal session.cert_id cert.id %}
+			 {% ifequal cert.revoked 0 %}
+			  <td><form method="post" action="/openvpn/openvpn/download/">
+			  <p class="submit"><input type="submit" value="Download" /></p>
+			  </form></td></tr>
+			 {% endifequal %}
+			 {% endifequal %}
+			  {% endfor %}
+			 {% endifequal %}
+			{% endfor %}
+	       </tr></table><p>&nbsp;</p>
+	     {% endfor %}
+	  {% endfor %}
+	</ul>
+      {% else %}
+        <p>No organisations at the moment.</p>
+      {% endif %}
+  {% else %}
+    <p>You are not logged in!
+    You need to <a href="/openvpn/openvpn/">login</a>
+    before you can use this service.</p>
+  {% endif %}
+
+  
+{% endblock content %}
+				      
