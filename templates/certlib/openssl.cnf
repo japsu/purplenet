@@ -1,0 +1,100 @@
+HOME				= .
+RANDFILE			= /etc/ssl/privates/.rand
+
+[ ca ]
+
+default_ca			= CA_default
+
+[ CA_default ]
+
+dir				= {{ dir }}
+crl_dir				= $dir
+database			= $dir/index.txt
+unique_subject			= yes
+
+new_certs_dir			= $dir/new_certs
+
+certificate			= $dir/ca.crt
+serial				= $dir/cert-serial
+crlnumber			= $dir/crl-serial
+
+crl				= $dir/crl.pem
+private_key			= $dir/ca.key
+
+crt_extensions			= crt_ext
+
+name_opt 			= ca_default
+cert_opt 			= ca_default
+email_in_dn			= no
+
+crl_extensions			= crl_ext
+copy_extensions			= none
+
+default_days			= {{ default_days }}
+default_crl_days		= {{ default_crl_days }}
+default_md			= sha1
+preserve			= no
+
+policy				= policy_match
+
+[ policy_match ]
+
+countryName			= match
+stateOrProvinceName		= optional
+localityName			= match
+organizationName		= match
+organizationalUnitName		= supplied
+commonName			= supplied
+emailAddress			= optional
+
+[ crt_ext ]
+
+subjectKeyIdentifier		= hash
+authorityKeyIdentifier		= keyid:always,issuer:always
+
+basicConstraints		= {{ basic_constraints }}
+
+keyUsage			= {{ key_usage }}
+{% if extended_key_usage %}
+extendedKeyUsage		= {{ extended_key_usage }}
+{% endif %}
+
+{% if crl_distribution_points %}
+crlDistributionPoints           = crl_distribution_points
+{% endif %}
+
+[ crl_ext ]
+
+authorityKeyIdentifier          = keyid:always,issuer:always
+
+[ req ]
+
+default_bits                    = 2048
+distinguished_name              = req_distinguished_name
+string_mask                     = nombstr
+
+[ req_distinguished_name ]
+
+countryName                     = Country Name (2 letter code)
+countryName_default             = FI
+countryName_min                 = 2
+countryName_max                 = 2
+
+stateOrProvinceName             = State or Province Name (full name)
+#stateOrProvinceName_default    = .
+
+localityName                    = Locality Name (eg, city)
+localityName_default            = Tampere
+
+organizationName                = Organization Name (eg, company)
+organizationName_default        = Tampere University of Technology
+
+organizationalUnitName          = Organizational Unit Name (eg, section)
+organizationalUnitName_default  = Department of Communications Engineering
+
+commonName                      = Common Name (eg, YOUR name)
+commonName_max                  = 64
+
+emailAddress                    = Email Address
+emailAddress_max                = 64
+

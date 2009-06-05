@@ -1,0 +1,3 @@
+PYTHONPATH=. bin/mkca -h
+
+setup.py lacks stuff.
