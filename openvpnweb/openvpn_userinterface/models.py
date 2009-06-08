@@ -1,12 +1,8 @@
 from subprocess import Popen
 
+import certlib.openssl
+
 # TODO File locking?
-
-# XXX
-OPENSSL = "/usr/bin/openssl"
-
-class OpenSSLError(RuntimeError):
-	pass
 
 class CA(models.Model):
 	name = models.CharField(max_length=200)
@@ -20,13 +16,10 @@ class CA(models.Model):
 		return value are strings that contain the X.509 data in a
 		format readable by OpenSSL, preferably PEM.
 		"""
-		openssl = Popen([OPENSSL, "ca", "-batch", "-config", self.config])
-		err, cert = openssl.communicate(csr)
-		if openssl.returncode != 0:
-			raise OpenSSLError(err)
+		return openssl.sign_certificate(self.dir, csr)
 
 	def revoke_certificate(self, cert):
-		pass
+		return openssl.revoke_certificate(self.dir, cert)
 
 	def generate_crl(self):
-		pass
+		return openssl.generate_crl(self.dir)
