@@ -10,7 +10,14 @@
 
 from __future__ import absolute_import
 
+import os
+
 from .enums import CAType
+
+OPENSSL = "/usr/bin/openssl"
+DEFAULT_CONFIG = "/etc/ssl/openssl.cnf"
+
+MKCA_CONFIG = os.path.join(os.path.dirname(__file__), "mkca.cnf")
 
 base = dict(
 	default_days = 365,

@@ -14,9 +14,8 @@ import sys, os
 import logging
 import subprocess
 
-OPENSSL = "/usr/bin/openssl"
+from .data import DEFAULT_CONFIG, OPENSSL
 
-DEFAULT_CONFIG = "/etc/ssl/openssl.cnf"
 log = logging.getLogger("certlib")
 
 class OpenSSLError(RuntimeError):

@@ -62,7 +62,7 @@ def write_file(filename, contents, force=False):
 			log.error("%s exists. Will not overwrite without force.", filename)
 			raise FileExists(filename)
 	else:
-		log.debug("Creating %s", filename)
+		log.debug("Writing %s", filename)
 
 	with file(filename, "w") as f:
 		f.write(contents)

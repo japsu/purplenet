@@ -1,0 +1,43 @@
+HOME				= .
+RANDFILE			= /etc/ssl/privates/.rand
+
+[ crt_ext ]
+
+subjectKeyIdentifier		= hash
+authorityKeyIdentifier		= keyid:always,issuer:always
+
+basicConstraints		= CA:true
+
+keyUsage			= critical,cRLSign,keyCertSign
+
+[ req ]
+
+default_bits                    = 2048
+distinguished_name              = req_distinguished_name
+string_mask                     = nombstr
+
+[ req_distinguished_name ]
+
+countryName                     = Country Name (2 letter code)
+countryName_default             = FI
+countryName_min                 = 2
+countryName_max                 = 2
+
+stateOrProvinceName             = State or Province Name (full name)
+#stateOrProvinceName_default    = .
+
+localityName                    = Locality Name (eg, city)
+localityName_default            = Tampere
+
+organizationName                = Organization Name (eg, company)
+organizationName_default        = Tampere University of Technology
+
+organizationalUnitName          = Organizational Unit Name (eg, section)
+organizationalUnitName_default  = Department of Communications Engineering
+
+commonName                      = Common Name (eg, YOUR name)
+commonName_max                  = 64
+
+emailAddress                    = Email Address
+emailAddress_max                = 64
+

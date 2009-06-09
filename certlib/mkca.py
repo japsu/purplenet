@@ -19,7 +19,7 @@ from __future__ import absolute_import
 
 from .helpers import FileExists, mkdir_check, enum_check, write_file
 from .enums import Exit, CAType, SignMode
-from . import helpers, openssl_data
+from . import helpers, data
 from . import openssl as openssl
 
 import sys, os
@@ -41,8 +41,8 @@ CA_CERT_FILE_NAME = "ca.crt"
 
 log = None
 
-def mkca(dir, ca_type=CAType.CLIENT, sign_mode=SignMode.SELF_SIGN,
-		sign_ca=None, force=False):
+def mkca(dir, common_name="" ca_type=CAType.CLIENT,
+		sign_mode=SignMode.SELF_SIGN, config=None, force=False):
 	global log
 	log = logging.getLogger("certlib")
 
@@ -56,10 +56,13 @@ def mkca(dir, ca_type=CAType.CLIENT, sign_mode=SignMode.SELF_SIGN,
 	csr_file = os.path.join(dir, CA_CSR_FILE_NAME)
 	cert_file = os.path.join(dir, CA_CERT_FILE_NAME)
 
+	config = config if config is not None else data.MKCA_CONFIG
+
 	log.debug("sign_mode = %s", sign_mode)
-	log.debug("sign_ca = %s", sign_ca)
+	log.debug("ca_type = %s", ca_type)
 	log.debug("force = %s", force)
 	log.debug("dir = %s", dir)
+	log.debug("config = %s", config)
 
 	# Make directories
 	mkdir_check(dir, force)
@@ -75,8 +78,8 @@ def mkca(dir, ca_type=CAType.CLIENT, sign_mode=SignMode.SELF_SIGN,
 	write_file(crl_serial_file, '%x' % crl_serial, force)
 
 	# Initialize the context with type-specific values from
-	# openssl_data.py and fill in the rest of the gaps.
-	ctx = dict(openssl_data.config_data[ca_type], dir=dir)
+	# data.py and fill in the rest of the gaps.
+	ctx = dict(data.config_data[ca_type], dir=dir)
 
 	# Render the OpenSSL configuration file from a template
 	helpers.render_to_file(openssl_config_file,
@@ -84,16 +87,16 @@ def mkca(dir, ca_type=CAType.CLIENT, sign_mode=SignMode.SELF_SIGN,
 
 	# Create the CA key and certificate
 	if sign_mode == SignMode.SELF_SIGN:
-		key, cert = openssl.create_self_signed_keypair()
+		key, cert = openssl.create_self_signed_keypair(config=config)
 		csr = None
 	elif sign_mode == SignMode.CSR_ONLY:
-		key = openssl.generate_rsa_key()
+		key = openssl.generate_rsa_key(config=config)
 		cert = None
-		csr = openssl.create_csr(key)
+		csr = openssl.create_csr(key, config=config)
 	elif sign_mode == SignMode.USE_CA:
-		key = openssl.generate_rsa_key()
-		csr = openssl.create_csr(key)
-		cert = openssl.sign_certificate(csr) 
+		key = openssl.generate_rsa_key(config=config)
+		csr = openssl.create_csr(key, config=config)
+		cert = openssl.sign_certificate(csr, config=config) 
 	else:
 		raise AssertionError("Unknown signing mode %s in mkca",
 			sign_mode)
