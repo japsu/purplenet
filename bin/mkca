@@ -1,0 +1,132 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# OpenSSL Certificate Authority generation script
+# Department of Communications Engineering,
+# Tampere University of Technology (TUT)
+#
+# Copyright (c) 2009 Santtu Pajukanta
+#
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and associated documentation
+# files (the "Software"), to deal in the Software without
+# restriction, including without limitation the rights to use,
+# copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following
+# conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+#
+
+from __future__ import absolute_import
+
+from django.conf import settings as django_settings
+from certlib.mkca import mkca
+from certlib.helpers import FileExists, mkdir_check, write_file, enum_check
+from certlib.enums import Exit, SignMode, CAType
+	
+import certlib.helpers as helpers
+import getopt, logging
+import os, sys
+
+HEADLINE = """usage: mkca.py [options] <dirname>
+Creates an OpenSSL X.509 Certificate Authority."""
+
+OPTIONS = [
+        ("c:", "config=", "OpenSSL config for signing the new CA key."),
+        ("e:", "template-path=", "Override default template path"),
+        ("f", "force", "Skip certain checks"),
+        ("h", "help", "Shows this help text."),
+	("n:", "common-name=", "Sets the commonName (CN) field of the CA cert."),
+        ("q", "quiet", "Only show error messages."),
+        ("s:", "sign-mode=", "How to sign this CA: self-sign, csr-only, use-ca"),
+        ("t:", "type=", "What to sign with this CA: ca, server, client"),
+        ("v", "verbose", "Show verbose output."),
+]
+
+OPTS, LONG_OPTS = helpers.mkopts(OPTIONS)
+
+# TODO might there be a better way to determine template path?
+# must be absolute because, well, Django.
+DEFAULT_TEMPLATE_PATH = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "templates"))
+
+log = logging.getLogger()
+
+def usage(stream=sys.stdout):
+        helpers.usage(HEADLINE, OPTIONS, stream)
+
+def main(args):
+	global log
+	log = helpers.setup_logging("certlib")
+
+	try:
+		opts, args = getopt.gnu_getopt(args, OPTS, LONG_OPTS)
+	except getopt.GetoptError, e:
+		log.error(str(e))
+		usage(sys.stderr)
+		sys.exit(Exit.COMMAND_LINE_SYNTAX_ERROR)
+
+	# Default parameters for mkca
+	template_path = DEFAULT_TEMPLATE_PATH
+	sign_mode = SignMode.SELF_SIGN
+	config = None
+	ca_type = CAType.CLIENT	
+	force = False
+
+	for opt, optarg in opts:
+		if opt in ("--config", "-c"):
+			config = optarg
+		elif opt in ("--template-path", "-e"):
+			template_path = optarg
+		elif opt in ("--force", "-f"):
+			force = True
+		elif opt in ("--help", "-h"):
+			usage(sys.stdout)
+			sys.exit(Exit.SUCCESS)
+		elif opt in ("--quiet", "-q"):
+			log.setLevel(logging.WARNING)
+		elif opt in ("--sign-mode", "-s"):
+			enum_check("sign-mode", optarg, SignMode.all)
+			sign_mode = optarg
+		elif opt in ("--type", "-t"):
+			enum_check("type", optarg, CAType.all)
+			ca_type = optarg
+		elif opt in ("--verbose", "-v"):
+			log.setLevel(logging.DEBUG)
+		else:
+			raise AssertionError("Unhandled command line " +
+				"parameter: " + opt)		 
+
+	if len(args) < 1:
+		log.error("No target directories specified.")
+		usage(sys.stderr)
+		sys.exit(Exit.COMMAND_LINE_SYNTAX_ERROR)
+
+	log.debug("template path = %s", template_path)
+	log.debug("Configuring Django for templates")
+	django_settings.configure(TEMPLATE_DIRS=[template_path])
+
+	n = len(args)
+	for i, dir in enumerate(args):	
+		log.info("Creating %s (%d/%d)", dir, i + 1, n)
+
+		try:
+			mkca(dir, common_name, ca_type, sign_mode, config, force)
+		except FileExists:
+			sys.exit(Exit.FAILURE)
+
+if __name__ == "__main__":
+	main(sys.argv[1:])
+

@@ -1,0 +1,4 @@
+- olemassaoleva toiminnallisuus toimimaan erillisellä konfiguraatiotiedostolla
+- CA:iden hallinta web-kälistä
+	* avaimen allekirjoittaminen
+	* avaimen kumoaminen
