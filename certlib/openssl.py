@@ -14,6 +14,8 @@ import sys, os
 import logging
 import subprocess
 
+from openvpnweb.certificate_manager import _parse_conf_value
+
 from .data import DEFAULT_CONFIG, OPENSSL
 
 log = logging.getLogger("certlib")
@@ -59,15 +61,64 @@ def _run(*args, **kwargs):
 
 	return stdoutdata
 
-def generate_rsa_key(key_length=2048, config=DEFAULT_CONFIG):
-	# config taken just for symmetry
-	# openssl genrsa does not accept -config
+DN_COMPONENTS = [
+	# (shorthand, [kwarg, ...], config key)
+	("C", ["countryName", "country_name"], "countryName_default"),
+	("L", ["localityName", "locality_name"], "localityName_default"),
+	("O", ["organizationName", "organization_name"], "organizationName_default"),
+	("OU", ["organizationalUnitName", "organizational_unit_name"], "organizationalUnitName_default"),
+	("CN", ["commonName", "common_name"], "commonName_default"),
+]
 
+def _process_dn_components(components):
+	kwa_to_short = {}
+	ckey_to_short = {}
+	ckeys = []
+	shorts = {}
+	for shorthand, kws, ckey in components:
+		for kw in kws:
+			kwa_to_short[kw] = shorthand
+			ckey_to_shrt[ckey] = shorthand
+			ckeys.append(ckey)
+			shorts.append(shorthand)
+	return kwa_to_short, ckey_to_short, ckeys, shorts
+
+DN_KWA_SHORT, DN_CKEY_SHORT, DN_CKEYS, DN_SHORTS = _process_dn_components(DN_COMPONENTS)
+
+def _make_dn(**kwargs):
+	if kwargs.has_key("config"):
+		config = kwargs["config"]
+		del kwargs["config"]
+	else:
+		config = DEFAULT_CONFIG
+
+	defaults = _parse_conf_value("req_distinguished_name", DN_CKEYS)
+	values = defaultdict(lambda: "", defaults, **kwargs)
+
+	# FIXME
+	return "".join("/%s=%s" % (DN_CKEY_SHORT[key], values[key]) for key in DN_SHORTS)
+	
+
+def generate_rsa_key(key_length=2048, config=DEFAULT_CONFIG):
+	"""generate_rsa_key(key_length=2048, config=DEFAULT_CONFIG) -> String
+
+	Generates a private RSA key of the specified length. The config
+	argument is provided only for symmetry and is ignored. The generated
+	RSA key is returned as a string in the PEM format.
+	"""
 	log.debug("Generating a %d-bit RSA private key", key_length)	
 
 	return _run("genrsa", "%d" % key_length)
 
-def create_csr(key, config=DEFAULT_CONFIG):
+def create_csr(common_name, key, config=DEFAULT_CONFIG):
+	"""create_csr(common_name, key, config=DEFAULT_CONFIG) -> String
+
+	Creates a Certificate Signing Request using the supplied common name
+	(CN) and private key. Other attributes are taken from the supplied
+	configuration file or, the config parameter being absent, the default
+	configuration file. The generated CSR is returned as a string in the
+	PEM format.
+	"""
 	log.debug("Creating CSR")
 
 	return _run("req", "-config", config, "-batch",
@@ -75,7 +126,16 @@ def create_csr(key, config=DEFAULT_CONFIG):
 		input=key
 	)
 
-def create_self_signed_certificate(key, config=DEFAULT_CONFIG):
+def create_self_signed_certificate(common_name, key, config=DEFAULT_CONFIG):
+	"""create_self_signed_certificate(common_name, key,
+		config=DEFAULT_CONFIG) -> str
+
+	Creates a self-signed X.509 test certificate using the supplied
+	common name (CN) and private key. Other attributes are taken from the
+	supplied configuration file or, in its absence, the default
+	configuration file. The generated certificate is returned as a string
+	in the PEM format.
+	"""
 	log.debug("Creating a self-signed certificate")
 
 	return _run("req", "-config", config, "-batch",
