@@ -84,6 +84,7 @@ def main(args):
 	config = None
 	ca_type = CAType.CLIENT	
 	force = False
+	common_name = ""
 
 	for opt, optarg in opts:
 		if opt in ("--config", "-c"):
@@ -95,6 +96,8 @@ def main(args):
 		elif opt in ("--help", "-h"):
 			usage(sys.stdout)
 			sys.exit(Exit.SUCCESS)
+		elif opt in ("--common-name", "-n"):
+			common_name = optarg
 		elif opt in ("--quiet", "-q"):
 			log.setLevel(logging.WARNING)
 		elif opt in ("--sign-mode", "-s"):

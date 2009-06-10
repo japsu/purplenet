@@ -41,7 +41,7 @@ CA_CERT_FILE_NAME = "ca.crt"
 
 log = None
 
-def mkca(dir, common_name="" ca_type=CAType.CLIENT,
+def mkca(dir, common_name="", ca_type=CAType.CLIENT,
 		sign_mode=SignMode.SELF_SIGN, config=None, force=False):
 	global log
 	log = logging.getLogger("certlib")
