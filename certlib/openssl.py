@@ -116,7 +116,7 @@ def generate_rsa_key(key_length=2048, config=DEFAULT_CONFIG):
 
 	return _run("genrsa", "%d" % key_length)
 
-def create_csr(common_name, key, config=DEFAULT_CONFIG):
+def create_csr(key, common_name, config=DEFAULT_CONFIG):
 	"""create_csr(common_name, key, config=DEFAULT_CONFIG) -> String
 
 	Creates a Certificate Signing Request using the supplied common name
@@ -131,7 +131,7 @@ def create_csr(common_name, key, config=DEFAULT_CONFIG):
 
 	return _run("req", "-config", config, "-batch",
 		"-new", "-key", "/dev/stdin",
-		"-subject", subject,
+		"-subj", subject,
 		input=key
 	)
 
@@ -169,7 +169,7 @@ def create_self_signed_keypair(common_name, key_length=2048, config=DEFAULT_CONF
 def sign_certificate(csr, extensions="crt_ext", config=DEFAULT_CONFIG):
 	log.debug("Signing a CSR")
 
-	params = ["ca", "-config", config, "-batch", "-noemailDN"]
+	params = ["ca", "-config", config, "-batch", "-noemailDN", "-in", "/dev/stdin"]
 
 	if extensions is not None:
 		params.extend(("-extensions", extensions))
