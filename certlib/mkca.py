@@ -87,15 +87,15 @@ def mkca(dir, common_name="", ca_type=CAType.CLIENT,
 
 	# Create the CA key and certificate
 	if sign_mode == SignMode.SELF_SIGN:
-		key, cert = openssl.create_self_signed_keypair(config=config)
+		key, cert = openssl.create_self_signed_keypair(common_name=common_name, config=config)
 		csr = None
 	elif sign_mode == SignMode.CSR_ONLY:
 		key = openssl.generate_rsa_key(config=config)
 		cert = None
-		csr = openssl.create_csr(key, config=config)
+		csr = openssl.create_csr(key, common_name=common_name, config=config)
 	elif sign_mode == SignMode.USE_CA:
 		key = openssl.generate_rsa_key(config=config)
-		csr = openssl.create_csr(key, config=config)
+		csr = openssl.create_csr(key, common_name=common_name, config=config)
 		cert = openssl.sign_certificate(csr, config=config) 
 	else:
 		raise AssertionError("Unknown signing mode %s in mkca",

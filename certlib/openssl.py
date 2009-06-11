@@ -14,6 +14,7 @@ import sys, os
 import logging
 import subprocess
 
+from collections import defaultdict
 from openvpnweb.certificate_manager import _parse_conf_value
 
 from .data import DEFAULT_CONFIG, OPENSSL
@@ -74,16 +75,20 @@ def _process_dn_components(components):
 	kwa_to_short = {}
 	ckey_to_short = {}
 	ckeys = []
-	shorts = {}
+	shorts = []
 	for shorthand, kws, ckey in components:
+		ckeys.append(ckey)
+		shorts.append(shorthand)
+		ckey_to_short[ckey] = shorthand
 		for kw in kws:
 			kwa_to_short[kw] = shorthand
-			ckey_to_shrt[ckey] = shorthand
-			ckeys.append(ckey)
-			shorts.append(shorthand)
 	return kwa_to_short, ckey_to_short, ckeys, shorts
 
 DN_KWA_SHORT, DN_CKEY_SHORT, DN_CKEYS, DN_SHORTS = _process_dn_components(DN_COMPONENTS)
+
+def _dn_escape(s):
+	# TODO verify
+	return s.replace("/",r"\/")
 
 def _make_dn(**kwargs):
 	if kwargs.has_key("config"):
@@ -92,11 +97,12 @@ def _make_dn(**kwargs):
 	else:
 		config = DEFAULT_CONFIG
 
-	defaults = _parse_conf_value("req_distinguished_name", DN_CKEYS)
-	values = defaultdict(lambda: "", defaults, **kwargs)
+	defaults = _parse_conf_value("req_distinguished_name", *DN_CKEYS, config=config)
+	defaults = ((DN_CKEY_SHORT[key], value) for key, value in defaults.iteritems())
+	kwargs = dict((DN_KWA_SHORT[key], value) for key, value in kwargs.iteritems() if DN_KWA_SHORT.has_key(key))
+	values = dict(defaults, **kwargs)
 
-	# FIXME
-	return "".join("/%s=%s" % (DN_CKEY_SHORT[key], values[key]) for key in DN_SHORTS)
+	return "".join("/%s=%s" % (key, _dn_escape(values[key])) for key in DN_SHORTS if values.has_key(key))
 	
 
 def generate_rsa_key(key_length=2048, config=DEFAULT_CONFIG):
@@ -121,14 +127,17 @@ def create_csr(common_name, key, config=DEFAULT_CONFIG):
 	"""
 	log.debug("Creating CSR")
 
+	subject = _make_dn(common_name=common_name, config=config)
+
 	return _run("req", "-config", config, "-batch",
 		"-new", "-key", "/dev/stdin",
+		"-subject", subject,
 		input=key
 	)
 
-def create_self_signed_certificate(common_name, key, config=DEFAULT_CONFIG):
+def create_self_signed_certificate(key, common_name, extensions="crt_ext", config=DEFAULT_CONFIG):
 	"""create_self_signed_certificate(common_name, key,
-		config=DEFAULT_CONFIG) -> str
+		extensions="crt_ext", config=DEFAULT_CONFIG) -> str
 
 	Creates a self-signed X.509 test certificate using the supplied
 	common name (CN) and private key. Other attributes are taken from the
@@ -138,18 +147,33 @@ def create_self_signed_certificate(common_name, key, config=DEFAULT_CONFIG):
 	"""
 	log.debug("Creating a self-signed certificate")
 
-	return _run("req", "-config", config, "-batch",
-		"-new", "-x509", "-key", "/dev/stdin",
-		input=key
-	)
+	subject = _make_dn(common_name=common_name, config=config)
 
-def create_self_signed_keypair(key_length=2048, config=DEFAULT_CONFIG):
-	key = generate_rsa_key(key_length, config)
-	cert = create_self_signed_certificate(key, config)
+	params = [
+		"req", "-config", config, "-batch",
+		"-new", "-x509", "-key", "/dev/stdin",
+		"-subj", subject
+	]
+
+	if extensions is not None:
+		params.extend(("-extensions", extensions))
+
+	return _run(*params, input=key)
+
+def create_self_signed_keypair(common_name, key_length=2048, config=DEFAULT_CONFIG):
+	key = generate_rsa_key(key_length, config=config)
+	cert = create_self_signed_certificate(key, common_name=common_name, config=config)
 
 	return key, cert
 
-def sign_certificate(csr, config=DEFAULT_CONFIG):
+def sign_certificate(csr, extensions="crt_ext", config=DEFAULT_CONFIG):
 	log.debug("Signing a CSR")
 
-	return _run("ca", "-config", config, "-batch", input=csr)
+	params = ["ca", "-config", config, "-batch", "-noemailDN"]
+
+	if extensions is not None:
+		params.extend(("-extensions", extensions))
+
+	return _run(*params, input=csr)
+
+

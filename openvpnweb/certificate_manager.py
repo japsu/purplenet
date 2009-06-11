@@ -82,7 +82,7 @@ def _parse_database(ca_name, common_name=""):
 	
 	return certificates
 
-def _parse_conf_value(section_name, *variable_names):
+def _parse_conf_value(section_name, *variable_names, **kwargs):
 	"""
 	Parser the openssl configuration file.
 	
@@ -90,7 +90,7 @@ def _parse_conf_value(section_name, *variable_names):
 	"""
 	
 	regexp_section = re.compile("^\s*\[\s*(%s)\s*\]" % section_name)
-	conf_file = open(_SSL_CONF, "r")
+	conf_file = open(kwargs.get("config", _SSL_CONF), "r")
 
 	# Start iterating the file
 	for line in conf_file:
