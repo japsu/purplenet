@@ -117,6 +117,7 @@ def _parse_conf_value(section_name, *variable_names, **kwargs):
 	
 	return values
 
+# TODO rename to get_certificate_authorities
 def get_certificate_authoroties():
 	"""
 	Lists certificate authoroties.

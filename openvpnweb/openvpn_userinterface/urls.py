@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-from openvpn.openvpn_userinterface.views import *
+from openvpnweb.openvpn_userinterface.views import *
 
 urlpatterns = patterns('',
 

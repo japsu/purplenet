@@ -5,12 +5,14 @@ from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import logout, authenticate, login
-from openvpn.openvpn_userinterface.models import *
 from django.template import Context, RequestContext
 from django.contrib.auth.decorators import login_required
-from openvpn.settings import LOGIN_URL
-from openvpn.certificate_manager import *
-from openvpn.helper_functions import *
+
+from openvpnweb.openvpn_userinterface.models import *
+from openvpnweb.settings import LOGIN_URL
+from openvpnweb.certificate_manager import *
+from openvpnweb.helper_functions import *
+
 from datetime import datetime
 import zipfile
 from cStringIO import StringIO

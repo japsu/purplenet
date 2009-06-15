@@ -7,7 +7,10 @@ import certlib.openssl as openssl
 class CertificateAuthority(models.Model):
     common_name = models.CharField(max_length=200, unique=True)
     config = models.CharField(max_length=200)
-    parent = models.ForeignKey('self')
+    parent = models.ForeignKey('self', null=True, blank=True)
+
+    def __unicode__(self):
+        return self.common_name
 
     def sign_certificate(self, csr):
         """sign_certificate(csr) -> signed certificate
@@ -24,12 +27,14 @@ class CertificateAuthority(models.Model):
 
     class Admin:
         pass
-        
+    
+    class Meta:
+        verbose_name_plural = "Certificate Authorities"    
 
 class Org(models.Model):
-    name = models.CharField(maxlength=30)
+    name = models.CharField(max_length=30)
     ca = models.ForeignKey(CertificateAuthority)
-    cn_suffix = models.CharField(maxlength=30)        
+    cn_suffix = models.CharField(max_length=30)        
 
     def _get_ca_name(self):
         return self.ca.common_name
@@ -45,7 +50,7 @@ class Org(models.Model):
     class Admin: pass
 
 class Client(models.Model):
-    name = models.CharField(maxlength=30)
+    name = models.CharField(max_length=30)
     orgs = models.ManyToManyField(Org, null=True)
     def __str__(self):
         return self.name
@@ -56,9 +61,9 @@ class Client(models.Model):
     class Admin: pass
                             
 class Server(models.Model):
-    name = models.CharField(maxlength=30)
+    name = models.CharField(max_length=30)
     address = models.IPAddressField()
-    port = models.IntegerField(maxlength=10)
+    port = models.IntegerField(max_length=10)
     PROTOCOL_CHOICES = (
         ('tcp','TCP'),
         ('udp','UDP')
@@ -67,8 +72,8 @@ class Server(models.Model):
         ('bridged','BRIDGED'),
         ('routed','ROUTED')
     )
-    protocol = models.CharField(maxlength=30, choices=PROTOCOL_CHOICES)
-    mode = models.CharField(maxlength=30, choices=MODE_CHOICES) 
+    protocol = models.CharField(max_length=30, choices=PROTOCOL_CHOICES)
+    mode = models.CharField(max_length=30, choices=MODE_CHOICES) 
     
     def __str__(self):
         return self.name
@@ -79,7 +84,7 @@ class Server(models.Model):
     class Admin: pass
 
 class Network(models.Model):
-    name = models.CharField(maxlength=30)
+    name = models.CharField(max_length=30)
     org = models.ForeignKey(Org)
     server = models.ForeignKey(Server)
     
@@ -91,18 +96,24 @@ class Network(models.Model):
     
     class Admin: pass
     
+# TODO rename class to NetworkAttribute (PEP-8)
 class Network_attribute(models.Model):
-    name = models.CharField(maxlength=30)
-    value = models.CharField(maxlength=30)
+    name = models.CharField(max_length=30)
+    value = models.CharField(max_length=30)
     networks = models.ManyToManyField(Network)
     
     def __str__(self):
         return self.name
     
-    class Admin: pass
+    class Admin:
+        pass
+
+    class Meta:
+        # TODO unnecessary after class rename
+        verbose_name_plural = "Network attributes"        
 
 class Certificate(models.Model):
-    common_name = models.CharField(maxlength=30)
+    common_name = models.CharField(max_length=30)
     ca = models.ForeignKey(CertificateAuthority)
     timestamp = models.DateTimeField()
     revoked = models.BooleanField(default=False)
