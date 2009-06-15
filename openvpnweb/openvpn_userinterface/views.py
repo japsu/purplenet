@@ -1,3 +1,4 @@
+# vim: shiftwidth=4 expandtab
 # XXX hack: lots of hard-coded redirects
 
 from django.shortcuts import render_to_response

@@ -84,7 +84,7 @@ def main(args):
 	config = None
 	ca_type = CAType.CLIENT	
 	force = False
-	common_name = ""
+	common_name = None
 
 	for opt, optarg in opts:
 		if opt in ("--config", "-c"):
@@ -114,6 +114,11 @@ def main(args):
 
 	if len(args) < 1:
 		log.error("No target directories specified.")
+		usage(sys.stderr)
+		sys.exit(Exit.COMMAND_LINE_SYNTAX_ERROR)
+
+	if not common_name:
+		log.error("CN (-n) not specified or empty")
 		usage(sys.stderr)
 		sys.exit(Exit.COMMAND_LINE_SYNTAX_ERROR)
 

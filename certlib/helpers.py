@@ -50,22 +50,24 @@ def usage(headline, options, stream=sys.stderr):
 		if help is not None:
 			stream.write("\t%s\n" % help)
 
-def write_file(filename, contents, force=False):
+def write_file(filename, contents, force=False, mode=0644):
 	if os.path.exists(filename):
 		if not os.path.isfile(filename):
 			log.error("%s exists and is not a regular file. Will not overwrite (even with force).", filename)
 			raise FileExists(filename)
 
 		if force:
-			log.debug("%s exists and force set. Overwriting.", filename)
+			log.debug("%s exists and force set. Overwriting (mode=%o).", filename, mode)
 		else:
 			log.error("%s exists. Will not overwrite without force.", filename)
 			raise FileExists(filename)
 	else:
-		log.debug("Writing %s", filename)
+		log.debug("Writing %s (mode=%o)", filename, mode)
 
 	with file(filename, "w") as f:
 		f.write(contents)
+
+	os.chmod(filename, mode)
 
 def render_to_file(filename, template_name, context, force):
 	write_file(filename, render_to_string(template_name, context), force)
