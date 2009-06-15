@@ -114,6 +114,7 @@ def order_page(request):
         client = request.session["client"]
         organisations = request.session["organisations"]
         network_id = request.POST['net_id']
+        # XXX
         try:
             network = Network.objects.get(id = network_id)
         except:
@@ -136,6 +137,7 @@ def order_page(request):
 
 @login_required
 def download(request):
+    # XXX
     try:
         path = request.session["path"]
         cert_id = request.session["cert_id"]
@@ -165,11 +167,13 @@ def revoke_page(request):
     if request.method == 'POST':
 	cert_id_p = None
 
+        # XXX
 	try:
             cert_id_p = request.POST['cert_id']
 
 	    cert_id_s = None
 
+            # XXX
 	    try:
 		cert_id_s = request.session['cert_id']
 	    except:
@@ -184,9 +188,11 @@ def revoke_page(request):
 
 	cert_id = cert_id_p
 	certificate = None
+        # XXX
         try:
             certificate = Certificate.objects.get(id = cert_id)
 
+            # XXX 
 	    if certificate.revokated:
 		return HttpResponseRedirect('/openvpn/openvpn/main/')
         except:
@@ -200,6 +206,7 @@ def revoke_page(request):
 	    certificate.downloaded = True
             certificate.save()
 
+            # XXX
             try:
                 del request.session["path"]
                 del request.session["cert_id"]
@@ -208,6 +215,7 @@ def revoke_page(request):
     return HttpResponseRedirect('/openvpn/openvpn/main/')
 
 def logout_page(request):
+    # XXX
     try:
         del request.session["client"]
         del request.session["organisations"]
