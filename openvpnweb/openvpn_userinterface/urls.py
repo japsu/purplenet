@@ -1,14 +1,15 @@
+# vim: shiftwidth=4 expandtab
+
 from django.conf.urls.defaults import *
 from openvpnweb.openvpn_userinterface.views import *
 
 urlpatterns = patterns('',
 
 #URLs for  user interface
-(r'^$', login_page),
-(r'^main/$', main_page),
-(r'^revoke/$', revoke_page),
-(r'^order/$', order_page),
-(r'^download/$', download),
-(r'^logout/$', logout_page),
-
+    url(r'^$', login_page, name="login_page"),
+    url(r'^main/$', main_page, name="main_page"),
+    url(r'^revoke/$', revoke_page, name="revoke_page"),
+    url(r'^order/$', order_page, name="order_page"),
+    url(r'^download/$', download, name="download"),
+    url(r'^logout/$', logout_page, name="logout_page"),
 )

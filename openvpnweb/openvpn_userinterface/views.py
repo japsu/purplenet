@@ -10,8 +10,9 @@ from django.core.urlresolvers import reverse
 
 from openvpnweb.openvpn_userinterface.models import *
 from openvpnweb.settings import LOGIN_URL
-from openvpnweb.certificate_manager import *
 from openvpnweb.helper_functions import *
+
+import certlib.openssl as openssl
 
 from datetime import datetime
 import zipfile
@@ -122,19 +123,32 @@ def order_page(request):
         except:
             pass
         if network.org in organisations:
-            common_name = generate_random_string()+network.org.cn_suffix
-            create_certificate(network.org.ca_name, common_name)
-            path = create_pkcs12(common_name)
-            #Creating new certificate object
+            common_name = generate_random_string() + network.org.cn_suffix
+            ca = network.org.ca
+            config = ca.config
+            
+            # TODO user-supplied CSR
+            key = openssl.generate_rsa_key(config=config)
+            csr = openssl.create_csr(common_name=common_name, key=key, config=config)
+            cert = openssl.sign_certificate(csr, config=config)
+
             certificate = Certificate()
             certificate.common_name = common_name
-            certificate.ca_name = network.org.ca_name
+            certificate.ca = ca
             certificate.timestamp = datetime.now()
             certificate.user = client
             certificate.network = network
             certificate.save()
-            request.session["path"] = path
-            request.session["cert_id"] = certificate.id
+
+            # FIXME If the user orders multiple certificates without downloading them in between, catastrophe happens.
+            # The session data might not be the right place for this kind of information.
+            # Possible solution: Make the user download the certificate right away after it has been created.
+            request.session["new_key"] = key
+            request.session["new_cert"] = cert
+            request.session["new_cert_pk"] = certificate.pk
+        else:
+            # XXX
+            raise AssertionError("Then what?")
     return HttpResponseRedirect(
         reverse("openvpnweb.openvpn_userinterface.views.main_page"))
 
@@ -142,21 +156,30 @@ def order_page(request):
 def download(request):
     # XXX
     try:
-        path = request.session["path"]
-        cert_id = request.session["cert_id"]
-        certificate = Certificate.objects.get(id=cert_id)
+        key = request.session["new_key"]
+        cert = request.session["new_cert"]
+        cert_pk = request.session["new_cert_pk"]
+        certificate = Certificate.objects.get(pk=cert_pk)
         if certificate.downloaded:
             raise Exception()
     except:
         return HttpResponseRedirect(
             reverse("openvpnweb.openvpn_userinterface.views.main_page"))
-    del request.session["path"]
-    del request.session["cert_id"]
+
+    del request.session["new_key"]
+    del request.session["new_cert"]
+    del request.session["new_cert_pk"]
+
     response = HttpResponse(mimetype='application/zip')
     response['Content-Disposition'] = 'filename=openvpn-certificates.zip'
+
+    # TODO with ZipFile(...) as zip?
+    # TODO write directly into response?
     buffer=StringIO()
     zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-    zip.write(path)
+    # TODO zip.writestr("ca.crt", server_ca)
+    zip.writestr("client.key", key)
+    zip.writestr("client.crt", cert)
     zip.close()
     buffer.flush()
     ret_zip = buffer.getvalue()

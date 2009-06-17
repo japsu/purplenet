@@ -17,7 +17,7 @@ to remove current certificates.</h3>
 	       <table><tr>
 			<th>{{ network.name }}</th>
 			<th>
-			<form method="post" action="/openvpn/openvpn/order/">
+			<form method="post" action="{% url order_page %}">
 			<input type="hidden" name="net_id" value= "{{network.id }}" />
 			<p class="submit">
 			  <input type="submit" value="Order" {% if session.cert_id %}disabled{% endif %}/>
@@ -29,7 +29,7 @@ to remove current certificates.</h3>
 			  {% for cert in certs.1 %}
 			 <tr><td> {{ cert.common_name }}</td>
 			  <td>{% ifequal cert.revoked 0 %}
-			  <form method="post" action="/openvpn/openvpn/revoke/">
+			  <form method="post" action="{% url revoke_page %}">
 			  <input type="hidden" name="cert_id" value="{{cert.id}}" />
 			  <p class="submit"><input type="submit" value="Remove" {% if session.cert_id %}disabled{% endif %}/></p>
 			  </form>
@@ -38,7 +38,7 @@ to remove current certificates.</h3>
 			  {% endifequal %}</td>
 			 {% ifequal session.cert_id cert.id %}
 			 {% ifequal cert.revoked 0 %}
-			  <td><form method="post" action="/openvpn/openvpn/download/">
+			  <td><form method="post" action="{% url download %}">
 			  <p class="submit"><input type="submit" value="Download" /></p>
 			  </form></td></tr>
 			 {% endifequal %}
@@ -55,7 +55,7 @@ to remove current certificates.</h3>
       {% endif %}
   {% else %}
     <p>You are not logged in!
-    You need to <a href="/openvpn/openvpn/">login</a>
+    You need to <a href="{% url login_page %}">login</a>
     before you can use this service.</p>
   {% endif %}
 

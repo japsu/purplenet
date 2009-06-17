@@ -176,4 +176,12 @@ def sign_certificate(csr, extensions="crt_ext", config=DEFAULT_CONFIG):
 
 	return _run(*params, input=csr)
 
+def create_pkcs12(crt, key, config=DEFAULT_CONFIG):
+	log.debug("Creating a PKCS#12 package")
 
+	pem = crt + key
+	# TODO -chain? poke Tuure
+	params = ["pkcs12", "-export"]
+
+	# FIXME OpenSSLError: No certificate matches private key
+	return _run(*params, input=pem)
