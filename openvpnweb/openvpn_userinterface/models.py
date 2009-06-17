@@ -96,8 +96,7 @@ class Network(models.Model):
     
     class Admin: pass
     
-# TODO rename class to NetworkAttribute (PEP-8)
-class Network_attribute(models.Model):
+class NetworkAttribute(models.Model):
     name = models.CharField(max_length=30)
     value = models.CharField(max_length=30)
     networks = models.ManyToManyField(Network)
