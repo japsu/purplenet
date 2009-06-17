@@ -1,5 +1,4 @@
 # vim: shiftwidth=4 expandtab
-# XXX hack: lots of hard-coded redirects
 
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponseRedirect, HttpResponse
@@ -7,6 +6,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth import logout, authenticate, login
 from django.template import Context, RequestContext
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
 from openvpnweb.openvpn_userinterface.models import *
 from openvpnweb.settings import LOGIN_URL
@@ -18,14 +18,15 @@ import zipfile
 from cStringIO import StringIO
 from os.path import getsize
 
+# XXX
 DEFAULT = "TTY"
 
 def login_page(request):
     #if user.is_authenticated:
     #    return HttpResponseRedirect('/openvpn/openvpn/main/')
     variables = {
-     'type': "info", 
-     'message_login': ""
+        'type': "info", 
+        'message_login': ""
     }
     if request.method == 'POST':
 	# XXX
@@ -34,8 +35,8 @@ def login_page(request):
 		    request.session.delete_test_cookie()
 		else:
 		    variables = {
-		      'type': "error",
-		      'message_login': "Please enable cookies and try again!"
+                        'type': "error",
+		        'message_login': "Please enable cookies and try again!"
 		    }
 		    return render_to_response('openvpn_userinterface/login.html', variables )
         username = request.POST['username']
@@ -61,18 +62,18 @@ def login_page(request):
                 groups = user.groups.all()
                 organisations = []
                 for group in groups:
-                  try:
+                    try:
                   	organisations.append(Org.objects.get(name=group.name))
-                  except Org.DoesNotExist:	
+                    except Org.DoesNotExist:	
                   	pass
                 request.session["organisations"] = organisations
                 request.session["client"] = client
                 
-		return HttpResponseRedirect('/openvpn/openvpn/main/')
+		return HttpResponseRedirect(reverse(main_page))
         else:
             variables = {
-             'type': "error", 
-             'message_login': "Your login details are incorrect. Please try again."
+               'type': "error", 
+               'message_login': "Your login details are incorrect. Please try again."
             }
                           
     request.session.set_test_cookie()
@@ -93,14 +94,14 @@ def main_page(request):
             certificates[network.id] = []
 	    certificates[network.id].append(cert)
     variables = RequestContext(request, {
-    'client': client,
-    'organisations': organisations,
-    'certificates': certificates,
-    'session': request.session,
+        'client': client,
+        'organisations': organisations,
+        'certificates': certificates,
+        'session': request.session,
     })
     
     return render_to_response( 
-     'openvpn_userinterface/main_page.html', variables 
+        'openvpn_userinterface/main_page.html', variables 
     )
 
 @login_required
@@ -108,7 +109,8 @@ def order_page(request):
     if request.method == 'POST':
         try:
             cert_id = request.session["cert_id"]
-            return HttpResponseRedirect('/openvpn/openvpn/main/')
+            return HttpResponseRedirect(
+                reverse("openvpnweb.openvpn_userinterface.views.main_page"))
         except:
             pass
         client = request.session["client"]
@@ -133,7 +135,8 @@ def order_page(request):
             certificate.save()
             request.session["path"] = path
             request.session["cert_id"] = certificate.id
-    return HttpResponseRedirect('/openvpn/openvpn/main/')
+    return HttpResponseRedirect(
+        reverse("openvpnweb.openvpn_userinterface.views.main_page"))
 
 @login_required
 def download(request):
@@ -145,7 +148,8 @@ def download(request):
         if certificate.downloaded:
             raise Exception()
     except:
-        return HttpResponseRedirect('/openvpn/openvpn/main/')
+        return HttpResponseRedirect(
+            reverse("openvpnweb.openvpn_userinterface.views.main_page"))
     del request.session["path"]
     del request.session["cert_id"]
     response = HttpResponse(mimetype='application/zip')
@@ -180,11 +184,13 @@ def revoke_page(request):
 		pass
 
 	    if not cert_id_s is None and cert_id_p != cert_id_s:
-                return HttpResponseRedirect('/openvpn/openvpn/main/')
+                return HttpResponseRedirect(reverse(
+                    "openvpnweb.openvpn_userinterface.views.main_page"))
 
             client = request.session["client"]
         except:
-	    return HttpResponseRedirect('/openvpn/openvpn/main/')
+	    return HttpResponseRedirect(reverse(
+                "openvpnweb.openvpn_userinterface.views.main_page"))
 
 	cert_id = cert_id_p
 	certificate = None
@@ -194,7 +200,9 @@ def revoke_page(request):
 
             # XXX 
 	    if certificate.revokated:
-		return HttpResponseRedirect('/openvpn/openvpn/main/')
+		return HttpResponseRedirect(reverse(
+                    "openvpnweb.openvpn_userinterface.views.main_page"))
+
         except:
             pass
         certificates = client.certificate_set.all()
@@ -212,7 +220,8 @@ def revoke_page(request):
                 del request.session["cert_id"]
             except:
                 pass
-    return HttpResponseRedirect('/openvpn/openvpn/main/')
+    return HttpResponseRedirect(reverse(
+        "openvpnweb.openvpn_userinterface.views.main_page"))
 
 def logout_page(request):
     # XXX
@@ -225,4 +234,5 @@ def logout_page(request):
         pass
     
     logout(request)
-    return HttpResponseRedirect('/openvpn/openvpn/')
+    return HttpResponseRedirect(reverse(
+        "openvpnweb.openvpn_userinterface.views.login_page"))        

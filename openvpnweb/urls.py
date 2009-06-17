@@ -6,9 +6,9 @@ admin.autodiscover()
 urlpatterns = patterns('',
 
 #URLs for  user interface
-(r'^openvpn/', include('openvpnweb.openvpn_userinterface.urls')),
+(r'^', include('openvpnweb.openvpn_userinterface.urls')),
 
 # URL for admin interface:
-(r'^openvpn/admin/(.*)', admin.site.root),
+(r'^admin/(.*)', admin.site.root),
 
 )
