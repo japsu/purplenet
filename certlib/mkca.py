@@ -102,7 +102,7 @@ def mkca(dir, common_name, ca_type=CAType.CLIENT,
 			sign_mode)
 
 	# Write key, csr and/or cert files
-	write_file(key_file, key, force)
+	write_file(key_file, key, force, mode=0600)
 	if cert is not None:
 		write_file(cert_file, cert, force)
 	if csr is not None:

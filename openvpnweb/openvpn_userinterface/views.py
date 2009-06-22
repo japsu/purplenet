@@ -145,7 +145,7 @@ def order_page(request):
             # Possible solution: Make the user download the certificate right away after it has been created.
             request.session["new_key"] = key
             request.session["new_cert"] = cert
-            request.session["new_cert_pk"] = certificate.pk
+            request.session["new_cert_id"] = certificate.pk
         else:
             # XXX
             raise AssertionError("Then what?")
@@ -158,7 +158,7 @@ def download(request):
     try:
         key = request.session["new_key"]
         cert = request.session["new_cert"]
-        cert_pk = request.session["new_cert_pk"]
+        cert_pk = request.session["new_cert_id"]
         certificate = Certificate.objects.get(pk=cert_pk)
         if certificate.downloaded:
             raise Exception()
@@ -168,7 +168,7 @@ def download(request):
 
     del request.session["new_key"]
     del request.session["new_cert"]
-    del request.session["new_cert_pk"]
+    del request.session["new_cert_id"]
 
     response = HttpResponse(mimetype='application/zip')
     response['Content-Disposition'] = 'filename=openvpn-certificates.zip'
@@ -231,10 +231,7 @@ def revoke_page(request):
         certificates = client.certificate_set.all()
         
         if certificate in certificates:
-            revoke_certificate(certificate.ca_name, certificate.common_name)
-            certificate.revoked = True
-            certificate.timestamp = datetime.now()
-	    certificate.downloaded = True
+            certificate.revoke()
             certificate.save()
 
             # XXX
@@ -259,3 +256,5 @@ def logout_page(request):
     logout(request)
     return HttpResponseRedirect(reverse(
         "openvpnweb.openvpn_userinterface.views.login_page"))        
+
+#def manage_page(request):

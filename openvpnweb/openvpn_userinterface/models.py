@@ -1,6 +1,7 @@
 # vim: shiftwidth=4 expandtab
 
 from django.db import models
+from datetime import datetime
 
 import certlib.openssl as openssl
 
@@ -25,6 +26,9 @@ class CertificateAuthority(models.Model):
     def generate_crl(self):
         return openssl.generate_crl(config=self.config)
 
+    def revoke_certificate(self, common_name):
+        return openssl.revoke_certificate(common_name, config=self.config)    
+
     class Admin:
         pass
     
@@ -48,6 +52,11 @@ class Org(models.Model):
         return self.name
     
     class Admin: pass
+
+    class Meta:
+        permissions = (
+            ("can_revoke_certificates", "Can revoke certificates of other users"),
+        )
 
 class Client(models.Model):
     name = models.CharField(max_length=30)
@@ -138,6 +147,8 @@ class Certificate(models.Model):
         """
         self.ca.revoke_certificate(self.common_name)
         self.revoked = True
+        self.downloaded = True
+        self.timestamp = datetime.now()
     
     class Admin:
         list_display = ('revoked','downloaded','common_name','user','network','timestamp')

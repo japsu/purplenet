@@ -16,7 +16,9 @@ from .enums import CAType
 
 OPENSSL = "/usr/bin/openssl"
 DEFAULT_CONFIG = "/etc/ssl/openssl.cnf"
+DEFAULT_CA_NAME = "CA_default"
 
+# XXX
 MKCA_CONFIG = os.path.join(os.path.dirname(__file__), "mkca.cnf")
 
 base = dict(

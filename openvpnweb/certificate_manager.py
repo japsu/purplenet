@@ -25,60 +25,34 @@ _SSL_PKCS12 = _SSL_DIR + "client_pkcs12/"
 _SSL_SERVER_CA = _SSL_CERTS + "openvpn-ca-server.crt"
 
 _SSL_DEFAULT_KEY_SIZE = 2048
+_SSL_DEFAULT_CA_NAME = "CA_default"
 
-def _parse_database(ca_name, common_name=""):
+# FIXME linear search :(
+def _parse_database(ca_name=_SSL_DEFAULT_CA_NAME, common_name=None, config=_SSL_CONF):
 	"""
 	Parser the openssl certificate database (txt).
 	
 	Returns a dictionary of certificates signed by a given CA.
 	"""
 	
-	regexp_ca = re.compile("^\s*\[\s*(%s)\s*\]" % ca_name)
-      	conf_file = open(_SSL_CONF, "r")
+	database_file_name = _parse_conf_value(ca_name, "database", config=config)["database"]
 	
-	# Start iterating the file
-	for line in conf_file:
-		if regexp_ca.match(line):
-			break
-	else:
-		raise Exception("No given CA was found.")
-	
-	regexp_database = re.compile("^\s*database\s*=\s*(\S+)", re.IGNORECASE)
-	database_name = ""
-	
-	# Continue iterating the file
-	for line in conf_file:
-		if regexp_database.match(line):
-			match = regexp_database.search(line)
-			database_name = match.group(1)
-			break
-	else:
-		raise Exception("No database file defined for given CA.")
-	
-	conf_file.close()
-
 	regexp = ".*CN=(\S+)\s*$"
-
-	if common_name != "":
+	if common_name is not None:
 		regexp = ".*CN=(%s)\s*$" % common_name
 	
 	regexp_cn = re.compile(regexp, re.IGNORECASE)
-	database_file = open(database_name.replace("$dir/", _SSL_DIR), "r")
 	
 	certificates = {}
 	
-	seria = ""
-	common_name = ""
-	
-	for line in database_file:
-		if regexp_cn.match(line):
-			match = regexp_cn.search(line)
-			serial = line.split()[2]
-			common_name = match.group(1)			
-			
-			certificates[common_name] = serial
-	
-	database_file.close()
+	with open(database_file_name, "r") as database_file:
+		for line in database_file:
+			if regexp_cn.match(line):
+				match = regexp_cn.search(line)
+				serial = line.split()[2]
+				common_name = match.group(1)			
+				
+				certificates[common_name] = serial
 	
 	return certificates
 

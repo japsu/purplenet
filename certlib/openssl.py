@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# vim: noexpandtab shiftwidth=8
 #
 # OpenSSL Certificate Authority generation script
 # Department of Communications Engineering, 
@@ -15,9 +16,9 @@ import logging
 import subprocess
 
 from collections import defaultdict
-from openvpnweb.certificate_manager import _parse_conf_value
+from openvpnweb.certificate_manager import _parse_conf_value, _parse_database
 
-from .data import DEFAULT_CONFIG, OPENSSL
+from .data import DEFAULT_CONFIG, DEFAULT_CA_NAME, OPENSSL
 
 log = logging.getLogger("certlib")
 
@@ -116,6 +117,18 @@ def generate_rsa_key(key_length=2048, config=DEFAULT_CONFIG):
 
 	return _run("genrsa", "%d" % key_length)
 
+def generate_crl(config):
+	try:
+		conf = _parse_conf_value(DEFAULT_CA_NAME, "crl", config=config)
+		crl_file_name = conf["crl"]
+	except KeyError, e:
+		raise OpenSSLError, e
+
+	log.debug("Generating CRL into %s", crl_file_name)
+
+	params = ["ca", "-config", config, "-gencrl", "-out", crl_file_name]
+	run(*params)
+
 def create_csr(key, common_name, config=DEFAULT_CONFIG):
 	"""create_csr(common_name, key, config=DEFAULT_CONFIG) -> String
 
@@ -125,7 +138,7 @@ def create_csr(key, common_name, config=DEFAULT_CONFIG):
 	configuration file. The generated CSR is returned as a string in the
 	PEM format.
 	"""
-	log.debug("Creating CSR")
+	log.debug("Creating a CSR for CN=%s", common_name)
 
 	subject = _make_dn(common_name=common_name, config=config)
 
@@ -145,7 +158,7 @@ def create_self_signed_certificate(key, common_name, extensions="crt_ext", confi
 	configuration file. The generated certificate is returned as a string
 	in the PEM format.
 	"""
-	log.debug("Creating a self-signed certificate")
+	log.debug("Creating a self-signed certificate for CN=%s", common_name)
 
 	subject = _make_dn(common_name=common_name, config=config)
 
@@ -185,3 +198,20 @@ def create_pkcs12(crt, key, config=DEFAULT_CONFIG):
 
 	# FIXME OpenSSLError: No certificate matches private key
 	return _run(*params, input=pem)
+
+def revoke_certificate(common_name, config, ca_name=DEFAULT_CA_NAME):
+	# XXX hard-coded CA_default?
+	try:
+		certificates = _parse_database(ca_name, common_name, config=config)
+		serial = certificates[common_name]
+		conf = _parse_conf_value(ca_name, "new_certs_dir", config=config)
+		new_certs_dir = conf["new_certs_dir"]
+	except KeyError, e:
+		# wrap the error
+		raise OpenSSLError(e)
+
+	cert_filename = os.path.join(new_certs_dir, serial + ".pem")
+	params = ["ca", "-config", config, "-name", ca_name, "-revoke", cert_filename]
+
+	_run(*params)
+

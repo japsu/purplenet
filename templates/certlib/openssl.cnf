@@ -8,18 +8,18 @@ default_ca			= CA_default
 [ CA_default ]
 
 dir				= {{ dir }}
-crl_dir				= $dir
-database			= $dir/index.txt
+crl_dir				= {{ dir }}
+database			= {{ dir }}/index.txt
 unique_subject			= yes
 
-new_certs_dir			= $dir/new_certs
+new_certs_dir			= {{ dir }}/new_certs
 
-certificate			= $dir/ca.crt
-serial				= $dir/cert-serial
-crlnumber			= $dir/crl-serial
+certificate			= {{ dir }}/ca.crt
+serial				= {{ dir }}/cert-serial
+crlnumber			= {{ dir }}/crl-serial
 
-crl				= $dir/crl.pem
-private_key			= $dir/ca.key
+crl				= {{ dir }}/crl.pem
+private_key			= {{ dir }}/ca.key
 
 crt_extensions			= crt_ext
 
