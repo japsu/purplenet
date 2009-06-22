@@ -1,4 +1,8 @@
-- olemassaoleva toiminnallisuus toimimaan erillisellä konfiguraatiotiedostolla
-- CA:iden hallinta web-kälistä
-	* avaimen allekirjoittaminen
-	* avaimen kumoaminen
+# TODO
+
+- admin: create certificate authorities from the web front-end
+- admin: revoke certificates of other users
+
+# DONE
+
+- make existing functionality work with separate CAs
