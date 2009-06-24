@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# vim: shiftwidth=4 expandtab
 #
 # OpenSSL Certificate Authority generation script
 # Department of Communications Engineering, 
@@ -11,13 +12,13 @@
 
 #
 # TODO Missing features:
-#	* certificate attributes (from file or user input)
-#	* X.509 extensions (from CA type)
+#    * certificate attributes (from file or user input)
+#    * X.509 extensions (from CA type)
 #
 
 from __future__ import absolute_import
 
-from .helpers import FileExists, mkdir_check, enum_check, write_file
+from .helpers import FileExists, mkdir_check, enum_check, write_file, naturals
 from .enums import Exit, CAType, SignMode
 from . import helpers, data
 from . import openssl as openssl
@@ -41,72 +42,95 @@ CA_CERT_FILE_NAME = "ca.crt"
 
 log = None
 
-def mkca(dir, common_name, ca_type=CAType.CLIENT,
-		sign_mode=SignMode.SELF_SIGN, config=None, force=False):
-	global log
-	log = logging.getLogger("certlib")
+def mkca(dir, common_name, ca_type=CAType.CLIENT, 
+        sign_mode=SignMode.SELF_SIGN, copy_dir=None,
+        config=None, force=False):
+    global log
+    log = logging.getLogger("certlib")
 
-	dir = os.path.abspath(dir)
-	new_certs_dir = os.path.join(dir, NEW_CERTS_DIR_NAME)
-	database_file = os.path.join(dir, DATABASE_FILE_NAME)
-	cert_serial_file = os.path.join(dir, CERT_SERIAL_FILE_NAME)
-	crl_serial_file = os.path.join(dir, CRL_SERIAL_FILE_NAME)
-	openssl_config_file = os.path.join(dir, OPENSSL_CONFIG_FILE_NAME)
-	key_file = os.path.join(dir, CA_KEY_FILE_NAME)
-	csr_file = os.path.join(dir, CA_CSR_FILE_NAME)
-	cert_file = os.path.join(dir, CA_CERT_FILE_NAME)
+    dir = os.path.abspath(dir)
+    new_certs_dir = os.path.join(dir, NEW_CERTS_DIR_NAME)
+    database_file = os.path.join(dir, DATABASE_FILE_NAME)
+    cert_serial_file = os.path.join(dir, CERT_SERIAL_FILE_NAME)
+    crl_serial_file = os.path.join(dir, CRL_SERIAL_FILE_NAME)
+    openssl_config_file = os.path.join(dir, OPENSSL_CONFIG_FILE_NAME)
+    key_file = os.path.join(dir, CA_KEY_FILE_NAME)
+    csr_file = os.path.join(dir, CA_CSR_FILE_NAME)
+    cert_file = os.path.join(dir, CA_CERT_FILE_NAME)
 
-	config = config if config is not None else data.MKCA_CONFIG
+    config = config if config is not None else data.MKCA_CONFIG
 
-	log.debug("sign_mode = %s", sign_mode)
-	log.debug("ca_type = %s", ca_type)
-	log.debug("force = %s", force)
-	log.debug("dir = %s", dir)
-	log.debug("config = %s", config)
+    assert ((sign_mode != SignMode.CSR_ONLY) or
+        (sign_mode == SignMode.CSR_ONLY and copy_dir is None)),
+        "copy_dir makes no sense with sign_mode == SignMode.CSR_ONLY"
 
-	# Make directories
-	mkdir_check(dir, force)
-	mkdir_check(new_certs_dir, force)
+    log.debug("sign_mode = %s", sign_mode)
+    log.debug("ca_type = %s", ca_type)
+    log.debug("force = %s", force)
+    log.debug("dir = %s", dir)
+    log.debug("copy_dir = %s", copy_dir)
+    log.debug("config = %s", config)
 
-	# Create an empty database file
-	write_file(database_file, '', force)
-	
-	# Generate random serials for certs and CRLs and write them down
-	cert_serial = random.randint(0, 2**31-1)
-	crl_serial = random.randint(0, 2**31-1)
-	write_file(cert_serial_file, '%x' % cert_serial, force)
-	write_file(crl_serial_file, '%x' % crl_serial, force)
+    # Make directories
+    mkdir_check(dir, force)
+    mkdir_check(new_certs_dir, force)
 
-	# Initialize the context with type-specific values from
-	# data.py and fill in the rest of the gaps.
-	ctx = dict(data.config_data[ca_type], dir=dir)
+    # Create an empty database file
+    write_file(database_file, '', force)
+    
+    # Generate random serials for certs and CRLs and write them down
+    cert_serial = random.randint(0, 2**31-1)
+    crl_serial = random.randint(0, 2**31-1)
+    write_file(cert_serial_file, '%x' % cert_serial, force)
+    write_file(crl_serial_file, '%x' % crl_serial, force)
 
-	# Render the OpenSSL configuration file from a template
-	helpers.render_to_file(openssl_config_file,
-		OPENSSL_CONFIG_TEMPLATE_NAME, ctx, force)
+    # Initialize the context with type-specific values from
+    # data.py and fill in the rest of the gaps.
+    ctx = dict(data.config_data[ca_type], dir=dir)
 
-	# Create the CA key and certificate
-	if sign_mode == SignMode.SELF_SIGN:
-		key, cert = openssl.create_self_signed_keypair(common_name=common_name, config=config)
-		csr = None
-	elif sign_mode == SignMode.CSR_ONLY:
-		key = openssl.generate_rsa_key(config=config)
-		cert = None
-		csr = openssl.create_csr(key, common_name=common_name, config=config)
-	elif sign_mode == SignMode.USE_CA:
-		key = openssl.generate_rsa_key(config=config)
-		csr = openssl.create_csr(key, common_name=common_name, config=config)
-		cert = openssl.sign_certificate(csr, config=config) 
-	else:
-		raise AssertionError("Unknown signing mode %s in mkca",
-			sign_mode)
+    # Render the OpenSSL configuration file from a template
+    helpers.render_to_file(openssl_config_file,
+        OPENSSL_CONFIG_TEMPLATE_NAME, ctx, force)
 
-	# Write key, csr and/or cert files
-	write_file(key_file, key, force, mode=0600)
-	if cert is not None:
-		write_file(cert_file, cert, force)
-	if csr is not None:
-		write_file(csr_file, csr, force)
+    # Create the CA key and certificate
+    if sign_mode == SignMode.SELF_SIGN:
+        key, cert = openssl.create_self_signed_keypair(
+            common_name=common_name, config=config)
+        csr = None
+    elif sign_mode == SignMode.CSR_ONLY:
+        key = openssl.generate_rsa_key(config=config)
+        cert = None
+        csr = openssl.create_csr(key, common_name=common_name, config=config)
+    elif sign_mode == SignMode.USE_CA:
+        key = openssl.generate_rsa_key(config=config)
+        csr = openssl.create_csr(key, common_name=common_name, config=config)
+        cert = openssl.sign_certificate(csr, config=config) 
+    else:
+        raise AssertionError("Unknown signing mode %s in mkca",
+            sign_mode)
+
+    # Write key, csr and/or cert files
+    write_file(key_file, key, force, mode=0600)
+    if cert is not None:
+        write_file(cert_file, cert, force)
+    if csr is not None:
+        write_file(csr_file, csr, force)
+
+    # Write hash-named copy if requested
+    if cert is not None and copy_dir is not None:
+        hash = openssl.get_certificate_hash(cert, config=config)
+
+        for ind in naturals():
+            filename = os.path.join(copy_dir, "%s.%s" % (hash, ind))
+            try:
+                write_file(filename, cert, force=False)
+                break
+            except FileExists, e:
+                log.info("Hash collision detected! Don't worry, this happens"
+                    + " roughly once in a century and we've safeguards "
+                    + "in place. Disregard the above error message about "
+                    + "not overwriting; this is not dangerous.")
+                continue
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+    main(sys.argv[1:])

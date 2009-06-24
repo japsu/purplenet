@@ -48,24 +48,22 @@ OPTIONS = [
         ("e:", "template-path=", "Override default template path"),
         ("f", "force", "Skip certain checks"),
         ("h", "help", "Shows this help text."),
-	("n:", "common-name=", "Sets the commonName (CN) field of the CA cert."),
+	("n:", "common-name=", "Set the commonName (CN) field of the CA cert."),
+	("o:", "copy=", "Place a hash-named copy of ca.crt in this directory."),
         ("q", "quiet", "Only show error messages."),
         ("s:", "sign-mode=", "How to sign this CA: self-sign, csr-only, use-ca"),
         ("t:", "type=", "What to sign with this CA: ca, server, client"),
         ("v", "verbose", "Show verbose output."),
 ]
 
-OPTS, LONG_OPTS = helpers.mkopts(OPTIONS)
+OPTS, LONG_OPTS, usage = helpers.mkopts_and_usage(HEADLINE, OPTIONS)
 
 # TODO might there be a better way to determine template path?
 # must be absolute because, well, Django.
 DEFAULT_TEMPLATE_PATH = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "templates"))
 
-log = logging.getLogger()
-
-def usage(stream=sys.stdout):
-        helpers.usage(HEADLINE, OPTIONS, stream)
+log = logging.getLogger("certlib")
 
 def main(args):
 	global log
@@ -85,6 +83,7 @@ def main(args):
 	ca_type = CAType.CLIENT	
 	force = False
 	common_name = None
+	copy_dir = None
 
 	for opt, optarg in opts:
 		if opt in ("--config", "-c"):
@@ -98,6 +97,8 @@ def main(args):
 			sys.exit(Exit.SUCCESS)
 		elif opt in ("--common-name", "-n"):
 			common_name = optarg
+		elif opt in ("--copy", "-o"):
+			copy_dir = optarg
 		elif opt in ("--quiet", "-q"):
 			log.setLevel(logging.WARNING)
 		elif opt in ("--sign-mode", "-s"):
@@ -112,6 +113,8 @@ def main(args):
 			raise AssertionError("Unhandled command line " +
 				"parameter: " + opt)		 
 
+	# Command line sanity checks
+
 	if len(args) < 1:
 		log.error("No target directories specified.")
 		usage(sys.stderr)
@@ -122,6 +125,13 @@ def main(args):
 		usage(sys.stderr)
 		sys.exit(Exit.COMMAND_LINE_SYNTAX_ERROR)
 
+	if sign_mode == SignMode.CSR_ONLY and copy_dir is not None:
+		log.error("--copy-dir (-o) makes no sense with --sign-mode csr-only")
+		usage(sys.stderr)
+		sys.exit(Exit.COMMAND_LINE_SYNTAX_ERROR)
+
+	# Command line approved.
+
 	log.debug("template path = %s", template_path)
 	log.debug("Configuring Django for templates")
 	django_settings.configure(TEMPLATE_DIRS=[template_path])
@@ -131,7 +141,16 @@ def main(args):
 		log.info("Creating %s (%d/%d)", dir, i + 1, n)
 
 		try:
-			mkca(dir, common_name, ca_type, sign_mode, config, force)
+			mkca(
+				dir=dir,
+				common_name=common_name,
+				ca_type=ca_type,
+				sign_mode=sign_mode,
+				copy_dir=copy_dir,
+				config=config,
+				force=force
+			)
+			sys.exit(Exit.SUCCESS)
 		except FileExists:
 			sys.exit(Exit.FAILURE)
 

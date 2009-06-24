@@ -53,11 +53,6 @@ class Org(models.Model):
     
     class Admin: pass
 
-    class Meta:
-        permissions = (
-            ("can_revoke_certificates", "Can revoke certificates of other users"),
-        )
-
 class Client(models.Model):
     name = models.CharField(max_length=30)
     orgs = models.ManyToManyField(Org, null=True)
