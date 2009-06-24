@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # vim: shiftwidth=4 expandtab
 #
@@ -126,11 +125,7 @@ def mkca(dir, common_name, ca_type=CAType.CLIENT,
                 write_file(filename, cert, force=False)
                 break
             except FileExists, e:
-                log.info("Hash collision detected! Don't worry, this happens"
-                    + " roughly once in a century and we've safeguards "
-                    + "in place. Disregard the above error message about "
-                    + "not overwriting; this is not dangerous.")
+                log.info("Hash collision detected! Please disregard the above"
+                    + " error message about not overwriting. Everything is"
+                    + " under control.")
                 continue
-
-if __name__ == "__main__":
-    main(sys.argv[1:])

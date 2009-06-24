@@ -51,6 +51,7 @@ def _run(*args, **kwargs):
     messages written by OpenSSL into its standard error stream as the
     payload of the exception.
     """
+
     input = kwargs.get("input", None)
 
     #cmdline = ["strace", "-o", "strace.out", "--", OPENSSL]

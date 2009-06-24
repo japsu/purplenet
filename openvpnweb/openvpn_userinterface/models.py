@@ -103,17 +103,13 @@ class Network(models.Model):
 class NetworkAttribute(models.Model):
     name = models.CharField(max_length=30)
     value = models.CharField(max_length=30)
-    networks = models.ManyToManyField(Network)
+    networks = models.ManyToManyField(Network) # TODO Tuure, why MtM?
     
     def __str__(self):
         return self.name
     
     class Admin:
         pass
-
-    class Meta:
-        # TODO unnecessary after class rename
-        verbose_name_plural = "Network attributes"        
 
 class Certificate(models.Model):
     common_name = models.CharField(max_length=30)
