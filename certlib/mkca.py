@@ -61,7 +61,7 @@ def mkca(dir, common_name, ca_type=CAType.CLIENT,
     config = config if config is not None else data.MKCA_CONFIG
 
     assert ((sign_mode != SignMode.CSR_ONLY) or
-        (sign_mode == SignMode.CSR_ONLY and copy_dir is None)),
+        (sign_mode == SignMode.CSR_ONLY and copy_dir is None)), \
         "copy_dir makes no sense with sign_mode == SignMode.CSR_ONLY"
 
     log.debug("sign_mode = %s", sign_mode)

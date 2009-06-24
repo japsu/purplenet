@@ -21,7 +21,8 @@ __all__ = [
     "create_self_signed_keypair",
     "create_pkcs12",
     "sign_certificate",
-    "revoke_certificate"
+    "revoke_certificate",
+    "get_certificate_hash"
 ]
 
 import sys, os
@@ -305,6 +306,6 @@ def revoke_certificate(common_name, config, ca_name=DEFAULT_CA_NAME):
     _run("ca", "-config", config, "-name", ca_name, "-revoke", cert_filename)
 
 
-def get_hash(crt, config=None):
+def get_certificate_hash(crt, config=None):
     return _run("x509", "-noout", "-hash", "-in", "/dev/stdin", input=crt) \
         .strip()
