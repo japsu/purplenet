@@ -142,7 +142,8 @@ class Certificate(models.Model):
         self.timestamp = datetime.now()
     
     class Admin:
-        list_display = ('revoked','downloaded','common_name','user','network','timestamp')
+        list_display = ('revoked','downloaded','common_name','user',
+            'network','timestamp')
         list_filter = ['network','revoked','user']
         search_fields = ['user','network','common_name']
 
