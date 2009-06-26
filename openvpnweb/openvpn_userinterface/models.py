@@ -8,7 +8,14 @@ import certlib.openssl as openssl
 class CertificateAuthority(models.Model):
     common_name = models.CharField(max_length=200, unique=True)
     config = models.CharField(max_length=200)
-    parent = models.ForeignKey('self', null=True, blank=True)
+
+    CA_TYPE_CHOICES = (
+        ("root", "ROOT"),
+        ("server", "SERVER"),
+        ("client", "CLIENT"), # FIXME misleading names?
+        ("org", "ORGANIZATION"),
+    )
+    ca_type = models.CharField(max_length=30, choices=CA_TYPE_CHOICES)
 
     def __unicode__(self):
         return self.common_name
@@ -46,9 +53,7 @@ class Org(models.Model):
         self.ca = CertificateAuthority.objects.get(common_name=value)
     ca_name = property(_get_ca_name, _set_ca_name)
 
-    def __str__(self):
-        return self.name
-    def __repr__(self):
+    def __unicode__(self):
         return self.name
     
     class Admin: pass
@@ -56,12 +61,10 @@ class Org(models.Model):
 class Client(models.Model):
     name = models.CharField(max_length=30)
     orgs = models.ManyToManyField(Org, null=True)
-    def __str__(self):
-        return self.name
     
-    def __repr__(self):
+    def __unicode__(self):
         return self.name
-    
+
     class Admin: pass
                             
 class Server(models.Model):
@@ -79,46 +82,51 @@ class Server(models.Model):
     protocol = models.CharField(max_length=30, choices=PROTOCOL_CHOICES)
     mode = models.CharField(max_length=30, choices=MODE_CHOICES) 
     
-    def __str__(self):
+    def __unicode__(self):
         return self.name
-        
-    def __repr__(self):
-        return self.name
-                
+
     class Admin: pass
+
+class NetworkProfile(models.Model):
+    name = models.CharField(max_length=30)
+    inherited_profiles = models.ManyToMany('self', null=True, blank=True)
+
+class NetworkAttributeType(modes.Model):
+    name = models.CharField(max_length=30)
+    description = models.CharField(max_length=2000)
+    regex = models.CharField(max_length=200)
+
+class NetworkAttribute(models.Model):
+    profile = models.ForeignKey(NetworkProfile)
+    attribute = models.ForeignKey(NetworkAttributeType)
+    value = models.CharField(max_length=200)
 
 class Network(models.Model):
     name = models.CharField(max_length=30)
     org = models.ForeignKey(Org)
     server = models.ForeignKey(Server)
+    profiles = models.ManyToMany(NetworkProfile)
     
-    def __str__(self):
+    def __unicode__(self):
         return self.name
-   
-    def __repr__(self):
-        return self.name
-    
+
     class Admin: pass
     
-class NetworkAttribute(models.Model):
-    name = models.CharField(max_length=30)
-    value = models.CharField(max_length=30)
-    networks = models.ManyToManyField(Network) # TODO Tuure, why MtM?
-    
-    def __str__(self):
-        return self.name
-    
-    class Admin:
-        pass
-
 class Certificate(models.Model):
     common_name = models.CharField(max_length=30)
     ca = models.ForeignKey(CertificateAuthority)
-    timestamp = models.DateTimeField()
-    revoked = models.BooleanField(default=False)
+    granted = models.DateTimeField()
+    revoked = models.DateTimeField(null=True)
     user = models.ForeignKey(Client)
     network = models.ForeignKey(Network)
     downloaded = models.BooleanField(default=False)
+
+    def _get_timestamp(self):
+        if self.revoked is not None:
+            return self.revoked
+        else:
+            return self.granted
+    timestamp = property(_get_timestamp)
 
     def _get_ca_name(self):
         return self.ca.common_name
