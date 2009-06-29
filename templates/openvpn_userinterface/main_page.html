@@ -1,16 +1,11 @@
 {% extends "base/base.html" %}
-
-
 {% block content %}
 
-
   {% if user.username %}
-<!-- XXX lots of hard-coded urls -->
-<h3>From this page you can download certificates simply by pressing the download button. You are also able 
-to remove current certificates.</h3> 
+<p>From this page you can download certificates simply by pressing the download button. You are also able 
+to remove current certificates.</p> 
     <h2>Available networks:</h2>
       {% if organisations %}
-        <ul>
 	  {% for org in organisations %}
 	    <h2>{{ org.name }}: </h2>
 	     {% for network in org.network_set.all %}
@@ -36,7 +31,7 @@ to remove current certificates.</h3>
 			  {% else %}
 			  <p>Revoked @ {{ cert.timestamp }}</p>
 			  {% endifequal %}</td>
-			 {% ifequal session.new_cert_id cert.id %}
+			 {% ifequal session.cert_id cert.id %}
 			 {% ifequal cert.revoked 0 %}
 			  <td><form method="post" action="{% url download %}">
 			  <p class="submit"><input type="submit" value="Download" /></p>
@@ -49,7 +44,6 @@ to remove current certificates.</h3>
 	       </tr></table><p>&nbsp;</p>
 	     {% endfor %}
 	  {% endfor %}
-	</ul>
       {% else %}
         <p>No organisations at the moment.</p>
       {% endif %}
@@ -59,6 +53,5 @@ to remove current certificates.</h3>
     before you can use this service.</p>
   {% endif %}
 
-  
 {% endblock content %}
-				      
+

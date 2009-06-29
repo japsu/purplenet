@@ -40,21 +40,24 @@ def login_page(request):
 		        'message_login': "Please enable cookies and try again!"
 		    }
 		    return render_to_response('openvpn_userinterface/login.html', variables )
+
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
+
         if user is not None:
             if user.is_active:
                 login(request, user)    
                 client = None
                 try:
                     client = Client.objects.get(name=user.username)
-                except:
+                except Client.DoesNotExist:
                     #luodaan client ja taman jalkeen katsotaan mihin grouppiin
                     #on oikeudet ja luodaan nekin.
                     client = Client(name=user.username)
                     client.save()
                  
+                # XXX
                 if not DEFAULT in ["%s" % g for g in user.groups.all()]:
                     g = Group.objects.get(name=DEFAULT)
                     user.groups.add(g)
@@ -67,6 +70,7 @@ def login_page(request):
                   	organisations.append(Org.objects.get(name=group.name))
                     except Org.DoesNotExist:	
                   	pass
+                
                 request.session["organisations"] = organisations
                 request.session["client"] = client
                 
@@ -108,12 +112,10 @@ def main_page(request):
 @login_required
 def order_page(request):
     if request.method == 'POST':
-        try:
-            cert_id = request.session["cert_id"]
+        if request.session.has_key("cert_id"):
             return HttpResponseRedirect(
                 reverse("openvpnweb.openvpn_userinterface.views.main_page"))
-        except:
-            pass
+
         client = request.session["client"]
         organisations = request.session["organisations"]
         network_id = request.POST['net_id']
@@ -123,7 +125,7 @@ def order_page(request):
         except:
             pass
         if network.org in organisations:
-            common_name = generate_random_string() + network.org.cn_suffix
+            common_name = network.org.get_random_cn()
             ca = network.org.ca
             config = ca.config
             
@@ -135,17 +137,19 @@ def order_page(request):
             certificate = Certificate()
             certificate.common_name = common_name
             certificate.ca = ca
-            certificate.timestamp = datetime.now()
+            certificate.granted = datetime.now()
             certificate.user = client
             certificate.network = network
             certificate.save()
 
-            # FIXME If the user orders multiple certificates without downloading them in between, catastrophe happens.
-            # The session data might not be the right place for this kind of information.
-            # Possible solution: Make the user download the certificate right away after it has been created.
-            request.session["new_key"] = key
-            request.session["new_cert"] = cert
-            request.session["new_cert_id"] = certificate.pk
+            # FIXME If the user orders another certificate before downloading
+            # the certificate that was just created, the first certificate is
+            # lost. The session data might not be the right place for this
+            # kind of information. Possible solution: Make the user download
+            # the certificate right away after it has been created.
+            request.session["key"] = key
+            request.session["cert"] = cert
+            request.session["cert_id"] = certificate.pk
         else:
             # XXX
             raise AssertionError("Then what?")
@@ -156,9 +160,9 @@ def order_page(request):
 def download(request):
     # XXX
     try:
-        key = request.session["new_key"]
-        cert = request.session["new_cert"]
-        cert_pk = request.session["new_cert_id"]
+        key = request.session["key"]
+        cert = request.session["cert"]
+        cert_pk = request.session["cert_id"]
         certificate = Certificate.objects.get(pk=cert_pk)
         if certificate.downloaded:
             raise Exception()
@@ -166,9 +170,9 @@ def download(request):
         return HttpResponseRedirect(
             reverse("openvpnweb.openvpn_userinterface.views.main_page"))
 
-    del request.session["new_key"]
-    del request.session["new_cert"]
-    del request.session["new_cert_id"]
+    del request.session["key"]
+    del request.session["cert"]
+    del request.session["cert_id"]
 
     response = HttpResponse(mimetype='application/zip')
     response['Content-Disposition'] = 'filename=openvpn-certificates.zip'

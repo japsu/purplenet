@@ -4,6 +4,7 @@ from django.db import models
 from datetime import datetime
 
 import certlib.openssl as openssl
+from openvpnweb.helper_functions import generate_random_string 
 
 class CertificateAuthority(models.Model):
     common_name = models.CharField(max_length=200, unique=True)
@@ -43,7 +44,7 @@ class CertificateAuthority(models.Model):
         verbose_name_plural = "Certificate Authorities"    
 
 class Org(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
     ca = models.ForeignKey(CertificateAuthority)
     cn_suffix = models.CharField(max_length=30)        
 
@@ -55,6 +56,9 @@ class Org(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def get_random_cn(self):
+        return get_random_string() + self.get_cn_suffix()
     
     class Admin: pass
 
@@ -89,9 +93,9 @@ class Server(models.Model):
 
 class NetworkProfile(models.Model):
     name = models.CharField(max_length=30)
-    inherited_profiles = models.ManyToMany('self', null=True, blank=True)
+    inherited_profiles = models.ManyToManyField('self', null=True, blank=True)
 
-class NetworkAttributeType(modes.Model):
+class NetworkAttributeType(models.Model):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=2000)
     regex = models.CharField(max_length=200)
@@ -105,7 +109,7 @@ class Network(models.Model):
     name = models.CharField(max_length=30)
     org = models.ForeignKey(Org)
     server = models.ForeignKey(Server)
-    profiles = models.ManyToMany(NetworkProfile)
+    profiles = models.ManyToManyField(NetworkProfile, blank=True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -116,7 +120,7 @@ class Certificate(models.Model):
     common_name = models.CharField(max_length=30)
     ca = models.ForeignKey(CertificateAuthority)
     granted = models.DateTimeField()
-    revoked = models.DateTimeField(null=True)
+    revoked = models.DateTimeField(null=True, blank=True)
     user = models.ForeignKey(Client)
     network = models.ForeignKey(Network)
     downloaded = models.BooleanField(default=False)
@@ -134,9 +138,7 @@ class Certificate(models.Model):
         self.ca = CertificateAuthority.objects.get(common_name=value)
     ca_name = property(_get_ca_name, _set_ca_name)
     
-    def __str__(self):
-        return self.common_name
-    def __repr__(self):
+    def __unicode__(self):
         return self.common_name
 
     def revoke(self):
@@ -147,11 +149,11 @@ class Certificate(models.Model):
         self.ca.revoke_certificate(self.common_name)
         self.revoked = True
         self.downloaded = True
-        self.timestamp = datetime.now()
+        self.revoked = datetime.now()
     
     class Admin:
-        list_display = ('revoked','downloaded','common_name','user',
-            'network','timestamp')
+        list_display = ('downloaded','common_name','user',
+            'network','granted','revoked')
         list_filter = ['network','revoked','user']
         search_fields = ['user','network','common_name']
 
