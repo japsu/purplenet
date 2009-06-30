@@ -58,7 +58,7 @@ class Org(models.Model):
         return self.name
 
     def get_random_cn(self):
-        return get_random_string() + self.get_cn_suffix()
+        return generate_random_string() + self.cn_suffix
     
     class Admin: pass
 
@@ -134,9 +134,11 @@ class Certificate(models.Model):
 
     def _get_ca_name(self):
         return self.ca.common_name
-    def _set_ca_name(self, value):
-        self.ca = CertificateAuthority.objects.get(common_name=value)
-    ca_name = property(_get_ca_name, _set_ca_name)
+    ca_name = property(_get_ca_name)
+
+    def _is_revoked(self):
+        return (self.revoked is not None)
+    is_revoked = property(_is_revoked)
     
     def __unicode__(self):
         return self.common_name
@@ -147,8 +149,6 @@ class Certificate(models.Model):
         Revokes this certificate. Remember to call save() after revoke().
         """
         self.ca.revoke_certificate(self.common_name)
-        self.revoked = True
-        self.downloaded = True
         self.revoked = datetime.now()
     
     class Admin:

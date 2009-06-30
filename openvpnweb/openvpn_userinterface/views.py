@@ -105,7 +105,7 @@ def main_page(request):
         'session': request.session,
     })
     
-    return render_to_response( 
+    return render_to_response(
         'openvpn_userinterface/main_page.html', variables 
     )
 
