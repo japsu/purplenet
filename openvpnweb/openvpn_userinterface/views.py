@@ -1,7 +1,8 @@
 # vim: shiftwidth=4 expandtab
 
-from django.shortcuts import render_to_response
-from django.http import Http404, HttpResponseRedirect, HttpResponse
+from django.shortcuts import render_to_response, get_object_or_404
+from django.http import (HttpResponseRedirect, HttpResponse,
+    HttpResponseForbidden, HttpResponseNotAllowed)
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import logout, authenticate, login
 from django.template import Context, RequestContext
@@ -21,6 +22,18 @@ from os.path import getsize
 
 # XXX
 DEFAULT = "TTY"
+
+def post_confirmation_page(request, question, choices):
+    """post_confirmation_page(request, question, choices) -> response
+
+    A helper for implementing the REST protocol. Should a POST-only resource
+    be accessed with the GET method, this method may be used to return a
+    confirmation page that allows the user to retry with the POST method or
+    cancel.
+    """
+
+    vars = dict(question=question, choices=choices)
+    return render_to_response("openvpn_userinterface/confirmation.html", vars)
 
 def login_page(request):
     #if user.is_authenticated:
@@ -110,142 +123,93 @@ def main_page(request):
     )
 
 @login_required
-def order_page(request):
-    if request.method == 'POST':
-        if request.session.has_key("cert_id"):
-            return HttpResponseRedirect(
-                reverse("openvpnweb.openvpn_userinterface.views.main_page"))
+def order_page(request, network_id):
+    network = get_object_or_404(Network, id=int(network_id))
 
+    if request.method == 'POST':
         client = request.session["client"]
         organisations = request.session["organisations"]
-        network_id = request.POST['net_id']
-        # XXX
-        try:
-            network = Network.objects.get(id = network_id)
-        except:
-            pass
-        if network.org in organisations:
-            common_name = network.org.get_random_cn()
-            ca = network.org.ca
-            config = ca.config
-            
-            # TODO user-supplied CSR
-            key = openssl.generate_rsa_key(config=config)
-            csr = openssl.create_csr(common_name=common_name, key=key, config=config)
-            cert = openssl.sign_certificate(csr, config=config)
 
-            certificate = Certificate()
-            certificate.common_name = common_name
-            certificate.ca = ca
-            certificate.granted = datetime.now()
-            certificate.user = client
-            certificate.network = network
-            certificate.save()
+        if not network.org in organisations:
+            return HttpResponseForbidden()
 
-            # FIXME If the user orders another certificate before downloading
-            # the certificate that was just created, the first certificate is
-            # lost. The session data might not be the right place for this
-            # kind of information. Possible solution: Make the user download
-            # the certificate right away after it has been created.
-            request.session["key"] = key
-            request.session["cert"] = cert
-            request.session["cert_id"] = certificate.pk
-        else:
-            # XXX
-            raise AssertionError("Then what?")
-    return HttpResponseRedirect(
-        reverse("openvpnweb.openvpn_userinterface.views.main_page"))
-
-@login_required
-def download(request):
-    # XXX
-    try:
-        key = request.session["key"]
-        cert = request.session["cert"]
-        cert_pk = request.session["cert_id"]
-        certificate = Certificate.objects.get(pk=cert_pk)
-        if certificate.downloaded:
-            raise Exception()
-    except:
-        return HttpResponseRedirect(
-            reverse("openvpnweb.openvpn_userinterface.views.main_page"))
-
-    del request.session["key"]
-    del request.session["cert"]
-    del request.session["cert_id"]
-
-    response = HttpResponse(mimetype='application/zip')
-    response['Content-Disposition'] = 'filename=openvpn-certificates.zip'
-
-    # TODO with ZipFile(...) as zip?
-    # TODO write directly into response?
-    buffer=StringIO()
-    zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-    # TODO zip.writestr("ca.crt", server_ca)
-    zip.writestr("client.key", key)
-    zip.writestr("client.crt", cert)
-    zip.close()
-    buffer.flush()
-    ret_zip = buffer.getvalue()
-    buffer.close()
-    response.write(ret_zip)
-    certificate.downloaded = True
-    certificate.save()
-    return response
-
-@login_required
-def revoke_page(request):
-    if request.method == 'POST':
-	cert_id_p = None
-
-        # XXX
-	try:
-            cert_id_p = request.POST['cert_id']
-
-	    cert_id_s = None
-
-            # XXX
-	    try:
-		cert_id_s = request.session['cert_id']
-	    except:
-		pass
-
-	    if not cert_id_s is None and cert_id_p != cert_id_s:
-                return HttpResponseRedirect(reverse(
-                    "openvpnweb.openvpn_userinterface.views.main_page"))
-
-            client = request.session["client"]
-        except:
-	    return HttpResponseRedirect(reverse(
-                "openvpnweb.openvpn_userinterface.views.main_page"))
-
-	cert_id = cert_id_p
-	certificate = None
-        # XXX
-        try:
-            certificate = Certificate.objects.get(id = cert_id)
-
-            # XXX 
-	    if certificate.revokated:
-		return HttpResponseRedirect(reverse(
-                    "openvpnweb.openvpn_userinterface.views.main_page"))
-
-        except:
-            pass
-        certificates = client.certificate_set.all()
+        common_name = network.org.get_random_cn()
+        ca = network.org.ca
+        config = ca.config
         
-        if certificate in certificates:
-            certificate.revoke()
-            certificate.save()
+        # TODO user-supplied CSR
+        key = openssl.generate_rsa_key(config=config)
+        csr = openssl.create_csr(common_name=common_name, key=key,
+            config=config)
+        # TODO certificate_authority.sign(csr)
+        cert = openssl.sign_certificate(csr, config=config)
 
-            # XXX
-            try:
-                del request.session["path"]
-                del request.session["cert_id"]
-            except:
-                pass
-    return HttpResponseRedirect(reverse(
-        "openvpnweb.openvpn_userinterface.views.main_page"))
+        certificate = Certificate(
+            common_name=common_name,
+            ca=ca,
+            granted=datetime.now(),
+            user=client,
+            network=network
+        )
+        certificate.save()
+
+        response = HttpResponse(mimetype='application/zip')
+        response['Content-Disposition'] = 'filename=openvpn-certificates.zip'
+
+        # TODO with ZipFile(...) as zip?
+        # TODO write directly into response?
+        buffer=StringIO()
+        zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
+        # TODO zip.writestr("ca.crt", server_ca)
+        zip.writestr("client.key", key)
+        zip.writestr("client.crt", cert)
+        zip.close()
+        buffer.flush()
+        ret_zip = buffer.getvalue()
+        buffer.close()
+        response.write(ret_zip)
+        certificate.downloaded = True
+        certificate.save()
+        return response
+
+    elif request.method == "GET":
+        return post_confirmation_page(request,
+            question="Order a certificate for {0}?".format(network),
+            choices=[
+                ("Order", reverse("order_page",
+                    kwargs=dict(network_id=network_id))),
+                ("Cancel", reverse("main_page"))
+            ]
+        )
+
+    else:
+        return HttpResponseNotAllowed()
+
+@login_required
+def revoke_page(request, cert_id):
+    certificate = get_object_or_404(Certificate, id=int(cert_id))
+
+    if request.method == 'POST':
+        client = request.session["client"]
+        if not client.may_revoke(certificate):
+            return HttpResponseForbidden()
+
+        certificate.revoke()
+        certificate.save()
+        return HttpResponseRedirect(reverse("main_page"))
+
+    elif request.method == 'GET':
+        return post_confirmation_page(request,
+            question="Really revoke certificate {0}?".format(certificate),
+            choices=[
+                ("Revoke", reverse("revoke_page", kwargs=
+                    dict(cert_id=cert_id))),
+                ("Cancel", reverse("main_page"))
+            ]
+        )
+
+    else:
+        return HttpResponseNotAllowed()
 
 def logout_page(request):
     # XXX

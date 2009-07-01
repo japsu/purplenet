@@ -1,0 +1,27 @@
+{% extends "base/base.html" %}
+{% comment %}
+vim: shiftwidth=4 expandtab
+coding: UTF-8
+{% endcomment %}
+{% block content %}
+<h2>Confirmation</h2>
+<!--
+
+    REST note:
+
+    You are seeing this page because you used the GET method to access a
+    resource that is supposed to be accessed using the POST method. According
+    to the REST protocol no state change may be caused by GET requests.
+
+    A POST request may be made using the form below, if appropriate.
+
+-->
+<p>{{ question }}</p>
+<p>
+{% for choice, destination in choices %}
+<form action="{{ destination }}" method="post">
+<input type="submit" value="{{ choice }}" />
+</form>
+{% endfor %}
+</p>
+{% endblock %}

@@ -12,11 +12,8 @@ to remove current certificates.</p>
 	       <table><tr>
 			<th>{{ network.name }}</th>
 			<th>
-			<form method="post" action="{% url order_page %}">
-			<input type="hidden" name="net_id" value= "{{network.id }}" />
-			<p class="submit">
-			  <input type="submit" value="Order" {% if session.cert_id %}disabled{% endif %}/>
-			</p>
+			<form method="post" action="{% url order_page network_id=network.id %}">
+			<p class="submit"><input type="submit" value="Order" /></p>
 			</form></th><th> </th>
 			</tr>
 			{% for certs in certificates.items %}
@@ -24,12 +21,12 @@ to remove current certificates.</p>
 			  {% for cert in certs.1 %}
 			 <tr><td> {{ cert.common_name }}</td>
 			  <td>{% if not cert.is_revoked %}
-			  <form method="post" action="{% url revoke_page %}">
+			  <form method="post" action="{% url revoke_page cert_id=cert.id%}">
 			  <input type="hidden" name="cert_id" value="{{cert.id}}" />
 			  <p class="submit"><input type="submit" value="Remove" {% if session.cert_id %}disabled{% endif %}/></p>
 			  </form>
 			  {% else %}
-			  <p>Revoked @ {{ cert.revoked }}</p>
+			  <p>Revoked @ {{ cert.revoked|date }}</p>
 			  {% endif %}</td>
 			 {% ifequal session.cert_id cert.id %}
 			 {% if not cert.is_revoked %}

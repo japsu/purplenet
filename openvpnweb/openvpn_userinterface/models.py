@@ -4,6 +4,7 @@ from django.db import models
 from datetime import datetime
 
 import certlib.openssl as openssl
+from certlib.enums import CAType
 from openvpnweb.helper_functions import generate_random_string 
 
 class CertificateAuthority(models.Model):
@@ -11,12 +12,12 @@ class CertificateAuthority(models.Model):
     config = models.CharField(max_length=200)
 
     CA_TYPE_CHOICES = (
-        ("root", "ROOT"),
-        ("server", "SERVER"),
-        ("client", "CLIENT"), # FIXME misleading names?
-        ("org", "ORGANIZATION"),
+        (CAType.CA, "CA"),
+        (CAType.SERVER, "SERVER"),
+        (CAType.CLIENT, "CLIENT"),
     )
-    ca_type = models.CharField(max_length=30, choices=CA_TYPE_CHOICES)
+    ca_type = models.CharField(max_length=30, choices=CA_TYPE_CHOICES,
+        help_text="Which kind of objects are going to be signed with this CA")
 
     def __unicode__(self):
         return self.common_name
@@ -68,6 +69,10 @@ class Client(models.Model):
     
     def __unicode__(self):
         return self.name
+
+    def may_revoke(self, certificate):
+        # TODO Admins may revoke other certs, too.
+        return certificate.user == self
 
     class Admin: pass
                             
