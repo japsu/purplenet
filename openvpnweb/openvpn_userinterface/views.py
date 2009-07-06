@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from openvpnweb.openvpn_userinterface.models import *
 from openvpnweb.settings import LOGIN_URL
 from openvpnweb.helper_functions import *
+from openvpnweb.access_control import manager_required
 
 import certlib.openssl as openssl
 
@@ -225,4 +226,6 @@ def logout_page(request):
     return HttpResponseRedirect(reverse(
         "openvpnweb.openvpn_userinterface.views.login_page"))        
 
-#def manage_page(request):
+@manager_required
+def manage_page(request):
+    return render_to_response("openvpn_userinterface/manage.html", {})
