@@ -240,9 +240,10 @@ def manage_page(request):
 def manage_org_page(request, org_id):
     org = get_object_or_404(Org, org_id=int(org_id))
     manager = session["client"]
-    clients = Client.objects.filter(
+    clients = org.client_set.all()
 
     if not manager.may_manage(org):
         return HttpResponseForbidden()
 
-    
+    vars = { "clients" : clients }
+    return render_to_response("
