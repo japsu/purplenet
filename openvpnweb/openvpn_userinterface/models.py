@@ -1,6 +1,7 @@
 # vim: shiftwidth=4 expandtab
 
 from django.db import models
+from django.contrib.auth.models import User, Group
 from datetime import datetime
 
 import certlib.openssl as openssl
@@ -37,7 +38,6 @@ class CertificateAuthority(models.Model):
 
     def revoke_certificate(self, common_name):
         return openssl.revoke_certificate(common_name, config=self.config)    
-
     class Admin:
         pass
     
@@ -45,9 +45,13 @@ class CertificateAuthority(models.Model):
         verbose_name_plural = "Certificate Authorities"    
 
 class Org(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-    ca = models.ForeignKey(CertificateAuthority)
+    group = models.OneToOneField(Group)
+    ca = models.OneToOneField(CertificateAuthority)
     cn_suffix = models.CharField(max_length=30)        
+
+    def _get_name(self):
+        return self.group.name
+    name = property(_get_name)
 
     def _get_ca_name(self):
         return self.ca.common_name
@@ -63,19 +67,6 @@ class Org(models.Model):
     
     class Admin: pass
 
-class Client(models.Model):
-    name = models.CharField(max_length=30)
-    orgs = models.ManyToManyField(Org, null=True)
-    
-    def __unicode__(self):
-        return self.name
-
-    def may_revoke(self, certificate):
-        # TODO Admins may revoke other certs, too.
-        return certificate.user == self
-
-    class Admin: pass
-                            
 class Server(models.Model):
     name = models.CharField(max_length=30)
     address = models.IPAddressField()
@@ -162,3 +153,48 @@ class Certificate(models.Model):
         list_filter = ['network','revoked','user']
         search_fields = ['user','network','common_name']
 
+    class Meta:
+        abstract = True
+
+class CACertificate(Certificate):
+    pass
+
+class ServerCertificate(Certificate):
+    pass
+
+class ClientCertificate(Certificate):
+    # REVERSE: client = OneToOne(Client)
+    pass
+
+class Client(models.Model):
+    user = models.OneToOneField(User)
+    orgs = models.ManyToManyField(Org, blank=True,
+        related_name="clients")
+    certificate = models.OneToOneField(ClientCertificate,
+        related_name="client")
+    
+    def _get_name(self):
+        return self.user.username
+    name = property(_get_name)
+
+    def __unicode__(self):
+        return self.name
+
+    def may_revoke(self, certificate):
+        # TODO Admins may revoke other certs, too.
+        return certificate.user == self or \
+            self.may_manage(certificate.ca.org)
+
+    def may_manage(self, org):
+        # XXX Stub
+        return org in self.orgs.all()
+
+    def may_view_management_pages(self):
+        # XXX Stub
+        return True
+
+    def get_managed_organizations(self):
+        # XXX Stub
+        return self.orgs
+
+    class Admin: pass

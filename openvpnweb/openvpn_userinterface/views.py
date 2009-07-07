@@ -19,7 +19,6 @@ import certlib.openssl as openssl
 from datetime import datetime
 import zipfile
 from cStringIO import StringIO
-from os.path import getsize
 
 # XXX
 DEFAULT = "TTY"
@@ -27,13 +26,19 @@ DEFAULT = "TTY"
 def post_confirmation_page(request, question, choices):
     """post_confirmation_page(request, question, choices) -> response
 
-    A helper for implementing the REST protocol. Should a POST-only resource
+    A helper for implementing the lo-REST protocol. Should a POST-only resource
     be accessed with the GET method, this method may be used to return a
     confirmation page that allows the user to retry with the POST method or
     cancel.
     """
 
-    vars = dict(question=question, choices=choices)
+    client = request.session.get("client", None)
+
+    vars = {
+        "question" : question,
+        "choices" : choices,
+        "client" : client,
+    }
     return render_to_response("openvpn_userinterface/confirmation.html", vars)
 
 def login_page(request):
@@ -64,11 +69,11 @@ def login_page(request):
                 login(request, user)    
                 client = None
                 try:
-                    client = Client.objects.get(name=user.username)
+                    client = Client.objects.get(user=user)
                 except Client.DoesNotExist:
                     #luodaan client ja taman jalkeen katsotaan mihin grouppiin
                     #on oikeudet ja luodaan nekin.
-                    client = Client(name=user.username)
+                    client = Client(user=user)
                     client.save()
                  
                 # XXX
@@ -116,7 +121,6 @@ def main_page(request):
         'client': client,
         'organisations': organisations,
         'certificates': certificates,
-        'session': request.session,
     })
     
     return render_to_response(
@@ -217,8 +221,6 @@ def logout_page(request):
     try:
         del request.session["client"]
         del request.session["organisations"]
-        del request.session["cert_id"]
-        del request.session["path"]
     except:
         pass
     
@@ -228,4 +230,19 @@ def logout_page(request):
 
 @manager_required
 def manage_page(request):
+    manager = session["client"]
+    organizations = manager.get_managed_organizations()
+
+    vars = { "organizations" : organizations }
     return render_to_response("openvpn_userinterface/manage.html", {})
+
+@manager_required
+def manage_org_page(request, org_id):
+    org = get_object_or_404(Org, org_id=int(org_id))
+    manager = session["client"]
+    clients = Client.objects.filter(
+
+    if not manager.may_manage(org):
+        return HttpResponseForbidden()
+
+    
