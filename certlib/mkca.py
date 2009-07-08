@@ -9,18 +9,14 @@
 # 
 # 
 
-#
-# TODO Missing features:
-#    * certificate attributes (from file or user input)
-#    * X.509 extensions (from CA type)
-#
-
 from __future__ import absolute_import
 
-from .helpers import FileExists, mkdir_check, enum_check, write_file, naturals
+from .helpers import FileExists, mkdir_check, enum_check, write_file, coalesce
 from .enums import Exit, CAType, SignMode
 from . import helpers, data
 from . import openssl as openssl
+
+from itertools import count
 
 import sys, os
 import logging
@@ -57,7 +53,7 @@ def mkca(dir, common_name, ca_type=CAType.CLIENT,
     csr_file = os.path.join(dir, CA_CSR_FILE_NAME)
     cert_file = os.path.join(dir, CA_CERT_FILE_NAME)
 
-    config = config if config is not None else data.MKCA_CONFIG
+    config = coalesce(config, data.MKCA_CONFIG)
 
     assert ((sign_mode != SignMode.CSR_ONLY) or
         (sign_mode == SignMode.CSR_ONLY and copy_dir is None)), \
@@ -119,7 +115,7 @@ def mkca(dir, common_name, ca_type=CAType.CLIENT,
     if cert is not None and copy_dir is not None:
         hash = openssl.get_certificate_hash(cert, config=config)
 
-        for ind in naturals():
+        for ind in count():
             filename = os.path.join(copy_dir, "%s.%s" % (hash, ind))
             try:
                 write_file(filename, cert, force=False)

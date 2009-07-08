@@ -115,8 +115,9 @@ def mkdir_check(dir, force=False):
                 " force.", dir)
             raise FileExists(dir)
 
-def naturals():
-    i = 0
-    while True:
-        yield i
-        i += 1
+def coalesce(*args):
+    for arg in args:
+        if arg is not None:
+            return arg
+
+    return None

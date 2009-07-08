@@ -273,7 +273,7 @@ def create_pkcs12(crt, key, chain_dir=None, extra_cert=None,
     ]
 
     if chain_dir is not None:
-        params.extend(("-chain", "-CApath", chaindir))
+        params.extend(("-chain", "-CApath", chain_dir))
 
     if extra_cert is not None:
         params.extend(("-certfile", extra_cert))

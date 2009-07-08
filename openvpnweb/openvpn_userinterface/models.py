@@ -6,19 +6,20 @@ from datetime import datetime
 
 import certlib.openssl as openssl
 from certlib.enums import CAType
+from certlib.helpers import coalesce
 from openvpnweb.helper_functions import generate_random_string 
 
 class CertificateAuthority(models.Model):
-    common_name = models.CharField(max_length=200, unique=True)
     config = models.CharField(max_length=200)
+    owner = models.ForeignKey("Org", null=True, blank=True,
+        related_name="owned_%s(class)_set")
 
-    CA_TYPE_CHOICES = (
-        (CAType.CA, "CA"),
-        (CAType.SERVER, "SERVER"),
-        (CAType.CLIENT, "CLIENT"),
-    )
-    ca_type = models.CharField(max_length=30, choices=CA_TYPE_CHOICES,
-        help_text="Which kind of objects are going to be signed with this CA")
+    certificate = models.OneToOneField("CACertificate", null=True,
+        blank=True, related_name="%s(class)_user")
+
+    @property
+    def common_name(self):
+        return self.certificate.common_name
 
     def __unicode__(self):
         return self.common_name
@@ -43,21 +44,31 @@ class CertificateAuthority(models.Model):
     
     class Meta:
         verbose_name_plural = "Certificate Authorities"    
+        abstract = True
+
+class ClientCA(CertificateAuthority):
+    # REVERSE: user = OneToOne(Org)
+    pass
+
+class ServerCA(CertificateAuthority):
+    # REVERSE: user = OneToOne(Server)
+    pass
+
+class IntermediateCA(CertificateAuthority):
+    pass
 
 class Org(models.Model):
     group = models.OneToOneField(Group)
-    ca = models.OneToOneField(CertificateAuthority)
+    client_ca = models.ForeignKey(ClientCA, related_name="user_set")
     cn_suffix = models.CharField(max_length=30)        
 
-    def _get_name(self):
+    @property
+    def name(self):
         return self.group.name
-    name = property(_get_name)
 
-    def _get_ca_name(self):
+    @property
+    def ca_name(self):
         return self.ca.common_name
-    def _set_ca_name(self, value):
-        self.ca = CertificateAuthority.objects.get(common_name=value)
-    ca_name = property(_get_ca_name, _set_ca_name)
 
     def __unicode__(self):
         return self.name
@@ -67,74 +78,25 @@ class Org(models.Model):
     
     class Admin: pass
 
-class Server(models.Model):
-    name = models.CharField(max_length=30)
-    address = models.IPAddressField()
-    port = models.IntegerField(max_length=10)
-    PROTOCOL_CHOICES = (
-        ('tcp','TCP'),
-        ('udp','UDP')
-    )
-    MODE_CHOICES = (
-        ('bridged','BRIDGED'),
-        ('routed','ROUTED')
-    )
-    protocol = models.CharField(max_length=30, choices=PROTOCOL_CHOICES)
-    mode = models.CharField(max_length=30, choices=MODE_CHOICES) 
-    
-    def __unicode__(self):
-        return self.name
-
-    class Admin: pass
-
-class NetworkProfile(models.Model):
-    name = models.CharField(max_length=30)
-    inherited_profiles = models.ManyToManyField('self', null=True, blank=True)
-
-class NetworkAttributeType(models.Model):
-    name = models.CharField(max_length=30)
-    description = models.CharField(max_length=2000)
-    regex = models.CharField(max_length=200)
-
-class NetworkAttribute(models.Model):
-    profile = models.ForeignKey(NetworkProfile)
-    attribute = models.ForeignKey(NetworkAttributeType)
-    value = models.CharField(max_length=200)
-
-class Network(models.Model):
-    name = models.CharField(max_length=30)
-    org = models.ForeignKey(Org)
-    server = models.ForeignKey(Server)
-    profiles = models.ManyToManyField(NetworkProfile, blank=True, null=True)
-    
-    def __unicode__(self):
-        return self.name
-
-    class Admin: pass
-    
 class Certificate(models.Model):
     common_name = models.CharField(max_length=30)
-    ca = models.ForeignKey(CertificateAuthority)
     granted = models.DateTimeField()
     revoked = models.DateTimeField(null=True, blank=True)
-    user = models.ForeignKey(Client)
-    network = models.ForeignKey(Network)
-    downloaded = models.BooleanField(default=False)
 
-    def _get_timestamp(self):
+    @property
+    def timestamp(self):
         if self.revoked is not None:
             return self.revoked
         else:
             return self.granted
-    timestamp = property(_get_timestamp)
 
-    def _get_ca_name(self):
+    @property
+    def ca_name(self):
         return self.ca.common_name
-    ca_name = property(_get_ca_name)
 
-    def _is_revoked(self):
+    @property
+    def is_revoked(self):
         return (self.revoked is not None)
-    is_revoked = property(_is_revoked)
     
     def __unicode__(self):
         return self.common_name
@@ -157,25 +119,90 @@ class Certificate(models.Model):
         abstract = True
 
 class CACertificate(Certificate):
-    pass
+    ca = models.ForeignKey(IntermediateCA, blank=True, null=True,
+        related_name="certificate_set")
+
+    # REVERSES: %s(class)_user = OneToOne(IntermediaryCA/ServerCA/ClientCA)
+
+    # Here be dragons.
+    @property
+    def user(self):
+        return coalesce(
+            self.intermediateca_user,
+            self.serverca_user,
+            self.clientca_user
+        )
+    
 
 class ServerCertificate(Certificate):
-    pass
+    ca = models.ForeignKey(ServerCA, blank=True, null=True,
+        related_name="certificate_set")
+    # REVERSE: user = OneToOne(Server)
+
+class Server(models.Model):
+    name = models.CharField(max_length=30)
+    address = models.IPAddressField()
+    port = models.IntegerField(max_length=10)
+    PROTOCOL_CHOICES = (
+        ('tcp','TCP'),
+        ('udp','UDP')
+    )
+    MODE_CHOICES = (
+        ('bridged','BRIDGED'),
+        ('routed','ROUTED')
+    )
+    protocol = models.CharField(max_length=30, choices=PROTOCOL_CHOICES)
+    mode = models.CharField(max_length=30, choices=MODE_CHOICES) 
+    certificate = models.OneToOneField(ServerCertificate,
+        related_name="user")
+    
+    def __unicode__(self):
+        return self.name
+
+    class Admin: pass
+
+class NetworkProfile(models.Model):
+    name = models.CharField(max_length=30)
+    inherited_profiles = models.ManyToManyField('self', null=True,
+        blank=True, symmetrical=False, related_name="inherited_by")
+    # REVERSE: inherited_by = ManyToMany(self)
+
+class NetworkAttributeType(models.Model):
+    name = models.CharField(max_length=30)
+    description = models.CharField(max_length=2000)
+    regex = models.CharField(max_length=200)
+
+class NetworkAttribute(models.Model):
+    profile = models.ForeignKey(NetworkProfile)
+    attribute = models.ForeignKey(NetworkAttributeType)
+    value = models.CharField(max_length=200)
+
+class Network(models.Model):
+    name = models.CharField(max_length=30)
+    org = models.ForeignKey(Org)
+    server = models.ForeignKey(Server)
+    profiles = models.ManyToManyField(NetworkProfile, blank=True, null=True)
+    
+    def __unicode__(self):
+        return self.name
+
+    class Admin: pass
 
 class ClientCertificate(Certificate):
-    # REVERSE: client = OneToOne(Client)
+    network = models.ForeignKey(Network)
+    # REVERSE: user = OneToOne(Client)
     pass
-
+    
 class Client(models.Model):
     user = models.OneToOneField(User)
     orgs = models.ManyToManyField(Org, blank=True,
         related_name="clients")
     certificate = models.OneToOneField(ClientCertificate,
-        related_name="client")
+        related_name="user")
     
-    def _get_name(self):
+    @property
+    def name(self):
         return self.user.username
-    name = property(_get_name)
 
     def __unicode__(self):
         return self.name
