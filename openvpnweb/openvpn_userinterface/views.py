@@ -19,6 +19,7 @@ import certlib.openssl as openssl
 from datetime import datetime
 import zipfile
 from cStringIO import StringIO
+from collections import defaultdict
 
 # XXX
 DEFAULT = "TTY"
@@ -50,15 +51,15 @@ def login_page(request):
     }
     if request.method == 'POST':
 	# XXX
-	if False:
-		if request.session.test_cookie_worked():
-		    request.session.delete_test_cookie()
-		else:
-		    variables = {
-                        'type': "error",
-		        'message_login': "Please enable cookies and try again!"
-		    }
-		    return render_to_response('openvpn_userinterface/login.html', variables )
+        # if request.session.test_cookie_worked():
+        #    request.session.delete_test_cookie()
+        # else:
+        #    variables = {
+        #        'type': "error",
+        #        'message_login': "Please enable cookies and try again!"
+        #    }
+        #    return render_to_response('openvpn_userinterface/login.html',
+        #        variables )
 
         username = request.POST['username']
         password = request.POST['password']
@@ -77,10 +78,10 @@ def login_page(request):
                     client.save()
                  
                 # XXX
-                if not DEFAULT in ["%s" % g for g in user.groups.all()]:
-                    g = Group.objects.get(name=DEFAULT)
-                    user.groups.add(g)
-                    user.save()
+                # if not DEFAULT in ["%s" % g for g in user.groups.all()]:
+                #    g = Group.objects.get(name=DEFAULT)
+                #    user.groups.add(g)
+                #    user.save()
                     
                 groups = user.groups.all()
                 organisations = []
@@ -96,8 +97,9 @@ def login_page(request):
 		return HttpResponseRedirect(reverse(main_page))
         else:
             variables = {
-               'type': "error", 
-               'message_login': "Your login details are incorrect. Please try again."
+               'type' : "error", 
+               'message_login' : "Your login details are incorrect. " +
+                    "Please try again."
             }
                           
     request.session.set_test_cookie()
@@ -109,14 +111,12 @@ def main_page(request):
     client = request.session["client"]
     organisations = request.session["organisations"]
     
-    certificates = {}
+    # XXX try to replace with smarter queries
+    certificates = defaultdict(list)
     for cert in client.certificate_set.all():
         network = cert.network
-        if certificates.has_key(network.id):
-	    certificates[network.id].append(cert)
-        else:
-            certificates[network.id] = []
-	    certificates[network.id].append(cert)
+        certificates[network.id].append(cert)
+
     variables = RequestContext(request, {
         'client': client,
         'organisations': organisations,
@@ -173,8 +173,6 @@ def order_page(request, network_id):
         ret_zip = buffer.getvalue()
         buffer.close()
         response.write(ret_zip)
-        certificate.downloaded = True
-        certificate.save()
         return response
 
     elif request.method == "GET":

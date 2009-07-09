@@ -12,7 +12,7 @@ from openvpnweb.helper_functions import generate_random_string
 class CertificateAuthority(models.Model):
     config = models.CharField(max_length=200)
     owner = models.ForeignKey("Org", null=True, blank=True,
-        related_name="owned_%s(class)_set")
+        related_name="%s(class)_set")
 
     certificate = models.OneToOneField("CACertificate", null=True,
         blank=True, related_name="%s(class)_user")
@@ -47,7 +47,8 @@ class CertificateAuthority(models.Model):
         abstract = True
 
 class ClientCA(CertificateAuthority):
-    # REVERSE: user = OneToOne(Org)
+    # REVERSE: certificates = ForeignKey(ClientCertificate)
+    # REVERSE: users = ForeignKey(Org)
     pass
 
 class ServerCA(CertificateAuthority):
@@ -164,7 +165,7 @@ class Server(models.Model):
 class NetworkProfile(models.Model):
     name = models.CharField(max_length=30)
     inherited_profiles = models.ManyToManyField('self', null=True,
-        blank=True, symmetrical=False, related_name="inherited_by")
+        blank=True, symmetrical=False, related_name="inheritor_set")
     # REVERSE: inherited_by = ManyToMany(self)
 
 class NetworkAttributeType(models.Model):
@@ -188,17 +189,10 @@ class Network(models.Model):
 
     class Admin: pass
 
-class ClientCertificate(Certificate):
-    network = models.ForeignKey(Network)
-    # REVERSE: user = OneToOne(Client)
-    pass
-    
 class Client(models.Model):
     user = models.OneToOneField(User)
     orgs = models.ManyToManyField(Org, blank=True,
-        related_name="clients")
-    certificate = models.OneToOneField(ClientCertificate,
-        related_name="user")
+        related_name="client_set")
     
     @property
     def name(self):
@@ -225,3 +219,9 @@ class Client(models.Model):
         return self.orgs
 
     class Admin: pass
+
+class ClientCertificate(Certificate):
+    ca = models.ForeignKey(ClientCA, related_name="certificate_set")
+    network = models.ForeignKey(Network)
+    owner = models.ForeignKey(Client, related_name="certificate_set")
+    
