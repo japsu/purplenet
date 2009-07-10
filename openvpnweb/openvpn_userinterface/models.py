@@ -191,12 +191,14 @@ class Network(models.Model):
 
 class Client(models.Model):
     user = models.OneToOneField(User)
-    orgs = models.ManyToManyField(Org, blank=True,
-        related_name="client_set")
-    
+
     @property
     def name(self):
         return self.user.username
+
+    @property
+    def orgs(self):
+        return Org.objects.filter(group__in=self.user.groups.all())
 
     def __unicode__(self):
         return self.name

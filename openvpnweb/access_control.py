@@ -1,7 +1,7 @@
 # coding: utf-8
 # vim: shiftwidth=4 expandtab
 
-from django.contrib.auth import User, Group
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import (user_passes_test, 
     REDIRECT_FIELD_NAME)
 
@@ -20,7 +20,7 @@ def manager_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
     )
 
     if function:
-        return actual_decorator(func)
+        return actual_decorator(function)
     return actual_decorator
         
 

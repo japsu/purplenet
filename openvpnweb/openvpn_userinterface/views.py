@@ -78,20 +78,21 @@ def login_page(request):
                     client.save()
                  
                 # XXX
-                # if not DEFAULT in ["%s" % g for g in user.groups.all()]:
+                #if not DEFAULT in ["%s" % g for g in user.groups.all()]:
                 #    g = Group.objects.get(name=DEFAULT)
                 #    user.groups.add(g)
                 #    user.save()
                     
-                groups = user.groups.all()
-                organisations = []
-                for group in groups:
-                    try:
-                  	organisations.append(Org.objects.get(name=group.name))
-                    except Org.DoesNotExist:	
-                  	pass
+                #groups = user.groups.all()
+                #organisations = []
+                #for group in groups:
+                #    try:
+                #  	organisations.append(Org.objects.get(name=group.name))
+                #    except Org.DoesNotExist:	
+                #  	pass
                 
-                request.session["organisations"] = organisations
+                # XXX
+                request.session["organisations"] = list(client.orgs.all())
                 request.session["client"] = client
                 
 		return HttpResponseRedirect(reverse(main_page))
@@ -139,7 +140,7 @@ def order_page(request, network_id):
             return HttpResponseForbidden()
 
         common_name = network.org.get_random_cn()
-        ca = network.org.ca
+        ca = network.org.client_ca
         config = ca.config
         
         # TODO user-supplied CSR
@@ -149,12 +150,12 @@ def order_page(request, network_id):
         # TODO certificate_authority.sign(csr)
         cert = openssl.sign_certificate(csr, config=config)
 
-        certificate = Certificate(
+        certificate = ClientCertificate(
             common_name=common_name,
             ca=ca,
             granted=datetime.now(),
-            user=client,
-            network=network
+            network=network,
+            owner=client
         )
         certificate.save()
 
@@ -244,4 +245,4 @@ def manage_org_page(request, org_id):
         return HttpResponseForbidden()
 
     vars = { "clients" : clients }
-    return render_to_response("
+    return render_to_response("openvpn_userinterface/manage_org.html", vars)
