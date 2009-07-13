@@ -8,6 +8,7 @@ from django.contrib.auth import logout, authenticate, login
 from django.template import Context, RequestContext
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 from openvpnweb.openvpn_userinterface.models import *
 from openvpnweb.settings import LOGIN_URL
@@ -142,13 +143,15 @@ def order_page(request, network_id):
         common_name = network.org.get_random_cn()
         ca = network.org.client_ca
         config = ca.config
+        chain_dir = settings.OPENVPNWEB_OPENSSL_CHAIN_DIR
+        server_ca_crt = network.server_ca.get_ca_certificate_path()
         
         # TODO user-supplied CSR
         key = openssl.generate_rsa_key(config=config)
         csr = openssl.create_csr(common_name=common_name, key=key,
             config=config)
         # TODO certificate_authority.sign(csr)
-        cert = openssl.sign_certificate(csr, config=config)
+        crt = openssl.sign_certificate(csr, config=config)
 
         certificate = ClientCertificate(
             common_name=common_name,
@@ -159,6 +162,13 @@ def order_page(request, network_id):
         )
         certificate.save()
 
+        pkcs12 = openssl.create_pkcs12(
+            crt=crt,
+            key=key,
+            chain_dir=chain_dir,
+            extra_crt_path=server_ca_crt
+        )
+
         response = HttpResponse(mimetype='application/zip')
         response['Content-Disposition'] = 'filename=openvpn-certificates.zip'
 
@@ -166,9 +176,7 @@ def order_page(request, network_id):
         # TODO write directly into response?
         buffer=StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-        # TODO zip.writestr("ca.crt", server_ca)
-        zip.writestr("client.key", key)
-        zip.writestr("client.crt", cert)
+        zip.writestr("keys.p12", pkcs12)
         zip.close()
         buffer.flush()
         ret_zip = buffer.getvalue()

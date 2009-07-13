@@ -12,10 +12,10 @@ from openvpnweb.helper_functions import generate_random_string
 class CertificateAuthority(models.Model):
     config = models.CharField(max_length=200)
     owner = models.ForeignKey("Org", null=True, blank=True,
-        related_name="%s(class)_set")
+        related_name="%(class)s_set")
 
     certificate = models.OneToOneField("CACertificate", null=True,
-        blank=True, related_name="%s(class)_user")
+        blank=True, related_name="%(class)s_user")
 
     @property
     def common_name(self):
@@ -39,6 +39,9 @@ class CertificateAuthority(models.Model):
 
     def revoke_certificate(self, common_name):
         return openssl.revoke_certificate(common_name, config=self.config)    
+    def get_ca_certificate_path(self):
+        return openssl.get_ca_certificate_path(config=self.config)
+
     class Admin:
         pass
     
@@ -52,7 +55,7 @@ class ClientCA(CertificateAuthority):
     pass
 
 class ServerCA(CertificateAuthority):
-    # REVERSE: user = OneToOne(Server)
+    # REVERSE: user_set = ForeignKey(Network)
     pass
 
 class IntermediateCA(CertificateAuthority):
@@ -133,7 +136,6 @@ class CACertificate(Certificate):
             self.serverca_user,
             self.clientca_user
         )
-    
 
 class ServerCertificate(Certificate):
     ca = models.ForeignKey(ServerCA, blank=True, null=True,
@@ -156,6 +158,8 @@ class Server(models.Model):
     mode = models.CharField(max_length=30, choices=MODE_CHOICES) 
     certificate = models.OneToOneField(ServerCertificate,
         related_name="user")
+
+    # REVERSE: network_set = ManyToMany(Network)
     
     def __unicode__(self):
         return self.name
@@ -164,7 +168,7 @@ class Server(models.Model):
 
 class NetworkProfile(models.Model):
     name = models.CharField(max_length=30)
-    inherited_profiles = models.ManyToManyField('self', null=True,
+    inherited_profile_set = models.ManyToManyField('self', null=True,
         blank=True, symmetrical=False, related_name="inheritor_set")
     # REVERSE: inherited_by = ManyToMany(self)
 
@@ -181,8 +185,10 @@ class NetworkAttribute(models.Model):
 class Network(models.Model):
     name = models.CharField(max_length=30)
     org = models.ForeignKey(Org)
-    server = models.ForeignKey(Server)
-    profiles = models.ManyToManyField(NetworkProfile, blank=True, null=True)
+    server_set = models.ManyToManyField(Server)
+    profile_set = models.ManyToManyField(NetworkProfile, blank=True,
+        null=True, related_name="user_set")
+    server_ca = models.ForeignKey(ServerCA)
     
     def __unicode__(self):
         return self.name

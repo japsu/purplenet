@@ -237,11 +237,11 @@ def sign_certificate(csr, extensions="crt_ext", config=DEFAULT_CONFIG):
 
 # TODO Find out if there's a way to do this without using a temporary file.
 # How would, perhaps, a named pipe interact with Popen.communicate()?
-def create_pkcs12(crt, key, chain_dir=None, extra_cert=None,
-        config=DEFAULT_CONFIG):
+def create_pkcs12(crt, key, chain_dir=None, extra_crt_path=None,
+        config=None):
 
-    """create_pkcs12(crt, key, chain_dir=None, extra_cert=None,
-        config=DEFAULT_CONFIG) -> pkcs12
+    """create_pkcs12(crt, key, chain_dir=None, extra_crt_path=None,
+        config=None) -> pkcs12
 
     Creates a PKCS#12 package from the given X.509 certificate, private
     key and (optionally) its certification chain and and extra certificate.
@@ -262,6 +262,8 @@ def create_pkcs12(crt, key, chain_dir=None, extra_cert=None,
     be included in the PKCS#12 package. The parameter should be the file name
     of the certificate to include.
 
+    The config parameter is unused and only accepted for symmetry.
+
     For more information, refer to pkcs12(1SSL).
     """
 
@@ -275,8 +277,8 @@ def create_pkcs12(crt, key, chain_dir=None, extra_cert=None,
     if chain_dir is not None:
         params.extend(("-chain", "-CApath", chain_dir))
 
-    if extra_cert is not None:
-        params.extend(("-certfile", extra_cert))
+    if extra_crt_path is not None:
+        params.extend(("-certfile", extra_crt_path))
 
     with NamedTemporaryFile() as crt_file:
         crt_file.write(crt)
@@ -310,3 +312,10 @@ def revoke_certificate(common_name, config, ca_name=DEFAULT_CA_NAME):
 def get_certificate_hash(crt, config=None):
     return _run("x509", "-noout", "-hash", "-in", "/dev/stdin", input=crt) \
         .strip()
+
+def get_ca_certificate_path(config=DEFAULT_CONFIG, ca_name=DEFAULT_CA_NAME):
+    try:
+        conf = _parse_conf_value(ca_name, "certificate", config=config)
+        return conf["certificate"]
+    except KeyError, e:
+        raise OpenSSLError(e)
