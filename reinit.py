@@ -34,6 +34,11 @@ group = Group(
 )
 group.save()
 
+another_group = Group(
+    name="Test"
+)
+another_group.save()
+
 user = User(
     username="testuser"
 )
@@ -41,11 +46,12 @@ user.set_password('weak_password')
 user.save()
 
 user.groups.add(group)
+user.groups.add(another_group)
 user.save()
 
 root_ca_cert = CACertificate(
     common_name="RootCA",
-    ca=None,                    # the root is self- or externally signed
+    ca=None,                   # the root is self- or externally signed
     granted=datetime.now()     # XXX
 )
 root_ca_cert.save()
@@ -99,6 +105,20 @@ dept_ca = ClientCA(
 )
 dept_ca.save()
 
+another_dept_ca_cert = CACertificate(
+    common_name="InstCA",
+    ca=client_ca,
+    granted=datetime.now()
+)
+another_dept_ca_cert.save()
+
+another_dept_ca = ClientCA(
+    config="/home/pajukans/Temp/testca/InstCA/openssl.cnf",
+    owner=None,
+    certificate=another_dept_ca_cert
+)
+another_dept_ca.save()
+
 org = Org(
     group=group,
     client_ca=dept_ca,
@@ -106,9 +126,19 @@ org = Org(
 )
 org.save()
 
+another_org = Org(
+    group=another_group,
+    client_ca=another_dept_ca,
+    cn_suffix=".xd.tut.fi"
+)
+another_org.save()
+
 for ca in (root_ca, server_ca, client_ca, dept_ca):
     ca.owner = org
     ca.save()
+
+another_dept_ca.owner = another_org
+another_dept_ca.save()
 
 server_cert = ServerCertificate(
     common_name="testserver.rd.tut.fi",
@@ -129,10 +159,12 @@ server.save()
 
 network = Network(
     name="testnet",
-    org=org,
+    owner=org,
     server_ca=server_ca
 )
 network.save()
 
+network.orgs_that_have_access_set.add(org)
+network.orgs_that_have_access_set.add(another_org)
 network.server_set.add(server)
 network.save()

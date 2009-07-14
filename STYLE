@@ -1,0 +1,83 @@
+=================================
+Coding Conventions for OpenVPNweb
+=================================
+
+vim: shiftwidth=4 expandtab
+encoding: utf-8
+
+Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+Introduction
+============
+
+This document outlines the programming style for OpenVPNweb.
+
+Examples in this document are indented by four spaces. This indentation is
+not part of the actual code of the example.
+
+Python code
+===========
+
+The recommendations given in [PEP-8] should be followed where appropriate.
+
+The Python source code of OpenVPNweb is indented at four spaces per level.
+
+Each executable Python source file should start with the following header:
+
+    #!/usr/bin/env python
+    # encoding: utf-8
+    # vim: shiftwidth=4 expandtab
+
+Each nonexecutable Python source file should start with the following header:
+
+    # encoding: utf-8
+    # vim: shiftwidth=4 expandtab
+
+In both executable and nonexecutable cases, this header should be followed by
+the license boilerplate.
+
+Django templates
+================
+
+Templates are written with the readability of the template in mind, not the
+readability of the content produced by the template. An automatic filter to
+beautify or compress the content produced by the template may be added later.
+
+Each template should begin with the following header:
+
+    {% extends "whatever/this/template/extends.html" %}
+    {% comment %}
+    encoding: utf-8
+    vim: shiftwidth=2 expandtab
+    {% endcomment%}
+
+Templates are indented at two spaces per level. Each XHTML tag and template
+tag that has a closiong tag increases the indentation level, with the notable
+exception of {% block %} and {% comment %} that are not indented further.
+
+Example:
+
+    {# CORRECT #}
+    {% block content %}
+    <h1>Hello, World!</h1>
+    <ul>
+      {% for flurb in flurbs %}
+        <li>{{ flurb }}</li>
+      {% endfor %}
+    </ul>
+    {% endblock %}
+
+    {# INCORRECT #}
+    {% block content %}
+      <h1>Hello, World!</h1>    {# Wrong: block should not be indented #}
+      <ul>
+      {% for flurb in flurbs %} {# Wrong: this is inside <ul> #}
+        <li>{{ flurb }}</li>
+      {% endfor %}
+      </ul>
+    {% endblock %}
+
+Django models
+=============
+
+    TBD.

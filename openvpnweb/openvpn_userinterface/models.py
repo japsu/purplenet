@@ -65,6 +65,10 @@ class Org(models.Model):
     group = models.OneToOneField(Group)
     client_ca = models.ForeignKey(ClientCA, related_name="user_set")
     cn_suffix = models.CharField(max_length=30)        
+    accessible_network_set = models.ManyToManyField("Network", null=True,
+        blank=True, related_name="orgs_that_have_access_set")
+
+    # REVERSE: owned_network_set = ForeignKey(Network)
 
     @property
     def name(self):
@@ -184,7 +188,7 @@ class NetworkAttribute(models.Model):
 
 class Network(models.Model):
     name = models.CharField(max_length=30)
-    org = models.ForeignKey(Org)
+    owner = models.ForeignKey(Org, related_name="owned_network_set")
     server_set = models.ManyToManyField(Server)
     profile_set = models.ManyToManyField(NetworkProfile, blank=True,
         null=True, related_name="user_set")
@@ -211,7 +215,7 @@ class Client(models.Model):
 
     def may_revoke(self, certificate):
         # TODO Admins may revoke other certs, too.
-        return certificate.user == self or \
+        return certificate.owner == self or \
             self.may_manage(certificate.ca.org)
 
     def may_manage(self, org):

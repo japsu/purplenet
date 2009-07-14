@@ -1,54 +1,47 @@
 {% extends "base/base.html" %}
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
 {% block content %}
 
-  {% if user.username %}
 <p>From this page you can download certificates simply by pressing the download button. You are also able 
 to remove current certificates.</p> 
-    <h2>Available networks:</h2>
-      {% if organisations %}
-	  {% for org in organisations %}
-	    <h2>{{ org.name }}: </h2>
-	     {% for network in org.network_set.all %}
-	       <table><tr>
-			<th>{{ network.name }}</th>
-			<th>
-			<form method="post" action="{% url order_page network_id=network.id %}">
-			<p class="submit"><input type="submit" value="Order" /></p>
-			</form></th><th> </th>
-			</tr>
-			{% for certs in certificates.items %}
-			 {% ifequal certs.0 network.id %}
-			  {% for cert in certs.1 %}
-			 <tr><td> {{ cert.common_name }}</td>
-			  <td>{% if not cert.is_revoked %}
-			  <form method="post" action="{% url revoke_page cert_id=cert.id%}">
-			  <input type="hidden" name="cert_id" value="{{cert.id}}" />
-			  <p class="submit"><input type="submit" value="Remove" {% if session.cert_id %}disabled{% endif %}/></p>
-			  </form>
-			  {% else %}
-			  <p>Revoked @ {{ cert.revoked|date }}</p>
-			  {% endif %}</td>
-			 {% ifequal session.cert_id cert.id %}
-			 {% if not cert.is_revoked %}
-			  <td><form method="post" action="{% url download %}">
-			  <p class="submit"><input type="submit" value="Download" /></p>
-			  </form></td></tr>
-			 {% endif %}
-			 {% endifequal %}
-			  {% endfor %}
-			 {% endifequal %}
-			{% endfor %}
-	       </tr></table><p>&nbsp;</p>
-	     {% endfor %}
-	  {% endfor %}
-      {% else %}
-        <p>No organisations at the moment.</p>
-      {% endif %}
-  {% else %}
-    <p>You are not logged in!
-    You need to <a href="{% url login_page %}">login</a>
-    before you can use this service.</p>
-  {% endif %}
-
+<h2>Available networks:</h2>
+{% if data %}
+  {% for org, networks in data %}
+    <h2>{{ org.name }}: </h2>
+    {% for network, certificates in networks %}
+      <table>
+        <tr>
+          <th>{{ network.name }}</th>
+          <th>
+            <form method="post" action="{% url order_page org_id=org.id network_id=network.id %}">
+              <p class="submit"><input type="submit" value="Order" /></p>
+            </form>
+          </th>
+          <th></th>
+        </tr>
+        {% for cert in certificates %}
+          <tr>
+            <td>{{ cert.common_name }}</td>
+            <td>
+              {% if not cert.is_revoked %}
+                <form method="post" action="{% url revoke_page cert_id=cert.id%}">
+                  <input type="hidden" name="cert_id" value="{{cert.id}}" />
+                  <p class="submit"><input type="submit" value="Remove" /></p>
+                </form>
+              {% else %}
+                <p>Revoked @ {{ cert.revoked|date }}</p>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endfor %}
+  {% endfor %}
+{% else %}
+  <p>No organisations at the moment.</p>
+{% endif %}
 {% endblock content %}
 

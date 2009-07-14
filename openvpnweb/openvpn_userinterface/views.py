@@ -23,7 +23,7 @@ from cStringIO import StringIO
 from collections import defaultdict
 
 # XXX
-DEFAULT = "TTY"
+#DEFAULT = "TTY"
 
 def post_confirmation_page(request, question, choices):
     """post_confirmation_page(request, question, choices) -> response
@@ -44,24 +44,12 @@ def post_confirmation_page(request, question, choices):
     return render_to_response("openvpn_userinterface/confirmation.html", vars)
 
 def login_page(request):
-    #if user.is_authenticated:
-    #    return HttpResponseRedirect('/openvpn/openvpn/main/')
     variables = {
         'type': "info", 
         'message_login': ""
     }
-    if request.method == 'POST':
-	# XXX
-        # if request.session.test_cookie_worked():
-        #    request.session.delete_test_cookie()
-        # else:
-        #    variables = {
-        #        'type': "error",
-        #        'message_login': "Please enable cookies and try again!"
-        #    }
-        #    return render_to_response('openvpn_userinterface/login.html',
-        #        variables )
 
+    if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
@@ -73,27 +61,12 @@ def login_page(request):
                 try:
                     client = Client.objects.get(user=user)
                 except Client.DoesNotExist:
-                    #luodaan client ja taman jalkeen katsotaan mihin grouppiin
-                    #on oikeudet ja luodaan nekin.
                     client = Client(user=user)
                     client.save()
                  
+                # TODO: Update group membership
+
                 # XXX
-                #if not DEFAULT in ["%s" % g for g in user.groups.all()]:
-                #    g = Group.objects.get(name=DEFAULT)
-                #    user.groups.add(g)
-                #    user.save()
-                    
-                #groups = user.groups.all()
-                #organisations = []
-                #for group in groups:
-                #    try:
-                #  	organisations.append(Org.objects.get(name=group.name))
-                #    except Org.DoesNotExist:	
-                #  	pass
-                
-                # XXX
-                request.session["organisations"] = list(client.orgs.all())
                 request.session["client"] = client
                 
 		return HttpResponseRedirect(reverse(main_page))
@@ -111,18 +84,22 @@ def login_page(request):
 def main_page(request):
     
     client = request.session["client"]
-    organisations = request.session["organisations"]
     
     # XXX try to replace with smarter queries
-    certificates = defaultdict(list)
-    for cert in client.certificate_set.all():
-        network = cert.network
-        certificates[network.id].append(cert)
+    data = []
+    for org in client.orgs.all():
+        networks = []
+        for net in org.accessible_network_set.all():
+            certificates = ClientCertificate.objects.filter(
+                network=net,
+                ca__owner__exact=org,
+                owner=client
+            )
+            networks.append((net, certificates))
+        data.append((org, networks))
 
     variables = RequestContext(request, {
-        'client': client,
-        'organisations': organisations,
-        'certificates': certificates,
+        'data': data,
     })
     
     return render_to_response(
@@ -130,18 +107,21 @@ def main_page(request):
     )
 
 @login_required
-def order_page(request, network_id):
+def order_page(request, org_id, network_id):
+    org = get_object_or_404(Org, id=int(org_id))
     network = get_object_or_404(Network, id=int(network_id))
 
     if request.method == 'POST':
         client = request.session["client"]
-        organisations = request.session["organisations"]
 
-        if not network.org in organisations:
+        if not org in client.orgs:
             return HttpResponseForbidden()
 
-        common_name = network.org.get_random_cn()
-        ca = network.org.client_ca
+        if not org in network.orgs_that_have_access_set.all():
+            return HttpResponseForbidden()
+
+        common_name = org.get_random_cn()
+        ca = org.client_ca
         config = ca.config
         chain_dir = settings.OPENVPNWEB_OPENSSL_CHAIN_DIR
         server_ca_crt = network.server_ca.get_ca_certificate_path()
@@ -182,6 +162,7 @@ def order_page(request, network_id):
         ret_zip = buffer.getvalue()
         buffer.close()
         response.write(ret_zip)
+
         return response
 
     elif request.method == "GET":
@@ -189,7 +170,7 @@ def order_page(request, network_id):
             question="Order a certificate for {0}?".format(network),
             choices=[
                 ("Order", reverse("order_page",
-                    kwargs=dict(network_id=network_id))),
+                    kwargs=dict(network_id=network_id, org_id=org_id))),
                 ("Cancel", reverse("main_page"))
             ]
         )
@@ -199,7 +180,7 @@ def order_page(request, network_id):
 
 @login_required
 def revoke_page(request, cert_id):
-    certificate = get_object_or_404(Certificate, id=int(cert_id))
+    certificate = get_object_or_404(ClientCertificate, id=int(cert_id))
 
     if request.method == 'POST':
         client = request.session["client"]
@@ -227,7 +208,6 @@ def logout_page(request):
     # XXX
     try:
         del request.session["client"]
-        del request.session["organisations"]
     except:
         pass
     
