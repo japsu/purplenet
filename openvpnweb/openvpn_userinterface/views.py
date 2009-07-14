@@ -205,15 +205,27 @@ def revoke_page(request, cert_id):
         return HttpResponseNotAllowed()
 
 def logout_page(request):
-    # XXX
-    try:
-        del request.session["client"]
-    except:
-        pass
-    
-    logout(request)
-    return HttpResponseRedirect(reverse(
-        "openvpnweb.openvpn_userinterface.views.login_page"))        
+    if request.method == "POST":
+        # XXX
+        try:
+            del request.session["client"]
+        except:
+            pass
+        
+        logout(request)
+        return HttpResponseRedirect(reverse(
+            "openvpnweb.openvpn_userinterface.views.login_page"))
+    elif request.method == "GET":
+        return post_confirmation_page(request,
+            question="Really log out?",
+            choices=[
+                ("Log out", reverse("logout_page")),
+                ("Cancel", reverse("main_page"))
+            ]
+        )
+
+    else:
+        return HttpResponseNotAllowed()
 
 @manager_required
 def manage_page(request):

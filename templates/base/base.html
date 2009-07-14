@@ -14,9 +14,11 @@
 <p>
 {% if user.is_authenticated %}
 welcome, {{ user.username }}
-(<a href="/openvpn/logout">logout</a>)
+<form method="post" action="{% url logout_page %}">
+<input type="submit" value="Log out" />
+</form>
 {% else %}
-<a href="/openvpn/">login</a>
+<a href="{% url login_page %}">login</a>
 {% endif %}
 </p>
 {% endblock navigation %}
