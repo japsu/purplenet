@@ -1,56 +1,56 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html lang="en">
-<head>
-    	<title> {% block title %} OpenVPN {% endblock title %} </title>
-</head>
-<body>
-<div id="wrap">
-<link href="/openvpn/media/style_base2.css" rel="stylesheet" />
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>{% block title %}OpenVPN{% endblock title %}</title>
+    <link rel="stylesheet" type="text/css"
+        href="/openvpn/media/style_base2.css" />
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="top_bar">
+        {% block navigation %}
+          <h1>OpenVPN user interface</h1>
+          <p>
+            {% if user.is_authenticated %}
+              welcome, {{ user.username }}
+              <form method="post" action="{% url logout_page %}">
+                <input type="submit" value="Log out" />
+              </form>
+            {% else %}
+              <a href="{% url login_page %}">login</a>
+            {% endif %}
+          </p>
+        {% endblock navigation %}
+      </div>
 
-<div id="top_bar">
-{% block navigation %}
-    <h1>OpenVPN user interface</h1>
+      <div id="text">
+        {% block content %}
+          <div id="error">
+            {% block message %}
+              {% if messages %}
+                {% for message in messages %}
+                  {{ message }}
+                {% endfor %}
+              {% endif %}
+            {% endblock message %}
+          </div>
 
-<p>
-{% if user.is_authenticated %}
-welcome, {{ user.username }}
-<form method="post" action="{% url logout_page %}">
-<input type="submit" value="Log out" />
-</form>
-{% else %}
-<a href="{% url login_page %}">login</a>
-{% endif %}
-</p>
-{% endblock navigation %}
+          <p>This is the place where the content will be shown.</p>
+        {% endblock content %}
 
-</div>
-
-<div id="text">
-
-{% block content %}
-
-<div id="error">
-
-{% block message %}
-{% if messages %}
-  {% for message in messages %}
-        {{ message }}
-  {% endfor %}
-{% endif %}
-{% endblock message %}
-</div>
-
-<p>This is the place where the content will be shown.</p>
-{% endblock content %}
-
-
-{% block message_login %}
-<div id="message"> 
-  {{ message_login }}
-</div>
-{% endblock message_login %}
-
-</div>
-</div>
-</body>
+        {% block message_login %}
+          <div id="message"> 
+            {{ message_login }}
+          </div>
+        {% endblock message_login %}
+      </div>
+    </div>
+  </body>
 </html>
