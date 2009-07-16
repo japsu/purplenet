@@ -121,3 +121,6 @@ def coalesce(*args):
             return arg
 
     return None
+
+def import_module(module_name):
+    return __import__(module_name, {}, {}, [''])

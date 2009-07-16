@@ -13,7 +13,8 @@ from django.conf import settings
 from openvpnweb.openvpn_userinterface.models import *
 from openvpnweb.settings import LOGIN_URL
 from openvpnweb.helper_functions import *
-from openvpnweb.access_control import manager_required
+from openvpnweb.access_control import (manager_required,
+    update_group_membership)
 
 import certlib.openssl as openssl
 
@@ -64,7 +65,9 @@ def login_page(request):
                     client = Client(user=user)
                     client.save()
                  
-                # TODO: Update group membership
+                if settings.OPENVPNWEB_USE_GROUP_MAPPINGS:
+                    update_group_membership(client)
+                    client.save()
 
                 # XXX
                 request.session["client"] = client
@@ -206,10 +209,9 @@ def revoke_page(request, cert_id):
 
 def logout_page(request):
     if request.method == "POST":
-        # XXX
         try:
             del request.session["client"]
-        except:
+        except KeyError, e:
             pass
         
         logout(request)

@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from datetime import datetime
+from os import environ
 
 import certlib.openssl as openssl
 from certlib.enums import CAType
@@ -63,7 +64,8 @@ class IntermediateCA(CertificateAuthority):
 
 class Org(models.Model):
     group = models.OneToOneField(Group)
-    client_ca = models.ForeignKey(ClientCA, related_name="user_set")
+    client_ca = models.ForeignKey(ClientCA, null=True, blank=True,
+        related_name="user_set")
     cn_suffix = models.CharField(max_length=30)        
     accessible_network_set = models.ManyToManyField("Network", null=True,
         blank=True, related_name="orgs_that_have_access_set")
@@ -237,3 +239,29 @@ class ClientCertificate(Certificate):
     network = models.ForeignKey(Network)
     owner = models.ForeignKey(Client, related_name="certificate_set")
     
+class MappingType(models.Model):
+    name = models.CharField(max_length=60)
+    description = models.CharField(max_length=400)
+    source_name = models.CharField(max_length=200)
+    
+    NAMESPACE_CHOICES = [
+        ("env", "Environment variables")
+    ]
+    namespace = models.CharField(max_length=30, choices=NAMESPACE_CHOICES,
+        default="env")
+
+class OrgMapping(models.Model):
+    org = models.ForeignKey(Org, related_name="mapping_set")
+    # REVERSE: element_set = ForeignKey(MappingElement)
+
+class MappingElement(models.Model):
+    type = models.ForeignKey(MappingType, related_name="element_set")
+    mapping = models.ForeignKey(OrgMapping, related_name="element_set")
+    value = models.CharField(max_length=200)
+
+    def matches(self, client):
+        if self.type.namespace != "env":
+            raise AssertionError, "The only implemented namespace is 'env'"
+        
+        value_from_env = environ.get(self.type.source_name, None)
+        return self.value == value_from_env

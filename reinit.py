@@ -17,9 +17,12 @@ from os import environ as env
 env["DJANGO_SETTINGS_MODULE"] = "openvpnweb.settings"
 
 from openvpnweb.openvpn_userinterface.models import *
+from openvpnweb.tut_org_map import setup_org_map
 from django.contrib.auth.models import User, Group
 
 from datetime import datetime
+
+setup_org_map()
 
 superuser = User(
     username="pajukans",
@@ -29,24 +32,10 @@ superuser = User(
 )
 superuser.save()
 
-group = Group(
-    name="TTY"
-)
-group.save()
-
-another_group = Group(
-    name="Test"
-)
-another_group.save()
-
 user = User(
     username="testuser"
 )
 user.set_password('weak_password')
-user.save()
-
-user.groups.add(group)
-user.groups.add(another_group)
 user.save()
 
 root_ca_cert = CACertificate(
@@ -105,40 +94,15 @@ dept_ca = ClientCA(
 )
 dept_ca.save()
 
-another_dept_ca_cert = CACertificate(
-    common_name="InstCA",
-    ca=client_ca,
-    granted=datetime.now()
+org = Org.objects.get(
+    group__name="TUT Department of Communications Engineering"
 )
-another_dept_ca_cert.save()
-
-another_dept_ca = ClientCA(
-    config="/home/pajukans/Temp/testca/InstCA/openssl.cnf",
-    owner=None,
-    certificate=another_dept_ca_cert
-)
-another_dept_ca.save()
-
-org = Org(
-    group=group,
-    client_ca=dept_ca,
-    cn_suffix=".rd.tut.fi"
-)
+org.client_ca = dept_ca
 org.save()
-
-another_org = Org(
-    group=another_group,
-    client_ca=another_dept_ca,
-    cn_suffix=".xd.tut.fi"
-)
-another_org.save()
 
 for ca in (root_ca, server_ca, client_ca, dept_ca):
     ca.owner = org
     ca.save()
-
-another_dept_ca.owner = another_org
-another_dept_ca.save()
 
 server_cert = ServerCertificate(
     common_name="testserver.rd.tut.fi",
@@ -165,6 +129,5 @@ network = Network(
 network.save()
 
 network.orgs_that_have_access_set.add(org)
-network.orgs_that_have_access_set.add(another_org)
 network.server_set.add(server)
 network.save()
