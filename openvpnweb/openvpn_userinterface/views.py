@@ -45,7 +45,7 @@ def post_confirmation_page(request, question, choices):
     return render_to_response("openvpn_userinterface/confirmation.html", vars)
 
 def login_page(request):
-    variables = {
+    vars = {
         'type': "info", 
         'message_login': ""
     }
@@ -74,14 +74,14 @@ def login_page(request):
                 
 		return HttpResponseRedirect(reverse(main_page))
         else:
-            variables = {
+            vars = RequestContext(request, {
                'type' : "error", 
                'message_login' : "Your login details are incorrect. " +
                     "Please try again."
-            }
+            })
                           
     request.session.set_test_cookie()
-    return render_to_response('openvpn_userinterface/login.html',variables)
+    return render_to_response('openvpn_userinterface/login.html',vars)
                 
 @login_required
 def main_page(request):
@@ -103,6 +103,7 @@ def main_page(request):
 
     variables = RequestContext(request, {
         'data': data,
+        'client': client,
     })
     
     return render_to_response(
@@ -231,20 +232,24 @@ def logout_page(request):
 
 @manager_required
 def manage_page(request):
-    manager = session["client"]
-    organizations = manager.get_managed_organizations()
+    client = request.session["client"]
 
-    vars = { "organizations" : organizations }
-    return render_to_response("openvpn_userinterface/manage.html", {})
+    vars = RequestContext(request, {
+        "client" : client
+    })
+    return render_to_response("openvpn_userinterface/manage.html", vars)
 
 @manager_required
 def manage_org_page(request, org_id):
     org = get_object_or_404(Org, org_id=int(org_id))
-    manager = session["client"]
+    client = session["client"]
     clients = org.client_set.all()
 
-    if not manager.may_manage(org):
+    if not client.may_manage(org):
         return HttpResponseForbidden()
 
-    vars = { "clients" : clients }
+    vars = RequestContext(request, {
+        "client" : client,
+        "clients" : clients,
+    })
     return render_to_response("openvpn_userinterface/manage_org.html", vars)

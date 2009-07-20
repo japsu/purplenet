@@ -19,7 +19,10 @@ vim: shiftwidth=2 expandtab
           <h1>OpenVPN user interface</h1>
           <p>
             {% if user.is_authenticated %}
-              welcome, {{ user.username }}
+              welcome, {{ user.username }}.
+              {% if client.may_view_management_pages %}
+                <a href="{% url manage_page %}">manage</a>
+              {% endif %}
               <form method="post" action="{% url logout_page %}">
                 <input type="submit" value="Log out" />
               </form>

@@ -5,13 +5,15 @@ vim: shiftwidth=2 expandtab
 {% endcomment %}
 {% block content %}
 <h2>Organizations you can manage:</h2>
-{% if organizations %}
-  <ul>
-  {% for org in organizations %}
-    <li><a href="{% url manage_org_page org_id=org.id %}">{{ org.name }}</a></li>
-  {% endfor %}
-  </ul>
-{% else %}
-  <p>You cannot manage any organizations at this time.</p>
-{% endif %}
+{% with client.managed_orgs.all as orgs %}
+  {% if orgs %}
+    <ul>
+      {% for org in organizations %}
+        <li><a href="{% url manage_org_page org_id=org.id %}">{{ org.name }}</a></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You cannot manage any organizations at this time.</p>
+  {% endif %}
+{% endwith %}
 {% endblock %}

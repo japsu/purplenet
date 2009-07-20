@@ -20,7 +20,7 @@ from openvpnweb.openvpn_userinterface.models import *
 from openvpnweb.tut_org_map import setup_org_map
 from django.contrib.auth.models import User, Group
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 setup_org_map()
 
@@ -41,7 +41,8 @@ user.save()
 root_ca_cert = CACertificate(
     common_name="RootCA",
     ca=None,                   # the root is self- or externally signed
-    granted=datetime.now()     # XXX
+    granted=datetime.now(),     # XXX
+    expires=datetime.now() + timedelta(days=3650)
 )
 root_ca_cert.save()
 
@@ -55,7 +56,8 @@ root_ca.save()
 server_ca_cert = CACertificate(
     common_name="ServerCA",
     ca=root_ca,
-    granted=datetime.now()
+    granted=datetime.now(),
+    expires=datetime.now() + timedelta(days=3650)
 )
 server_ca_cert.save()
 
@@ -69,7 +71,8 @@ server_ca.save()
 client_ca_cert = CACertificate(
     common_name="ClientCA",
     ca=root_ca,
-    granted=datetime.now()
+    granted=datetime.now(),
+    expires=datetime.now() + timedelta(days=3650)
 )
 client_ca_cert.save()
 
@@ -83,7 +86,8 @@ client_ca.save()
 dept_ca_cert = CACertificate(
     common_name="DeptCA",
     ca=client_ca,
-    granted=datetime.now()
+    granted=datetime.now(),
+    expires=datetime.now() + timedelta(days=3650)
 )
 dept_ca_cert.save()
 
@@ -107,7 +111,8 @@ for ca in (root_ca, server_ca, client_ca, dept_ca):
 server_cert = ServerCertificate(
     common_name="testserver.rd.tut.fi",
     ca=server_ca,
-    granted=datetime.now()
+    granted=datetime.now(),
+    expires=datetime.now() + timedelta(days=3650)
 )
 server_cert.save()
     

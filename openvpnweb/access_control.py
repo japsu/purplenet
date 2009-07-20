@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import (user_passes_test,
 from django.conf import settings
 
 from openvpnweb.openvpn_userinterface.models import *
+from os import environ
+from itertools import groupby
 
 def manager_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
     """@manager_required(redirect_field_name=REDIRECT_FIELD_NAME)
@@ -24,6 +26,31 @@ def manager_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
         return actual_decorator(function)
     return actual_decorator
 
+def update_group_membership(client):
+    # XXX
+    INTERESTING_ENVVARS = ["departmentNumber"]
+    elements = list()
+
+    for var_name in INTERESTING_ENVVARS:
+        value = environ.get(var_name, None)
+        elements.extend(MappingElement.objects.filter(
+            type__namespace__exact="env",
+            type__source_name__exact=var_name,
+            value=value
+        ))
+
+    KEY_FUNC = lambda x: x.mapping
+    elements.sort(KEY_FUNC)
+    grouped = groupby(elements, KEY_FUNC)
+    
+    groups = list()
+
+    for mapping, elements in grouped:
+        if list(mapping.element_set.all()) == list(elements):
+            groups.append(mapping.group)
+
+    client.user.groups = groups
+
 # TODO O(n) for n of MappingElement (may be in thousands). Should there be
 # a performance problem, start reusing MappingElements and build a tree of
 # them. Or something.
@@ -31,9 +58,9 @@ def manager_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
 # Another approach would be to register all interesting source names
 # somewhere, get their values unconditionally and then search the database
 # for matching mappings.
-def update_group_membership(client):
+def old_update_group_membership(client):
     mappings = OrgMapping.objects.all()
-    orgs = []
+    groups = list()
     for mapping in mappings:
         if all(elem.matches(client) for elem in mapping.element_set.all()):
             orgs.append(mapping.org)

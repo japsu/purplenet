@@ -63,7 +63,9 @@ class IntermediateCA(CertificateAuthority):
     pass
 
 class Org(models.Model):
-    group = models.OneToOneField(Group)
+    group = models.OneToOneField(Group, related_name="org")
+    admin_group_set = models.ManyToManyField(Group, null=True, blank=True,
+        related_name="managed_orgs_set")
     client_ca = models.ForeignKey(ClientCA, null=True, blank=True,
         related_name="user_set")
     cn_suffix = models.CharField(max_length=30)        
@@ -91,7 +93,10 @@ class Org(models.Model):
 class Certificate(models.Model):
     common_name = models.CharField(max_length=30)
     granted = models.DateTimeField()
+    expires = models.DateTimeField()
     revoked = models.DateTimeField(null=True, blank=True)
+    revoked_by = models.ForeignKey("Client", null=True, blank=True,
+        related_name="revoked_%(class)s_set")
 
     @property
     def timestamp(self):
@@ -212,25 +217,24 @@ class Client(models.Model):
     def orgs(self):
         return Org.objects.filter(group__in=self.user.groups.all())
 
+    @property
+    def managed_orgs(self):
+        return self.orgs
+
     def __unicode__(self):
         return self.name
 
     def may_revoke(self, certificate):
-        # TODO Admins may revoke other certs, too.
         return certificate.owner == self or \
             self.may_manage(certificate.ca.org)
 
     def may_manage(self, org):
-        # XXX Stub
-        return org in self.orgs.all()
+        return bool(set(org.admin_group_set.all()).intersection(
+            self.user.groups.all()))
 
     def may_view_management_pages(self):
         # XXX Stub
         return True
-
-    def get_managed_organizations(self):
-        # XXX Stub
-        return self.orgs
 
     class Admin: pass
 
@@ -251,7 +255,7 @@ class MappingType(models.Model):
         default="env")
 
 class OrgMapping(models.Model):
-    org = models.ForeignKey(Org, related_name="mapping_set")
+    group = models.ForeignKey(Group)
     # REVERSE: element_set = ForeignKey(MappingElement)
 
 class MappingElement(models.Model):
