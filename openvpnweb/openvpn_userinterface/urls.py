@@ -16,6 +16,6 @@ urlpatterns = patterns('',
         name="manage_net_page"),
     url(r'^manage/(?P<org_id>\d+)$', manage_org_page,
         name="manage_org_page"),
-#    url(r'^manage/$', manage_page, name="manage_page"),
-    url(r'^setup/$', setup_page, name="setup_page"),
+    url(r'^manage/$', manage_page, name="manage_page"),
+#    url(r'^setup/$', setup_page, name="setup_page"),
 )
