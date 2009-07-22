@@ -40,7 +40,7 @@ def update_group_membership(client):
         ))
 
     KEY_FUNC = lambda x: x.mapping
-    elements.sort(KEY_FUNC)
+    elements.sort(key=KEY_FUNC)
     grouped = groupby(elements, KEY_FUNC)
     
     groups = list()

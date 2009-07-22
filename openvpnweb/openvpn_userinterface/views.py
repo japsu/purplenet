@@ -18,7 +18,7 @@ from openvpnweb.access_control import (manager_required,
 
 import certlib.openssl as openssl
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import zipfile
 from cStringIO import StringIO
 from collections import defaultdict
@@ -140,7 +140,8 @@ def order_page(request, org_id, network_id):
         certificate = ClientCertificate(
             common_name=common_name,
             ca=ca,
-            granted=datetime.now(),
+            granted=datetime.now(), #XXX this should come from the cert data
+            expires=datetime.now() + timedelta(days=365), # XXX this too
             network=network,
             owner=client
         )
@@ -191,7 +192,7 @@ def revoke_page(request, cert_id):
         if not client.may_revoke(certificate):
             return HttpResponseForbidden()
 
-        certificate.revoke()
+        certificate.revoke(revoked_by=client)
         certificate.save()
         return HttpResponseRedirect(reverse("main_page"))
 
@@ -234,22 +235,28 @@ def logout_page(request):
 def manage_page(request):
     client = request.session["client"]
 
+    data = list()
+    for org in client.managed_org_set.all():
+        networks = []
+        for net in org.accessible_network_set.all():
+            certificates = ClientCertificate.objects.filter(
+                network=net,
+                ca__owner__exact=org
+            ).order_by('owner__user__username')
+            networks.append((net, certificates))
+        data.append((org, networks))
+
     vars = RequestContext(request, {
-        "client" : client
+        "client" : client,
+        "data" : data,
     })
     return render_to_response("openvpn_userinterface/manage.html", vars)
 
 @manager_required
 def manage_org_page(request, org_id):
-    org = get_object_or_404(Org, org_id=int(org_id))
-    client = session["client"]
-    clients = org.client_set.all()
+    org = get_object_or_404(Org, id=int(org_id))
 
-    if not client.may_manage(org):
-        return HttpResponseForbidden()
-
-    vars = RequestContext(request, {
-        "client" : client,
-        "clients" : clients,
-    })
-    return render_to_response("openvpn_userinterface/manage_org.html", vars)
+@manager_required
+def manage_net_page(request, org_id, net_id):
+    org = get_object_or_404(Org, id=int(org_id))
+    network = get_object_or_404(Network, id=int(net_id))

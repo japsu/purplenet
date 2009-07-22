@@ -38,6 +38,14 @@ def setup_org_map():
             value=str(dept_number)
         )
 
+    # XXX
+    dept_number_to_dce_admin_mapping = OrgMapping(group=dce_admin_group)
+    dept_number_to_dce_admin_mapping.save()
+    dept_number_to_dce_admin_mapping.element_set.create(
+        type=dept_number_type,
+        value="90603"
+    )
+
 def main():
     from sys import environ
     environ["DJANGO_CONFIG_MODULE"] = "openvpnweb.settings"

@@ -65,7 +65,7 @@ class IntermediateCA(CertificateAuthority):
 class Org(models.Model):
     group = models.OneToOneField(Group, related_name="org")
     admin_group_set = models.ManyToManyField(Group, null=True, blank=True,
-        related_name="managed_orgs_set")
+        related_name="managed_org_set")
     client_ca = models.ForeignKey(ClientCA, null=True, blank=True,
         related_name="user_set")
     cn_suffix = models.CharField(max_length=30)        
@@ -116,13 +116,14 @@ class Certificate(models.Model):
     def __unicode__(self):
         return self.common_name
 
-    def revoke(self):
+    def revoke(self, revoked_by):
         """revoke()
 
         Revokes this certificate. Remember to call save() after revoke().
         """
         self.ca.revoke_certificate(self.common_name)
-        self.revoked = datetime.now()
+        self.revoked = datetime.now() # XXX this should come from cert data
+        self.revoked_by = revoked_by
     
     class Admin:
         list_display = ('downloaded','common_name','user',
@@ -218,8 +219,9 @@ class Client(models.Model):
         return Org.objects.filter(group__in=self.user.groups.all())
 
     @property
-    def managed_orgs(self):
-        return self.orgs
+    def managed_org_set(self):
+        return Org.objects.filter(
+            admin_group_set__in=self.user.groups.all())
 
     def __unicode__(self):
         return self.name
@@ -233,8 +235,7 @@ class Client(models.Model):
             self.user.groups.all()))
 
     def may_view_management_pages(self):
-        # XXX Stub
-        return True
+        return bool(self.managed_org_set)
 
     class Admin: pass
 
@@ -254,9 +255,23 @@ class MappingType(models.Model):
     namespace = models.CharField(max_length=30, choices=NAMESPACE_CHOICES,
         default="env")
 
+    def __unicode__(self):
+        return self.name
+
 class OrgMapping(models.Model):
     group = models.ForeignKey(Group)
     # REVERSE: element_set = ForeignKey(MappingElement)
+
+    def __unicode__(self):
+        return u"{0} ({1})".format(
+            self.group.name,
+    
+            u", ".join(u'{0}:{1}="{2}"'.format(
+                elem.type.namespace,
+                elem.type.source_name,
+                elem.value
+            ) for elem in self.element_set.all())
+        )
 
 class MappingElement(models.Model):
     type = models.ForeignKey(MappingType, related_name="element_set")

@@ -4,16 +4,44 @@ encoding: utf-8
 vim: shiftwidth=2 expandtab
 {% endcomment %}
 {% block content %}
-<h2>Organizations you can manage:</h2>
-{% with client.managed_orgs.all as orgs %}
-  {% if orgs %}
-    <ul>
-      {% for org in organizations %}
-        <li><a href="{% url manage_org_page org_id=org.id %}">{{ org.name }}</a></li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>You cannot manage any organizations at this time.</p>
-  {% endif %}
-{% endwith %}
-{% endblock %}
+
+<p>From this page you can revoke certificates in the organizations you manage and proceed to editing the details of the organizations.</p>
+{% if data %}
+  {% for org, networks in data %}
+    <h2>
+      {{ org.name }}
+      (<a href="{% url manage_org_page org_id=org.id %}">Edit</a>)
+    </h2>
+    {% for network, certificates in networks %}
+      <table>
+        <tr>
+          <th>{{ network.name }}</th>
+          <th></th>
+          <th>
+            <a href="{% url manage_net_page org_id=org.id net_id=network.id %}">Edit</a>
+          </th>
+        </tr>
+        {% for cert in certificates %}
+          <tr>
+            <td>{{ cert.common_name }}</td>
+            <td>{{ cert.owner.user.username }}</td>
+            <td>
+              {% if not cert.is_revoked %}
+                <form method="post" action="{% url revoke_page cert_id=cert.id%}">
+                  <input type="hidden" name="cert_id" value="{{cert.id}}" />
+                  <p class="submit"><input type="submit" value="Revoke" /></p>
+                </form>
+              {% else %}
+                <p>Revoked by {{cert.revoked_by.user.username}} at {{ cert.revoked|date }}</p>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endfor %}
+  {% endfor %}
+{% else %}
+  <p>No organisations at the moment.</p>
+{% endif %}
+{% endblock content %}
+
