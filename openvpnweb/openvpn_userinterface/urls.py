@@ -2,6 +2,8 @@
 
 from django.conf.urls.defaults import *
 from openvpnweb.openvpn_userinterface.views import *
+from openvpnweb.openvpn_userinterface.forms import (SetupWizard,
+    SETUP_WIZARD_FORM_LIST)
 
 urlpatterns = patterns('',
     url(r'^$', main_page, name="main_page"),
@@ -15,5 +17,5 @@ urlpatterns = patterns('',
     url(r'^manage/(?P<org_id>\d+)$', manage_org_page,
         name="manage_org_page"),
     url(r'^manage/$', manage_page, name="manage_page"),
-    url(r'^setup/$', setup_page, name="setup_page"),
+    url(r'^setup/$', SetupWizard(SETUP_WIZARD_FORM_LIST), name="setup_page"),
 )
