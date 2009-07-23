@@ -47,7 +47,7 @@ root_ca_cert = CACertificate(
 root_ca_cert.save()
 
 root_ca = IntermediateCA(
-    config="/home/pajukans/Temp/testca/RootCA/openssl.cnf",
+    dir="/home/pajukans/Temp/testca/RootCA",
     owner=None,                 # to be filled later on
     certificate=root_ca_cert
 )    
@@ -62,7 +62,7 @@ server_ca_cert = CACertificate(
 server_ca_cert.save()
 
 server_ca = ServerCA(
-    config="/home/pajukans/Temp/testca/ServerCA/openssl.cnf",
+    dir="/home/pajukans/Temp/testca/ServerCA",
     owner=None,                 # to be filled later on
     certificate=server_ca_cert
 )
@@ -77,7 +77,7 @@ client_ca_cert = CACertificate(
 client_ca_cert.save()
 
 client_ca = IntermediateCA(
-    config="/home/pajukans/Temp/testca/ClientCA/openssl.cnf",
+    dir="/home/pajukans/Temp/testca/ClientCA",
     owner=None,
     certificate=client_ca_cert
 )
@@ -92,7 +92,7 @@ dept_ca_cert = CACertificate(
 dept_ca_cert.save()
 
 dept_ca = ClientCA(
-    config="/home/pajukans/Temp/testca/DeptCA/openssl.cnf",
+    dir="/home/pajukans/Temp/testca/DeptCA",
     owner=None,
     certificate=dept_ca_cert
 )
