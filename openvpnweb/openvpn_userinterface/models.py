@@ -3,20 +3,25 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from datetime import datetime
-from os import environ
+import os
 
 import certlib.openssl as openssl
-from certlib.enums import CAType
+import certlib.mkca as mkca
+from certlib.enums import CAType, SignMode
 from certlib.helpers import coalesce
 from openvpnweb.helper_functions import generate_random_string 
 
 class CertificateAuthority(models.Model):
-    config = models.CharField(max_length=200)
+    dir = models.CharField(max_length=200)
     owner = models.ForeignKey("Org", null=True, blank=True,
         related_name="%(class)s_set")
 
     certificate = models.OneToOneField("CACertificate", null=True,
         blank=True, related_name="%(class)s_user")
+
+    @property
+    def config(self):
+        return os.path.join(self.dir, mkca.OPENSSL_CONFIG_FILE_NAME)
 
     @property
     def common_name(self):
@@ -43,6 +48,19 @@ class CertificateAuthority(models.Model):
     def get_ca_certificate_path(self):
         return openssl.get_ca_certificate_path(config=self.config)
 
+    def _create_ca(self, ca_type):
+        ca = self.certificate.ca        
+
+        mkca.mkca(
+            dir=self.dir,
+            common_name=self.certificate.common_name,
+            ca_type=ca_type,
+            sign_mode=SignMode.USE_CA if ca else SignMode.SELF_SIGN,
+            copy_dir=settings.OPENVPNWEB_OPENSSL_CHAIN_DIR,
+            config=ca.config if ca else None, # XXX
+            force=False
+        )
+
     class Admin:
         pass
     
@@ -53,14 +71,19 @@ class CertificateAuthority(models.Model):
 class ClientCA(CertificateAuthority):
     # REVERSE: certificates = ForeignKey(ClientCertificate)
     # REVERSE: users = ForeignKey(Org)
-    pass
 
+    def create_ca(self):
+        return super(ClientCa, self)._create_ca(CAType.CLIENT)
+    
 class ServerCA(CertificateAuthority):
     # REVERSE: user_set = ForeignKey(Network)
-    pass
+
+    def create_ca(self):
+        return super(ClientCa, self)._create_ca(CAType.SERVER)
 
 class IntermediateCA(CertificateAuthority):
-    pass
+    def create_ca(self):
+        return super(ClientCa, self)._create_ca(CAType.CA)
 
 class Org(models.Model):
     group = models.OneToOneField(Group, related_name="org")
@@ -282,5 +305,5 @@ class MappingElement(models.Model):
         if self.type.namespace != "env":
             raise AssertionError, "The only implemented namespace is 'env'"
         
-        value_from_env = environ.get(self.type.source_name, None)
+        value_from_env = os.environ.get(self.type.source_name, None)
         return self.value == value_from_env
