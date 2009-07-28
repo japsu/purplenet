@@ -6,11 +6,18 @@ from django.contrib.formtools.wizard import FormWizard
 
 class CAForm(forms.Form):
     root_ca_cn = forms.CharField(max_length=30, initial="Root CA")
+    root_ca_dir = forms.CharField(max_length=200)
+
     server_ca_cn = forms.CharField(max_length=30, initial="Server CA")
+    server_ca_dir = forms.CharField(max_length=200)
+
     client_ca_cn = forms.CharField(max_length=30, initial="Client CA")
+    client_ca_dir = forms.CharField(max_length=200)
 
 class OrgForm(forms.Form):
     org_name = forms.CharField(max_length=80)
+    cn_suffix = forms.CharField(max_length=30)
+    ca_dir = forms.CharField(max_length=200)
 
 class OrgMapForm(forms.Form):
     pass
@@ -21,17 +28,3 @@ class ServerForm(forms.Form):
 class NetworkForm(forms.Form):
     pass
 
-SETUP_WIZARD_FORM_LIST = [
-    CAForm,
-    OrgForm,
-    OrgMapForm,
-    ServerForm,
-    NetworkForm
-]
-
-class SetupWizard(FormWizard):
-    def done(self, request, form_list):
-        pass
-
-    def get_template(self, step):
-        return "openvpn_userinterface/setupwizard.html"

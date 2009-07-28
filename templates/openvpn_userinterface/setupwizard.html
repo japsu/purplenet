@@ -5,7 +5,7 @@ vim: shiftwidth=2 expandtab
 {% endcomment %}
 {% block content %}
   <p>Step {{ step }} of {{ step_count }}</p>
-  <form action="." method="post">
+  <form action="{% url setup_page %}" method="post">
     <table>
       {{ form }}
     </table>
