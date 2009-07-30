@@ -144,14 +144,8 @@ def setup_complete(request, ca_form, org_form, org_map_form, server_form,
     server_cert.save()
 
     # Server
-    server = Server(
-        name=server_form.cleaned_data["server_name"],
-        address=server_form.cleaned_data["server_address"],
-        port=server_form.cleaned_data["server_port"],
-        protocol=server_form.cleaned_data["server_protocol"],
-        mode=server_form.cleaned_data["server_mode"],
-        certificate=server_cert
-    )
+    server = server_form.save()
+    server.certificate = server_cert
     server.save()
 
     # CREATE A NETWORK
@@ -166,6 +160,9 @@ def setup_complete(request, ca_form, org_form, org_map_form, server_form,
     network.orgs_that_have_access_set.add(org)
     network.server_set.add(server)
     network.save()
+
+    return render_to_response("openvpn_userinterface/setupcomplete.html",
+        RequestContext(request, {}))
 
 class SetupWizard(FormWizard):
     def done(self, request, form_list):

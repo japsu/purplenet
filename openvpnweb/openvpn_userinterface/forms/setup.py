@@ -4,6 +4,8 @@
 from django import forms
 from django.contrib.formtools.wizard import FormWizard
 
+from openvpnweb.openvpn_userinterface.models import *
+
 class CAForm(forms.Form):
     root_ca_cn = forms.CharField(max_length=30, initial="Root CA")
     root_ca_dir = forms.CharField(max_length=200)
@@ -22,9 +24,16 @@ class OrgForm(forms.Form):
 class OrgMapForm(forms.Form):
     pass
 
-class ServerForm(forms.Form):
-    pass
+class ServerForm(forms.ModelForm):
+    class Meta:
+        model = Server
+        fields = [
+            "name",
+            "address",
+            "port",
+            "protocol",
+            "mode"
+        ]
 
 class NetworkForm(forms.Form):
-    pass
-
+    network_name = forms.CharField(max_length=30)
