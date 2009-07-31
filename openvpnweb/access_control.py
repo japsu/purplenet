@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import (user_passes_test,
 from django.conf import settings
 
 from openvpnweb.openvpn_userinterface.models import *
+from openvpnweb.openvpn_userinterface.logging import log
+
 from os import environ
 from itertools import groupby
 
@@ -43,26 +45,29 @@ def update_group_membership(client):
     elements.sort(key=KEY_FUNC)
     grouped = groupby(elements, KEY_FUNC)
     
-    groups = list()
+    new_groups = set()
 
     for mapping, elements in grouped:
         if list(mapping.element_set.all()) == list(elements):
-            groups.append(mapping.group)
+            new_groups.add(mapping.group)
 
-    client.user.groups = groups
+    old_groups = set(client.user.groups.all())
+    client.user.groups = new_groups
+    client.save()
 
-# TODO O(n) for n of MappingElement (may be in thousands). Should there be
-# a performance problem, start reusing MappingElements and build a tree of
-# them. Or something.
-#
-# Another approach would be to register all interesting source names
-# somewhere, get their values unconditionally and then search the database
-# for matching mappings.
-def old_update_group_membership(client):
-    mappings = OrgMapping.objects.all()
-    groups = list()
-    for mapping in mappings:
-        if all(elem.matches(client) for elem in mapping.element_set.all()):
-            orgs.append(mapping.org)
-    groups = Group.objects.filter(org__in=orgs)
-    client.user.groups = groups
+    groups_removed = old_groups - new_groups
+    groups_added = new_groups - old_groups
+    
+    for group in groups_removed:
+        log(
+            event="org_map.client_removed_from_group",
+            client=client,
+            group=group
+        )
+
+    for group in groups_added:
+        log(
+            event="org_map.client_added_to_group",
+            client=client,
+            group=group
+        )

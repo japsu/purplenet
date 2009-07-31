@@ -1,9 +1,10 @@
 # encoding: utf-8
 # vim: shiftwidth=4 expandtab
 
-from openvpnweb.openvpn_userinterface.forms import *
-
+from django.contrib.formtools.wizard import FormWizard
 from datetime import datetime, timedelta
+
+from openvpnweb.openvpn_userinterface.forms import *
 
 __all__ = ["setup_wizard"]
 
@@ -102,12 +103,12 @@ def setup_complete(request, ca_form, org_form, org_map_form, server_form,
     group.save()
 
     # Admin group
-    admin_group = Group(name=org_name + " (Admin)"))
+    admin_group = Group(name=org_name + " (Admin)")
     admin_group.save()
 
     # Orgazinational client CA
     dept_ca = create_ca(
-        org_name + " Client CA"), # XXX
+        org_name + " Client CA", # XXX
         client_ca,
         org_form.cleaned_data["ca_dir"]
     )

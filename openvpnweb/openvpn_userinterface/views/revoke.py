@@ -10,30 +10,52 @@ from django.http import (HttpResponseForbidden, HttpResponseRedirect,
 from openvpnweb.openvpn_userinterface.models import ClientCertificate
 
 from .helpers import post_confirmation_page
+from .logging import log
 
 @login_required
 def revoke_page(request, cert_id):
+    if request.method not in ("GET", "POST"):
+        return HttpMethodNotAllowed(["GET", "POST"])    
+
     certificate = get_object_or_404(ClientCertificate, id=int(cert_id))
 
     if request.method == 'POST':
         client = request.session["client"]
         if not client.may_revoke(certificate):
+            log(
+                event="client_certificate.revoke",
+                denied=True,
+                client=client,
+                certificate=certificate
+            )
             return HttpResponseForbidden()
 
         certificate.revoke(revoked_by=client)
         certificate.save()
-        return HttpResponseRedirect(reverse("main_page"))
 
-    elif request.method == 'GET':
-        return post_confirmation_page(request,
-            question="Really revoke certificate {0}?".format(certificate),
-            choices=[
-                ("Revoke", reverse("revoke_page", kwargs=
-                    dict(cert_id=cert_id))),
-                ("Cancel", reverse("main_page"))
-            ]
+        log(
+            event="client_certificate.revoke",
+            client=client,
+            certificate=certificate
         )
 
-    else:
-        return HttpResponseNotAllowed()
+        return HttpResponseRedirect(reverse("main_page"))
+
+    else: # request.method == 'GET'
+        if not client.may_revoke(certificate):
+            return post_confirmation_page(request,
+                question="You may not revoke certificate {0}.",
+                choices=[
+                    ("Return", reverse("main_page"))
+                ]
+            )
+        else:
+            return post_confirmation_page(request,
+                question="Really revoke certificate {0}?".format(certificate),
+                choices=[
+                    ("Revoke", reverse("revoke_page", kwargs=
+                        dict(cert_id=cert_id))),
+                    ("Cancel", reverse("main_page"))
+                ]
+            )
 

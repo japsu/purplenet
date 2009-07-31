@@ -3,6 +3,7 @@
 
 from .loginout import login_page, logout_page
 from .manage import manage_page, manage_org_page, manage_net_page
+from .logs import manage_log_page
 from .revoke import revoke_page
 from .order import order_page
 from .main import main_page
@@ -14,6 +15,7 @@ __all__ = [
     "manage_page",
     "manage_org_page",
     "manage_net_page",
+    "manage_log_page",
     "revoke_page",
     "order_page",
     "main_page",

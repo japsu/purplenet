@@ -1,0 +1,37 @@
+{% extends "base/base.html" %}
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+{% block content %}
+
+<p>
+  Log entries concerning organizations you manage are shown below.
+</p>
+
+<table>
+  <tr>
+    <th>Timestamp</th>
+    <th>Event</th>
+    <th>Denied?</th>
+    <th>Group</th>
+    <th>Network</th>
+    <th>Client</th>
+    <th>Cert</th>
+  </tr>
+  {% for entry in log_entries %}
+    <tr>
+      <td>{{ entry.timestamp|date }}</td>
+      <td>{{ entry.get_event_display }}</td>
+      <td>
+        {% if entry.denied %}
+          <p class="denied">denied</p>
+        {% endif %}
+      </td>
+      <td>{{ entry.group }}</td>
+      <td>{{ entry.network }}</td>
+      <td>{{ entry.client }}</td>
+      <td>{{ entry.client_certificate }}</td>
+    </tr>
+  {% endfor %} 
+</table>

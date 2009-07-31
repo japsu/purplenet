@@ -5,7 +5,8 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 
-from openvpnweb.openvpn_userinterface.models import ClientCertificate
+from ..models import ClientCertificate
+from ..logging import log
 
 @login_required
 def main_page(request):

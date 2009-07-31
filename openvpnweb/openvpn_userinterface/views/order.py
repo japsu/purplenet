@@ -5,8 +5,8 @@ from django.core.urlresolvers import reverse
 from django.http import (HttpResponseForbidden, HttpResponseRedirect,
     HttpResponseNotAllowed, HttpResponse)
 
-from openvpnweb.openvpn_userinterface.models import (Org, Network,
-    ClientCertificate)
+from ..models import Org, Network, ClientCertificate
+from ..logging import log
 
 from certlib import openssl
 from datetime import datetime, timedelta
@@ -22,11 +22,14 @@ def order_page(request, org_id, network_id):
     if request.method == 'POST':
         client = request.session["client"]
 
-        if not org in client.orgs:
-            return HttpResponseForbidden()
-
-        if not org in network.orgs_that_have_access_set.all():
-            return HttpResponseForbidden()
+        if not client.may_access(org, network):
+            log(
+                event="client_certificate.create",
+                denied=True,
+                client=client,
+                group=org.group,
+                network=network
+            )
 
         common_name = org.get_random_cn()
         ca = org.client_ca
@@ -50,6 +53,14 @@ def order_page(request, org_id, network_id):
             owner=client
         )
         certificate.save()
+
+        log(
+            event="client_certificate.create",
+            client=client,
+            group=org.group,
+            network=network,
+            client_certificate=certificate
+        )
 
         pkcs12 = openssl.create_pkcs12(
             crt=crt,

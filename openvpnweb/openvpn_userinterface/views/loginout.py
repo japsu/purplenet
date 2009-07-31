@@ -12,6 +12,7 @@ from openvpnweb.openvpn_userinterface.models import Client
 from openvpnweb.access_control import update_group_membership
 
 from .helpers import post_confirmation_page
+from ..logging import log
 
 def login_page(request):
     vars = RequestContext(request, {
@@ -32,10 +33,14 @@ def login_page(request):
             except Client.DoesNotExist:
                 client = Client(user=user)
                 client.save()
+
+                log(
+                    event="client.new",
+                    client=client
+                )
              
             if settings.OPENVPNWEB_USE_GROUP_MAPPINGS:
                 update_group_membership(client)
-                client.save()
 
             request.session["client"] = client
             
