@@ -27,6 +27,10 @@ class Certificate(models.Model):
     @property
     def is_revoked(self):
         return (self.revoked is not None)
+
+    @property
+    def org(self):
+        return self.ca.owner
     
     def __unicode__(self):
         return self.common_name

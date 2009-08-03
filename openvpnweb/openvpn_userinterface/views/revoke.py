@@ -10,7 +10,7 @@ from django.http import (HttpResponseForbidden, HttpResponseRedirect,
 from openvpnweb.openvpn_userinterface.models import ClientCertificate
 
 from .helpers import post_confirmation_page
-from .logging import log
+from ..logging import log
 
 @login_required
 def revoke_page(request, cert_id):
@@ -18,6 +18,7 @@ def revoke_page(request, cert_id):
         return HttpMethodNotAllowed(["GET", "POST"])    
 
     certificate = get_object_or_404(ClientCertificate, id=int(cert_id))
+    org = certificate.org
 
     if request.method == 'POST':
         client = request.session["client"]
@@ -26,7 +27,8 @@ def revoke_page(request, cert_id):
                 event="client_certificate.revoke",
                 denied=True,
                 client=client,
-                certificate=certificate
+                group=org.group,
+                client_certificate=certificate
             )
             return HttpResponseForbidden()
 
@@ -36,7 +38,8 @@ def revoke_page(request, cert_id):
         log(
             event="client_certificate.revoke",
             client=client,
-            certificate=certificate
+            group=org.group,
+            client_certificate=certificate
         )
 
         return HttpResponseRedirect(reverse("main_page"))

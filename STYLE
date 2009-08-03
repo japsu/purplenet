@@ -77,7 +77,37 @@ Example:
       </ul>
     {% endblock %}
 
-Django models
-=============
+Django models and views
+=======================
 
-    TBD.
+FIXME check if app_label is enough
+
+Models and views should be placed in the .models and .views sub-packages of
+their applications. Due to a braindamage in Django, splitting models over many
+files requires a hack an example of which may be found in openvpnweb/
+openvpn_userinterface/models/__init__.py. Such a hack is not required for
+views. This hack should be removed once Django fixes their braindamage. For
+more information, see
+
+http://www.ifisgeek.com/2009/01/26/splitting-django-models-into-separate-files/
+
+
+TODO, XXX and FIXME comments
+============================
+
+The words TODO, XXX and FIXME designate action points in the source code. They
+are classified as follows:
+
+    TODO denotes missing or incomplete functionality that is left to be
+    implemented at a later date.
+
+    XXX denotes broken code or temporary hacks. Problems marked XXX are
+    expected to be fairly short-lived. Debug output etc. should be marked XXX.
+
+    FIXME is a more severe form of XXX. It denotes a serious problem that
+    really, really should be fixed. FIXME is not to be overused.
+
+These action points may appear anywhere in any type of comments; however, they
+should be placed near the piece of code they refer to, preferrably right
+right before it.
+

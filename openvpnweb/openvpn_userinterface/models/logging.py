@@ -8,7 +8,6 @@ class LogEntry(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
     EVENT_CHOICES = [
-        ("client.new", "New client registered"),
         ("org_map.client_added_to_group", "User mapped into a group"),
         ("org_map.client_removed_from_group", "User de-mapped from a group"),
         ("client_certificate.create", "Client certificate created"),
@@ -18,10 +17,10 @@ class LogEntry(models.Model):
 
     denied = models.BooleanField(default=False)
     client = models.ForeignKey("Client")
+    group = models.ForeignKey(Group, related_name="log_entry_set")
+
     client_certificate = models.ForeignKey("ClientCertificate", null=True,
         blank=True, related_name="log_entry_set")
-    group = models.ForeignKey(Group, null=True, blank=True,
-        related_name="log_entry_set")
     network = models.ForeignKey("Network", null=True, blank=True,
         related_name="log_entry_set")
 

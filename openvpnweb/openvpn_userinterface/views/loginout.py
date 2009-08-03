@@ -34,11 +34,6 @@ def login_page(request):
                 client = Client(user=user)
                 client.save()
 
-                log(
-                    event="client.new",
-                    client=client
-                )
-             
             if settings.OPENVPNWEB_USE_GROUP_MAPPINGS:
                 update_group_membership(client)
 
