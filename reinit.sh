@@ -2,9 +2,20 @@
 # vim: shiftwidth=4 expandtab
 DBUSER=openvpn
 DBNAME=openvpn
+CADIR=/home/pajukans/Temp/testca
+SELINUXENABLED=/usr/sbin/selinuxenabled
 
 set -e
 source $(dirname $0)/env.sh
+
+rm -rf "$CADIR"
+mkdir -p "$CADIR/copies"
+
+if [ -x $SELINUXENABLED ]; then
+    if $SELINUXENABLED; then
+        chcon -R -t httpd_sys_content_rw_t "$CADIR"
+    fi
+fi
 
 dropdb -U $DBUSER $DBNAME
 createdb -U $DBUSER -E UNICODE $DBNAME

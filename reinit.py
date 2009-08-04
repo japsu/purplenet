@@ -53,6 +53,8 @@ root_ca = IntermediateCA(
 )    
 root_ca.save()
 
+root_ca.create_ca()
+
 server_ca_cert = CACertificate(
     common_name="ServerCA",
     ca=root_ca,
@@ -67,6 +69,8 @@ server_ca = ServerCA(
     certificate=server_ca_cert
 )
 server_ca.save()
+
+server_ca.create_ca()
 
 client_ca_cert = CACertificate(
     common_name="ClientCA",
@@ -83,6 +87,8 @@ client_ca = IntermediateCA(
 )
 client_ca.save()
 
+client_ca.create_ca()
+
 dept_ca_cert = CACertificate(
     common_name="DeptCA",
     ca=client_ca,
@@ -97,6 +103,8 @@ dept_ca = ClientCA(
     certificate=dept_ca_cert
 )
 dept_ca.save()
+
+dept_ca.create_ca()
 
 org = Org.objects.get(
     group__name="TUT Department of Communications Engineering"

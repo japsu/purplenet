@@ -2,11 +2,14 @@
 # vim: shiftwidth=4 expandtab
 
 from django.db import models
-import os
+from django.conf import settings
 
-import certlib.openssl as openssl
-import certlib.mkca as mkca
+from certlib import mkca
+from certlib import openssl
 from certlib.enums import CAType, SignMode
+from certlib.data import MKCA_CONFIG
+
+import os
 
 class CertificateAuthority(models.Model):
     dir = models.CharField(max_length=200)
@@ -54,7 +57,7 @@ class CertificateAuthority(models.Model):
             ca_type=ca_type,
             sign_mode=SignMode.USE_CA if ca else SignMode.SELF_SIGN,
             copy_dir=settings.OPENVPNWEB_OPENSSL_CHAIN_DIR,
-            config=ca.config if ca else None, # XXX
+            config=ca.config if ca else MKCA_CONFIG,
             force=False
         )
 
@@ -71,7 +74,7 @@ class ClientCA(CertificateAuthority):
     # REVERSE: users = ForeignKey(Org)
 
     def create_ca(self):
-        return super(ClientCA, self)._create_ca(CAType.CLIENT)
+        return self._create_ca(CAType.CLIENT)
 
     class Meta:
         app_label = "openvpn_userinterface"
@@ -80,14 +83,14 @@ class ServerCA(CertificateAuthority):
     # REVERSE: user_set = ForeignKey(Network)
 
     def create_ca(self):
-        return super(ServerCA, self)._create_ca(CAType.SERVER)
+        return self._create_ca(CAType.SERVER)
 
     class Meta:
         app_label = "openvpn_userinterface"
 
 class IntermediateCA(CertificateAuthority):
     def create_ca(self):
-        return super(IntermediateCA, self)._create_ca(CAType.CA)
+        return self._create_ca(CAType.CA)
 
     class Meta:
         app_label = "openvpn_userinterface"

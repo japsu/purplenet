@@ -76,8 +76,8 @@ def mkca(dir, common_name, ca_type=CAType.CLIENT,
     # Generate random serials for certs and CRLs and write them down
     cert_serial = random.randint(0, 2**31-1)
     crl_serial = random.randint(0, 2**31-1)
-    write_file(cert_serial_file, '%x' % cert_serial, force)
-    write_file(crl_serial_file, '%x' % crl_serial, force)
+    write_file(cert_serial_file, '%08x' % cert_serial, force)
+    write_file(crl_serial_file, '%08x' % crl_serial, force)
 
     # Initialize the context with type-specific values from
     # data.py and fill in the rest of the gaps.
