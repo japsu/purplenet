@@ -120,3 +120,9 @@ td {
 	border:0.4em;
 	color:#F00;
 }
+
+.denied {
+	background-color: red;
+	color: white;
+	font-weight: bold;
+}

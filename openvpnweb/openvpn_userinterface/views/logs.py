@@ -17,7 +17,7 @@ def manage_log_page(request):
     user_groups = Group.objects.filter(org__in=orgs)
     admin_groups = Group.objects.filter(managed_org_set__in=orgs)
 
-    log_entries = LogEntry.objects.filter(Q(group__in=user_groups) | Q(group__in=admin_groups))
+    log_entries = LogEntry.objects.filter(Q(group__in=user_groups) | Q(group__in=admin_groups)).order_by('timestamp')
 
     vars = {
         "client" : client,

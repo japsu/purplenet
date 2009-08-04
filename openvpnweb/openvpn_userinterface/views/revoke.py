@@ -28,6 +28,7 @@ def revoke_page(request, cert_id):
                 denied=True,
                 client=client,
                 group=org.group,
+                network=certificate.network,
                 client_certificate=certificate
             )
             return HttpResponseForbidden()
@@ -39,6 +40,7 @@ def revoke_page(request, cert_id):
             event="client_certificate.revoke",
             client=client,
             group=org.group,
+            network=certificate.network,
             client_certificate=certificate
         )
 
