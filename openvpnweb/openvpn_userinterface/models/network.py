@@ -19,6 +19,7 @@ class NetworkAttributeType(models.Model):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=2000)
     regex = models.CharField(max_length=200)
+    multiple = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -32,7 +33,7 @@ class NetworkAttribute(models.Model):
     value = models.CharField(max_length=200)
 
     def __unicode__(self):
-        return "{0} = {1}".format(self.type, self.value)
+        return "%s = %s" % (self.type, self.value)
 
     class Meta:
         app_label = "openvpn_userinterface"

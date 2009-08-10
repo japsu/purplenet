@@ -16,5 +16,5 @@ urlpatterns = patterns('',
         name="manage_org_page"),
     url(r'^manage/log/$', manage_log_page, name="manage_log_page"),
     url(r'^manage/$', manage_page, name="manage_page"),
-    url(r'^setup/$', setup_wizard, name="setup_page"),
+    url(r'^setup/$', setup_page, name="setup_page"),
 )
