@@ -1,0 +1,63 @@
+[
+  {
+    "pk": 1, 
+    "model": "openvpn_userinterface.networkattributetype", 
+    "fields": {
+      "regex": "\\d+", 
+      "multiple": false, 
+      "name": "vlan", 
+      "description": "VLAN number"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "openvpn_userinterface.networkattributetype", 
+    "fields": {
+      "regex": "\\d+\\.\\d+\\.\\d+\\.\\d+", 
+      "multiple": false, 
+      "name": "network_id", 
+      "description": "Network address"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "openvpn_userinterface.networkattributetype", 
+    "fields": {
+      "regex": "\\d+\\.\\d+\\.\\d+\\.\\d+", 
+      "multiple": false, 
+      "name": "netmask", 
+      "description": "Subnet mask"
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "openvpn_userinterface.networkattributetype", 
+    "fields": {
+      "regex": "\\d+\\.\\d+\\.\\d+\\.\\d+", 
+      "multiple": false, 
+      "name": "gateway", 
+      "description": "Default gateway"
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "openvpn_userinterface.networkattributetype", 
+    "fields": {
+      "regex": "\\d+\\.\\d+\\.\\d+\\.\\d+", 
+      "multiple": true, 
+      "name": "dns", 
+      "description": "Name server"
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "openvpn_userinterface.networkattributetype", 
+    "fields": {
+      "regex": "", 
+      "multiple": true, 
+      "name": "route", 
+      "description": "Route"
+    }
+  }
+]
+
