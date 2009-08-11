@@ -4,6 +4,11 @@
 from django.db import models
 
 class CircularInheritance(Exception):
+    """CircularInheritance(Exception)
+    
+    This exception is raised by NetworkProfile.attributes if a circular
+    inheritance is detected.
+    """
     pass
 
 class NetworkProfile(models.Model):
@@ -16,16 +21,42 @@ class NetworkProfile(models.Model):
 
     @property
     def local_attributes(self):
+        """@property local_attributes(self) -> dict
+        
+        Returns a dictionary of attributes specified locally in this network
+        profile. This does not include attributes inherited from other
+        profiles.
+        """
         for attribute in self.attribute_set.all():
             yield attribute.type.name, attribute.value
 
     @property
     def attributes(self):
+        """@property attributes(self) -> dict
+        
+        Returns a dictionary of attributes specified either in inherited
+        profiles or locally in this profile. The attributes specified locally
+        are given greatest priority and thus override any attributes with the
+        same name specified in inherited profiles. The priority between
+        inherited profiles defining attributes with the same name is decided
+        by the priority attribute of the inheritance relationship
+        (ProfileInheritance object). In the event of equal priorities,
+        behaviour is undefined.
+        """
         data = {}
         self._flatten(data)
         return data
 
     def set_attribute(self, attr_type, value):
+        """set_attribute(self, attr_type, value) -> NetworkAttribute
+        
+        Locally sets an attribute in this profile. The attribute type may be
+        specified either by an attribute type object or the name of an
+        attribute type.
+        
+        A NetworkAttribute object is either updated or created. This object
+        is returned at a successful invocation.
+        """
         if isinstance(attr_type, str):
             attr_type = NetworkAttributeType.objects.get(name=attr_type)
 
@@ -42,8 +73,20 @@ class NetworkProfile(models.Model):
                 type=attr_type,
                 value=value
             )
+        
+        return attr
     
     def inherit(self, profile, priority=0):
+        """inherit(self, profile, priority=0)
+        
+        Makes this NetworkProfile inherit another NetworkProfile. The profile
+        to be inherited may be specified by a NetworkProfile object, its
+        primary key (an integer) or the name of the profile (a string).
+        
+        An optional integer parameter, priority, may be specified, which will
+        be used to specify in which multiple profiles are inherited. A lower
+        priority number specifies a higher priority.
+        """
         if isinstance(profile, str):
             profile = NetworkProfile.objects.get(name=profile)
         elif isinstance(profile, int):
@@ -56,7 +99,13 @@ class NetworkProfile(models.Model):
         ).save()
 
     def _flatten(self, data, stack_contents=set()):
+        """_flatten(self, data, stack_contents=set())
         
+        The recursive implementation of the "attributes" property. Do not
+        call directly. 
+        """
+        # Don't blow the stack even if there's a loop in the inheritance
+        # diagram.
         if self in stack_contents:
             raise CircularInheritance
         
@@ -69,11 +118,14 @@ class NetworkProfile(models.Model):
         
         # Depth first        
         for heirloom in heritage:
-            inherited_profile = heirloom.target
-            inherited_profile._flatten(data)
+            # Get the attributes from each of the inherited profiles
+            heirloom.target._flatten(data)
 
+        # Finally, get local attributes
         data.update(self.local_attributes)
-        
+
+        # Avoid false positives on the classical Diamond Problem of multiple
+        # inheritance
         stack_contents.remove(self)
 
     def __unicode__(self):
