@@ -10,7 +10,7 @@ vim: shiftwidth=2 expandtab
   {% for org, networks in data %}
     <h2>
       {{ org.name }}
-      (<a href="{% url manage_org_page org_id=org.id %}">Edit</a>)
+      (<a href="{% url manage_org_page org_id=org.id %}">manage</a>)
     </h2>
     {% for network, certificates in networks %}
       <table>
@@ -18,7 +18,7 @@ vim: shiftwidth=2 expandtab
           <th>{{ network.name }}</th>
           <th></th>
           <th>
-            <a href="{% url manage_net_page org_id=org.id net_id=network.id %}">Edit</a>
+            <a href="{% url manage_network_page org_id=org.id network_id=network.id %}">manage</a>
           </th>
         </tr>
         {% for cert in certificates %}

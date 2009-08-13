@@ -1,20 +1,12 @@
 # encoding: utf-8
 # vim: shiftwidth=4 expandtab
 
-# FIXME There's been dragons before, but this time they've gotten serious.
+# Remember to add
 #
-# This is a hack to work around Django's braindead way of finding models.
-# Basically manage.py fails to find our modules at initialize time if we
-# don't force them in the openvpnweb.openvpn_userinterface.models namespace
-# the hard way.
+#     class Meta:
+#         app_label = "openvpn_userinterface"
 #
-# This neat little trick is simplified from
-# http://www.ifisgeek.com/2009/01/26/splitting-django-models-into-separate-files/
-# that presents the way Google does it.
-#
-# Once Django fixes their support for models in multiple files per app,
-# uncomment the commented imports below and delete everything after
-# the "XXX BEGIN DRAGONS".
+# in all new models to make Django find them.
 
 from .ca import CertificateAuthority, IntermediateCA, ClientCA, ServerCA
 from .certificates import (Certificate, ClientCertificate, ServerCertificate,

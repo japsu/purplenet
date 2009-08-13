@@ -41,7 +41,8 @@ class NetworkProfile(models.Model):
         inherited profiles defining attributes with the same name is decided
         by the priority attribute of the inheritance relationship
         (ProfileInheritance object). In the event of equal priorities,
-        behaviour is undefined.
+        it is up to the database which profile gets returned last and thus
+        has its attributes remain.
         """
         data = {}
         self._flatten(data)
@@ -54,13 +55,14 @@ class NetworkProfile(models.Model):
         specified either by an attribute type object or the name of an
         attribute type.
         
-        A NetworkAttribute object is either updated or created. This object
-        is returned at a successful invocation.
+        On a successful invocation a NetworkAttribute object is either updated
+        or created. This object is returned.
         """
         if isinstance(attr_type, str):
             attr_type = NetworkAttributeType.objects.get(name=attr_type)
 
         try:
+            # Existing attributes
             attr = self.attribute_set.get(
                 profile=self,
                 type=attr_type
@@ -68,6 +70,7 @@ class NetworkProfile(models.Model):
             attr.value = value
             attr.save()
         except NetworkAttribute.DoesNotExist:
+            # New attributes
             attr = self.attribute_set.create(
                 profile=self,
                 type=attr_type,
@@ -89,8 +92,6 @@ class NetworkProfile(models.Model):
         """
         if isinstance(profile, str):
             profile = NetworkProfile.objects.get(name=profile)
-        elif isinstance(profile, int):
-            profile = NetworkProfile.objects.get(pk=profile)
         
         ProfileInheritance(
             inheritor=self,
@@ -142,7 +143,7 @@ class ProfileInheritance(models.Model):
 
     class Meta:
         app_label = "openvpn_userinterface"
-        ordering = ("-priority",)
+        ordering = ("inheritor", "-priority",)
 
 class NetworkAttributeType(models.Model):
     name = models.CharField(max_length=30, unique=True)

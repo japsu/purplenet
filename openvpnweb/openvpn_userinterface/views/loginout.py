@@ -57,8 +57,7 @@ def logout_page(request):
             pass
         
         logout(request)
-        return HttpResponseRedirect(reverse(
-            "openvpnweb.openvpn_userinterface.views.login_page"))
+        return HttpResponseRedirect(reverse("login_page"))
     elif request.method == "GET":
         return post_confirmation_page(request,
             question="Really log out?",
