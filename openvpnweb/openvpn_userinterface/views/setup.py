@@ -6,6 +6,7 @@ from django.http import (HttpResponseRedirect, HttpResponseForbidden,
     HttpResponseNotAllowed)
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.contrib.auth.models import User, Group
 
 from datetime import datetime, timedelta
 
@@ -77,7 +78,7 @@ def setup_page(request, form):
     )
     
     # CREATE THE SUPERUSER GROUP AND ACCOUNT
-    superuser = User(username=form.cleaned_data["superuser_username"])
+    superuser = User(username=form.cleaned_data["superuser_name"])
     superuser.set_password(form.cleaned_data["password"])
     superuser.save()
     

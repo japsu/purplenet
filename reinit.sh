@@ -8,8 +8,13 @@ SELINUXENABLED=/usr/sbin/selinuxenabled
 set -e
 source $(dirname $0)/env.sh
 
-rm -rf "$CADIR"
+if [ -d "$CADIR" ]; then
+        echo "Nuking the CA dir with sudo (it prolly has files owned by the web server"
+        sudo rm -rf "$CADIR"
+fi
+
 mkdir -p "$CADIR/copies"
+chmod -R a+rwX "$CADIR"
 
 if [ -x $SELINUXENABLED ]; then
     if $SELINUXENABLED; then
@@ -21,9 +26,8 @@ fi
 dropdb -U $DBUSER $DBNAME
 createdb -U $DBUSER -E UNICODE $DBNAME
 python openvpnweb/manage.py syncdb --noinput
-#python reinit.py
-
-chmod -R a+rwX "$CADIR"
+#python bin/reinit_hard.py
+python bin/reinit_soft.py
 
 echo "Restarting Apache with sudo."
 if [ -x /etc/init.d/httpd ]; then
