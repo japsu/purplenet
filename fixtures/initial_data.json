@@ -58,6 +58,13 @@
       "name": "route", 
       "description": "Route"
     }
+  },
+  {
+    "pk": 1,
+    "model": "openvpn_userinterface.interestingenvvar",
+    "fields": {
+      "name": "departmentNumber"
+    }
   }
 ]
 

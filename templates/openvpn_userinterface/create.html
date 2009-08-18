@@ -1,0 +1,19 @@
+{% extends "base/base.html" %}
+{% comment %}
+vim: shiftwidth=4 expandtab
+coding: UTF-8
+{% endcomment %}
+{% block content %}
+<h2>{% block title %}Create something{% endblock %}
+{% block helptext %}
+  <p>This is a helpful help text.</p>
+{% endblock %}
+
+<form action="#" method="post">
+  <table>
+    {{ form }}
+  </table>
+  <input type="submit" />
+</form>
+
+{% endblock content %}

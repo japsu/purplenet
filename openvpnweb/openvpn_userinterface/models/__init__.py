@@ -18,4 +18,5 @@ from .network import (NetworkProfile, NetworkAttribute, NetworkAttributeType,
 from .org import Org
 from .org_map import (OrgMapping, MappingType, MappingElement)
 from .server import Server
+from .siteconfig import SiteConfig, InterestingEnvVar
 

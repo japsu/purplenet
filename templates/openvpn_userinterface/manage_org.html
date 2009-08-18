@@ -1,0 +1,72 @@
+{% extends "base/base.html" %}
+{% load ovpn_tags %}
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+{% block content %}
+<h1>{{ org.name }}</h1>
+
+<h2>Administrators</h2>
+<p>
+  This section lists the users that have administrative capabilities in
+  this organization.
+<p>
+{% if external_auth %}
+  <p>
+    Note that the administrative capabilities of a user are updated from
+    Shibboleth when he logs in. They cannot be managed from this page while
+    the service is linked into an external authentication service.
+  </p>
+{% endif %}
+
+<ul>
+  {% for group in org.admin_group_set.all %}
+    <li>{{ group.name }}
+      <ul>
+        {% for admin in group.user_set.all %}
+          <li>
+            <a href="{% manage_client_link user %}">{{ admin.username }}</a>
+            
+            {% if not external_auth %}
+              (<a href="{% remove_client_link user group %}">remove</a>)
+            {% endif %}
+          </li>
+        {% endfor %}
+        {% if not external_auth %}
+          <li class="group_add_client"><a href="FIXME">Add administrators to this group...</a></li>
+        {% endif %}
+      </ul>
+    </li>
+  {% endfor %}
+  {% if not external_auth %}
+    <li class="group_add_client"><a href="FIXME">Add administrator groups to this organization...</a></li>
+  {% endif %}
+</ul>
+
+<h2>Clients</h2>
+<p>This section lists the users that are members of this organization.</p>
+{% if external_auth %}
+  <p>
+    Note that the membership of a user is updated from Shibboleth each time
+    he logs in. Organization membership cannot be managed from this view while
+    the service is linked into an external authentication service.
+  </p>
+{% endif %}
+
+<ul>
+  {% for user in org.group.user_set.all %}
+    <li>
+      <a href="{% manage_client_link user %}">{{ user.username }}</a>
+      {% if not external_auth %}
+        (<a href="{% remove_client_link user org.group %}">remove</a>)
+      {% endif %}
+    </li>
+  {% endfor %}
+  {% if not external_auth %}
+    <li class="group_add_client"><a href="FIXME">Add clients to this organization...</a></li>
+  {% endif %}
+</ul>
+
+{% endblock content %}
+

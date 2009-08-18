@@ -9,16 +9,17 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 
 from openvpnweb.openvpn_userinterface.models import Client
-from openvpnweb.access_control import update_group_membership
+from openvpnweb.openvpn_userinterface.access_control import update_group_membership
 
 from .helpers import post_confirmation_page
 from ..logging import log
 
 def login_page(request):
-    vars = RequestContext(request, {
+    vars = {
         'type': "info", 
         'message_login': ""
-    })
+    }
+    context = RequestContext(request, {})
 
     if request.method == 'POST':
         username = request.POST['username']
@@ -47,7 +48,8 @@ def login_page(request):
                     "your account has been disabled. Please try again."
             })
                           
-    return render_to_response('openvpn_userinterface/login.html',vars)
+    return render_to_response('openvpn_userinterface/login.html', vars,
+        context_instance=context)
                 
 def logout_page(request):
     if request.method == "POST":

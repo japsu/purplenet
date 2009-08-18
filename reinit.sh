@@ -21,7 +21,7 @@ fi
 dropdb -U $DBUSER $DBNAME
 createdb -U $DBUSER -E UNICODE $DBNAME
 python openvpnweb/manage.py syncdb --noinput
-python reinit.py
+#python reinit.py
 
 chmod -R a+rwX "$CADIR"
 

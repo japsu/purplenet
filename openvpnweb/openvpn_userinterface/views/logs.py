@@ -6,7 +6,7 @@ from django.template import RequestContext
 from django.db.models import Q
 from django.contrib.auth.models import Group
 
-from openvpnweb.access_control import manager_required
+from ..access_control import manager_required
 from ..models import LogEntry
 
 @manager_required

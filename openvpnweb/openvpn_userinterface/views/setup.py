@@ -9,9 +9,10 @@ from django.template import RequestContext
 
 from datetime import datetime, timedelta
 
-from openvpnweb.openvpn_userinterface.forms import SetupForm
-from openvpnweb.openvpn_userinterface.models import (IntermediateCA, ServerCA,
-    CACertificate)
+from ..forms import SetupForm
+from ..models import (IntermediateCA, ServerCA, CACertificate, Client,
+    SiteConfig)
+from .helpers import create_view
 
 import os
 
@@ -42,57 +43,56 @@ def create_ca(common_name, ca, base_dir, ca_cls):
 
     return new_ca
 
-def setup_page(request):
-    if request.method == "GET":
-        form = SetupForm()
+@create_view(SetupForm, "openvpn_userinterface/setup.html")
+def setup_page(request, form):
+    if SiteConfig.objects.all():
+        return error_page(request, "The setup process has already been completed.")
+    
+     # CREATE THE CA HIERARCHY
 
-        vars = {
-            "form" : form,
-        }
-        
-        return render_to_response("openvpn_userinterface/setup.html", vars,
-            context_instance=RequestContext(request, {}))
+    base_dir = form.cleaned_data["ca_dir"]
 
-    elif request.method == "POST":
-        form = SetupForm(request.POST)
+    # Root CA
+    root_ca = create_ca(
+        form.cleaned_data["root_ca_cn"],
+        None,
+        base_dir,
+        IntermediateCA
+    )
 
-        if form.is_valid():
-            # CREATE THE CA HIERARCHY
-        
-            base_dir = form.cleaned_data["ca_dir"]
+    # Server CA
+    server_ca = create_ca(
+        form.cleaned_data["server_ca_cn"],
+        root_ca,
+        base_dir,
+        ServerCA
+    )
 
-            # Root CA
-            root_ca = create_ca(
-                form.cleaned_data["root_ca_cn"],
-                None,
-                base_dir,
-                IntermediateCA
-            )
+    # Client CA
+    client_ca = create_ca(
+        form.cleaned_data["client_ca_cn"],
+        root_ca,
+        base_dir,
+        IntermediateCA
+    )
+    
+    # CREATE THE SUPERUSER GROUP AND ACCOUNT
+    superuser = User(username=form.cleaned_data["superuser_username"])
+    superuser.set_password(form.cleaned_data["password"])
+    superuser.save()
+    
+    supergroup = superuser.groups.create(name="Superusers")
+    
+    superclient = Client(user=superuser)
+    superclient.save()
+    
+    # CREATE THE SITE CONFIG
+    siteconfig = SiteConfig(
+        superuser_group=supergroup,
+        root_ca=root_ca,
+        server_ca=server_ca,
+        client_ca=client_ca
+    )
+    siteconfig.save()
 
-            # Server CA
-            server_ca = create_ca(
-                form.cleaned_data["server_ca_cn"],
-                root_ca,
-                base_dir,
-                ServerCA
-            )
-
-            # Client CA
-            client_ca = create_ca(
-                form.cleaned_data["client_ca_cn"],
-                root_ca,
-                base_dir,
-                IntermediateCA
-            )
-
-            return HttpResponseRedirect(reverse("login_page"))
-
-        else:
-            vars = {
-                "form" : form,
-            }
-            return render_to_response("openvpn_userinterface/setup.html", vars,
-                context_instance=RequestContext(request, {}))
-
-    else:
-        return HttpResponseNotAllowed(["GET", "POST"])
+    return HttpResponseRedirect(reverse("setup_complete_page"))

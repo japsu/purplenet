@@ -1,0 +1,26 @@
+{% extends "base/base.html" %}
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+{% block content %}
+<h1>Setup complete!</h1>
+
+<p>
+  Congratulations! OpenVPNWeb was successfully set up. Now you can proceed to
+  log in and configure this OpenVPNWeb installation further:
+</p>
+
+<ol>
+  <li><a href="{% url create_org_page %}">Create organizations</a></li>
+  <li><a href="{% url manage_org_map_page %}">Configure organization mapping</a></li>
+  <li><a href="{% url create_server_page %}">Create servers</a></li>
+  <li><a href="{% url create_network_page %}">Create networks</a></li>
+</ol>
+
+<p>
+  NOTE: Remember to set <tt>OPENVPNWEB_SETUP_KEY = None</tt> in settings.py
+  to prevent the setup process from being run again.
+</p> 
+
+{% endblock content %}

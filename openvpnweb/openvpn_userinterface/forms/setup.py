@@ -2,6 +2,7 @@
 # vim: shiftwidth=4 expandtab
 
 from django import forms
+from django.forms.util import ErrorList
 from django.conf import settings
 from tempfile import NamedTemporaryFile
 from openvpnweb.openvpn_userinterface.models import *
@@ -46,6 +47,9 @@ class SetupKeyField(forms.CharField):
 
         return value
 
+class PasswordField(forms.CharField):
+    widget = forms.PasswordInput
+
 class SetupForm(forms.Form):
     setup_key = SetupKeyField(max_length=200,
         label="OPENVPNWEB_SETUP_KEY from settings.py")
@@ -61,3 +65,28 @@ class SetupForm(forms.Form):
 
     client_ca_cn = forms.CharField(max_length=30, initial="Client CA",
         label="Common Name for the client CA")
+    
+    superuser_name = forms.CharField(max_length=30, initial="Superuser",
+        label="Superuser account name")
+    
+    password = PasswordField(max_length=2048,
+        label="Superuser password")
+    
+    password_again = PasswordField(max_length=2048,
+        label="Superuser password (again)")
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        
+        password = cleaned_data.get("password")
+        password_again = cleaned_data.get("password_again")
+        
+        if password and password != password_again:
+            msg = "The passwords do not match."
+            self._errors["password"] = ErrorList([msg])
+            self._errors["password_again"] = ErrorList([msg])
+            
+            del cleaned_data["password"]
+            del cleaned_data["password_again"]
+            
+        return cleaned_data

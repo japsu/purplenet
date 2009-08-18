@@ -20,6 +20,11 @@ class Client(models.Model):
     def managed_org_set(self):
         return Org.objects.filter(
             admin_group_set__in=self.user.groups.all())
+        
+    @property
+    def is_superuser(self):
+        superuser_group = SiteConfig.objects.get().superuser_group
+        return superuser_group in self.user.groups.all()
 
     def __unicode__(self):
         return self.name
@@ -32,8 +37,8 @@ class Client(models.Model):
             self.may_manage(certificate.ca.org)
 
     def may_manage(self, org):
-        return bool(set(org.admin_group_set.all()).intersection(
-            self.user.groups.all()))
+        return self.is_superuser or bool(set(org.admin_group_set.all())
+            .intersection(self.user.groups.all()))
 
     def may_view_management_pages(self):
         return bool(self.managed_org_set)

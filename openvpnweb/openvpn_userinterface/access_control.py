@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import (user_passes_test,
     REDIRECT_FIELD_NAME)
 from django.conf import settings
 
-from openvpnweb.openvpn_userinterface.models import *
+from openvpnweb.openvpn_userinterface.models import (Client, InterestingEnvVar,
+    MappingElement)
 from openvpnweb.openvpn_userinterface.logging import log
 
 from os import environ
@@ -21,23 +22,31 @@ def manager_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
     
     actual_decorator = user_passes_test(
         lambda u: Client.objects.get(user=u).may_view_management_pages(),
-        redirect_field_name=REDIRECT_FIELD_NAME
+        redirect_field_name=redirect_field_name
     )
 
     if function:
         return actual_decorator(function)
     return actual_decorator
 
+def superuser_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
+    actual_decorator = user_passes_test(
+        lambda u: Client.objects.get(user=u).is_superuser(),
+        redirect_field_name=redirect_field_name
+    )
+    
+    if function:
+        return actual_decorator(function)
+    return actual_decorator
+
 def update_group_membership(client):
-    # XXX
-    INTERESTING_ENVVARS = ["departmentNumber"]
     elements = list()
 
-    for var_name in INTERESTING_ENVVARS:
-        value = environ.get(var_name, None)
+    for var in InterestingEnvVar.objects.all():
+        value = environ.get(var.name, None)
         elements.extend(MappingElement.objects.filter(
             type__namespace__exact="env",
-            type__source_name__exact=var_name,
+            type__source_name__exact=var.name,
             value=value
         ))
 
