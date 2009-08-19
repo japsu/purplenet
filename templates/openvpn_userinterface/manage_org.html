@@ -28,19 +28,19 @@ vim: shiftwidth=2 expandtab
           <li>
             <a href="{% manage_client_link user %}">{{ admin.username }}</a>
             
-            {% if not external_auth %}
+            {% if superuser and not external_auth %}
               (<a href="{% remove_client_link user group %}">remove</a>)
             {% endif %}
           </li>
         {% endfor %}
-        {% if not external_auth %}
-          <li class="group_add_client"><a href="FIXME">Add administrators to this group...</a></li>
+        {% if superuser and not external_auth %}
+          <li class="group_add_client"><a href="{% url add_client_to_group_page group_id=group.id %}">Add administrators to this group...</a></li>
         {% endif %}
       </ul>
     </li>
   {% endfor %}
-  {% if not external_auth %}
-    <li class="group_add_client"><a href="FIXME">Add administrator groups to this organization...</a></li>
+  {% if superuser %}
+    <li class="group_add_client"><a href="{% url add_admin_group_to_org_page org_id=org.id %}">Add administrator groups to this organization...</a></li>
   {% endif %}
 </ul>
 
@@ -64,7 +64,7 @@ vim: shiftwidth=2 expandtab
     </li>
   {% endfor %}
   {% if not external_auth %}
-    <li class="group_add_client"><a href="FIXME">Add clients to this organization...</a></li>
+    <li class="group_add_client"><a href="{% url add_client_to_org_page org_id=org.id %}">Add clients to this organization...</a></li>
   {% endif %}
 </ul>
 

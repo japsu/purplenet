@@ -11,8 +11,9 @@ from django.http import (HttpResponseForbidden, HttpResponseRedirect,
 from ..access_control import manager_required, superuser_required
 from ..models import (ClientCertificate, Org, Network, Client, Server,
     SiteConfig, InterestingEnvVar)
-from ..forms import OrgForm, ClientForm
-from .helpers import create_view
+from ..forms import (CreateOrgForm, CreateClientForm, ClientSearchForm,
+    GroupSearchForm, CreateServerForm, SimpleNetworkForm, CreateGroupForm)
+from .helpers import create_view, post_confirmation_page
 
 @manager_required
 def manage_page(request):
@@ -38,10 +39,15 @@ def manage_page(request):
 @manager_required
 def manage_org_page(request, org_id):
     org = get_object_or_404(Org, id=int(org_id))
+    client = request.session["client"]
+    
+    if not client.may_manage(org):
+        return HttpResponseForbidden()
 
     vars = {
         "org" : org,
-        "external_auth" : settings.OPENVPNWEB_USE_GROUP_MAPPINGS
+        "external_auth" : settings.OPENVPNWEB_USE_GROUP_MAPPINGS,
+        "superuser" : client.is_superuser
     }
     context = RequestContext(request, {})
 
@@ -57,7 +63,7 @@ def manage_org_page(request, org_id):
         return HttpResponseNotAllowed(["GET","POST"])            
 
 @superuser_required
-@create_view(OrgForm, "openvpn_userinterface/create_org.html")
+@create_view(CreateOrgForm, "openvpn_userinterface/create_org.html")
 def create_org_page(request, form):
     user_group = Group(name=form.cleaned_data["name"])
     user_group.save()
@@ -73,7 +79,7 @@ def create_org_page(request, form):
 
 
 @manager_required
-@create_view(ClientForm, "openvpn_userinterface/create_client.html")
+@create_view(CreateClientForm, "openvpn_userinterface/create_client.html")
 def create_client_page(request, form):
     user = User(
         username=form.cleaned_data["username"],
@@ -94,49 +100,111 @@ def create_client_page(request, form):
     return HttpResponseRedirect(reverse("manage_client_page",
         kwargs=dict(client_id=client.id)))
 
+@superuser_required
+@create_view(ClientSearchForm, "openvpn_userinterface/add_client_to_group.html")
+def add_client_to_group_page(request, form, group_id):
+    group = get_object_or_404(Group, id=int(group_id))
+    client_to_add = form.search_result
+    
+    group.user_set.add(client_to_add.user)
+    
+    return HttpResponseRedirect(reverse("manage_page"))
+
+@manager_required
+@create_view(ClientSearchForm, "openvpn_userinterface/add_client_to_org.html")
+def add_client_to_org_page(request, form, org_id):
+    client = request.session["client"]
+    
+    org = get_object_or_404(Org, id=int(org_id))
+    client_to_add = form.search_result
+    
+    if not client.may_manage(org):
+        return HttpResponseForbidden()
+    
+    org.group.user_set.add(client_to_add.user)
+    
+    return HttpResponseRedirect(reverse("manage_org_page", kwargs=dict(
+        org_id=org.id)))
+
+@superuser_required
+@create_view(GroupSearchForm,
+    "openvpn_userinterface/add_admin_group_to_org.html")
+def add_admin_group_to_org_page(request, form, org_id):
+    org = get_object_or_404(Org, id=int(org_id))
+    group_to_add = form.search_result
+    
+    org.admin_group_set.add(group_to_add)
+    
+    return HttpResponseRedirect(reverse("manage_org_page", kwargs=dict(
+        org_id=org.id)))
+    
+@superuser_required
+def remove_client_from_group_page(request, client_id, group_id):
+    client_to_remove = get_object_or_404(Client, id=int(client_id))
+    group = get_object_or_404(Group, id=int(group_id))
+    
+    if request.method == "POST":
+        group.user_set.remove(client_to_remove.user)
+        
+        return_url = request.META.get("HTTP_REFERER", reverse("manage_page"))
+        return HttpResponseRedirect(return_url)
+    
+    elif request.method == "GET":
+        return post_confirmation_page(
+            question="Remove %s from %s?" % (
+                client_to_remove.user.username,
+                group.name
+            ),
+            choices=[
+                ("Remove", reverse("remove_client_from_group_page", kwargs=dict(
+                    client_id=client_id,
+                    group_id=group_id
+                ))),
+                ("Cancel", reverse("manage_page"))
+            ]
+        )
+    
+    else:
+        return HttpResponseNotAllowed(["GET", "POST"])
+
 # XXX The following are stubs
 
+@superuser_required
+@create_view(CreateServerForm, "openvpn_userinterface/create_server.html")
+def create_server_page(request):
+    pass
+
+@superuser_required
+@create_view(SimpleNetworkForm, "openvpn_userinterface/create_server.html")
+def create_network_page(request):
+    pass
+
+@superuser_required
+@create_view(CreateGroupForm, "openvpn_userinterface/create_server.html")
+def create_group_page(request):
+    pass
+
+@superuser_required
 def manage_group_page(request, group_id):
     group = get_object_or_404(Group, id=int(group_id))
     org = get_object_or_404(Org, group=group)
     
     return HttpResponseRedirect(reverse("manage_org_page", org_id=org.id))
 
-@manager_required
+@superuser_required
 def manage_network_page(request, org_id, net_id):
     org = get_object_or_404(Org, id=int(org_id))
     network = get_object_or_404(Network, id=int(net_id))
 
-@manager_required
+@superuser_required
 def manage_server_page(request, server_id):
     server = get_object_or_404(Server, id=int(server_id))
 
-@manager_required
+@superuser_required
 def manage_org_map_page(request):
     pass
 
 @manager_required
 def manage_client_page(request, client_id):
-    client = get_object_or_404(Client, id=int(client_id))
-
-@manager_required
-def add_client_to_group_page(request, client_id, group_id):
-    client = get_object_or_404(Client, id=int(client_id))
-    group = get_object_or_404(Group, id=int(group_id))    
-
-@manager_required
-def remove_client_from_group_page(request, client_id, group_id):
-    client = get_object_or_404(Client, id=int(client_id))
-    group = get_object_or_404(Group, id=int(group_id))
+    client_to_manage = get_object_or_404(Client, id=int(client_id))
     
-@manager_required
-def create_server_page(request):
-    pass
-
-@manager_required
-def create_network_page(request):
-    pass
-
-@manager_required
-def create_group_page(request):
-    pass

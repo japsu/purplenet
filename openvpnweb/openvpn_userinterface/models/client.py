@@ -2,7 +2,7 @@
 # vim: shiftwidth=4 expandtab
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from openvpnweb.openvpn_userinterface.models.org import Org
 
 class Client(models.Model):
@@ -36,9 +36,22 @@ class Client(models.Model):
         return certificate.owner == self or \
             self.may_manage(certificate.ca.org)
 
-    def may_manage(self, org):
-        return self.is_superuser or bool(set(org.admin_group_set.all())
-            .intersection(self.user.groups.all()))
+    def may_manage(self, org_or_group):
+        if isinstance(org_or_group, Group):
+            group = org_or_group
+            
+            try:
+                # user group
+                org = Org.objects.get(group=group)
+                return self.may_manage(org)
+            except:
+                # admin or other group
+                return self.is_superuser()
+        else:
+            # assume Org
+            org = org_or_group
+            return self.is_superuser or bool(set(org.admin_group_set.all())
+                .intersection(self.user.groups.all()))
 
     def may_view_management_pages(self):
         return bool(self.managed_org_set)

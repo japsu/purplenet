@@ -3,5 +3,8 @@
 
 from .setup import SetupForm
 from .network import SimpleNetworkForm
-from .org import OrgForm
-from .client import ClientForm
+from .org import CreateOrgForm
+from .client import CreateClientForm
+from .search import ClientSearchForm, GroupSearchForm
+from .server import CreateServerForm
+from .group import CreateGroupForm

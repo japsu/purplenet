@@ -25,7 +25,6 @@ def mangle(data):
     soup = bs.BeautifulSoup(data)
     return str(soup.find("title"))
 
-
 def reinit_soft():
     params = {
         "setup_key" : settings.OPENVPNWEB_SETUP_KEY,
@@ -51,5 +50,5 @@ def reinit_soft():
     
     print status, reason, mangle(data)
     
-if __name__=="__main__":
+if __name__== "__main__":
     reinit_soft()

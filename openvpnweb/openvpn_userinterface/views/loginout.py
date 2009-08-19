@@ -40,7 +40,19 @@ def login_page(request):
 
             request.session["client"] = client
             
-            return HttpResponseRedirect(reverse("main_page"))
+            # Validate the redirect URL
+            next_url = request.GET.get('next')
+            if next_url:
+                try:
+                    resolve(next_url)
+                except Resolver404:
+                    next_url = None
+            
+            if next_url is None:
+                # Invalid or no next_url specified
+                next_url = reverse("main_page")
+            
+            return HttpResponseRedirect(next_url)
         else:
             vars = RequestContext(request, {
                'type' : "error", 

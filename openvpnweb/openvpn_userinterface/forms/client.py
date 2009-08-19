@@ -4,7 +4,7 @@ from django.forms.util import ErrorList
 class PasswordField(forms.CharField):
     widget = forms.PasswordInput
 
-class ClientForm(forms.Form):
+class CreateClientForm(forms.Form):
     username = forms.CharField(max_length=30, label="Username")
     first_name = forms.CharField(max_length=30, required=False,
         label="First name")

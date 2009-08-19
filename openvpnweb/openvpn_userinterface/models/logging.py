@@ -13,7 +13,7 @@ class LogEntry(models.Model):
         ("client_certificate.create", "Client certificate created"),
         ("client_certificate.revoke", "Client certificate revoked"),
     ]
-    event = models.CharField(max_length=30, choices=EVENT_CHOICES)
+    event = models.CharField(max_length=50, choices=EVENT_CHOICES)
 
     denied = models.BooleanField(default=False)
     client = models.ForeignKey("Client")
