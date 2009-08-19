@@ -1,0 +1,23 @@
+// encoding: utf-8
+// vim: shiftwidth=4 expandtab
+
+message CRLRequest {
+    optional string ca = 1;
+}
+
+message SignCertificateRequest {
+    required string csr = 1;
+    optional string extensions = 2 [default = "crt_ext"];
+    optional string ca = 3;
+}
+
+message SignCertificateResponse {
+    required string cert = 1;
+}
+
+service OpenSSLBase {
+    rpc GenerateCRL (CRLRequest);
+    rpc SignCertificate (SignCertificateRequest) returns
+        (SignCertificateResponse);
+    rpc CreatePKCS12 (PKCS12Request) returns (PKCS12Response);
+}
