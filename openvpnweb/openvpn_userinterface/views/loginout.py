@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.contrib.auth import authenticate, login, logout
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve, Resolver404
 from django.conf import settings
 
 from openvpnweb.openvpn_userinterface.models import Client

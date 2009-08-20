@@ -7,7 +7,6 @@ from django.contrib.auth.models import Group
 
 from ..models import Client
 
-
 class SearchForm(forms.Form):
     _model_field = "name"
     _search_method = "exact"
@@ -16,18 +15,18 @@ class SearchForm(forms.Form):
     
     @property
     def search_result(self):
-        return _search_result
+        return self._search_result
         
     def _perform_search(self):
         kwargs = {
-            "%s__%s" % (self._model_field, self.s_earch_method) :
+            "%s__%s" % (self._model_field, self._search_method) :
                 self.cleaned_data["search_field"]
         }
         
-        if allow_multiple_results:
-            _search_result = self.model.objects.filter(**kwargs)
+        if self._allow_multiple_results:
+            self._search_result = self._model.objects.filter(**kwargs)
         else:
-            _search_result = self.model.objects.get(**kwargs)
+            self._search_result = self._model.objects.get(**kwargs)
     
     def clean(self):
         cleaned_data = self.cleaned_data

@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.conf import settings
 from django.contrib.auth.models import Group, User, UNUSABLE_PASSWORD
+from django.core.urlresolvers import reverse
 from django.http import (HttpResponseForbidden, HttpResponseRedirect,
     HttpResponseNotAllowed)
 
@@ -12,7 +13,7 @@ from ..access_control import manager_required, superuser_required
 from ..models import (ClientCertificate, Org, Network, Client, Server,
     SiteConfig, InterestingEnvVar)
 from ..forms import (CreateOrgForm, CreateClientForm, ClientSearchForm,
-    GroupSearchForm, CreateServerForm, SimpleNetworkForm, CreateGroupForm)
+    SelectGroupForm, CreateServerForm, SimpleNetworkForm, CreateGroupForm)
 from .helpers import create_view, post_confirmation_page
 
 @manager_required
@@ -45,9 +46,9 @@ def manage_org_page(request, org_id):
         return HttpResponseForbidden()
 
     vars = {
+        "client" : client,
         "org" : org,
         "external_auth" : settings.OPENVPNWEB_USE_GROUP_MAPPINGS,
-        "superuser" : client.is_superuser
     }
     context = RequestContext(request, {})
 
@@ -127,11 +128,11 @@ def add_client_to_org_page(request, form, org_id):
         org_id=org.id)))
 
 @superuser_required
-@create_view(GroupSearchForm,
+@create_view(SelectGroupForm,
     "openvpn_userinterface/add_admin_group_to_org.html")
 def add_admin_group_to_org_page(request, form, org_id):
     org = get_object_or_404(Org, id=int(org_id))
-    group_to_add = form.search_result
+    group_to_add = form.cleaned_data["group"]
     
     org.admin_group_set.add(group_to_add)
     
@@ -146,11 +147,10 @@ def remove_client_from_group_page(request, client_id, group_id):
     if request.method == "POST":
         group.user_set.remove(client_to_remove.user)
         
-        return_url = request.META.get("HTTP_REFERER", reverse("manage_page"))
-        return HttpResponseRedirect(return_url)
+        return HttpResponseRedirect(reverse("manage_page"))
     
     elif request.method == "GET":
-        return post_confirmation_page(
+        return post_confirmation_page(request,
             question="Remove %s from %s?" % (
                 client_to_remove.user.username,
                 group.name
@@ -161,6 +161,74 @@ def remove_client_from_group_page(request, client_id, group_id):
                     group_id=group_id
                 ))),
                 ("Cancel", reverse("manage_page"))
+            ]
+        )
+    
+    else:
+        return HttpResponseNotAllowed(["GET", "POST"])
+
+@manager_required
+def remove_client_from_org_page(request, client_id, org_id):
+    client = request.session["client"]
+    client_to_remove = get_object_or_404(Client, id=int(client_id))
+    org = get_object_or_404(Org, id=int(org_id))
+    group = org.group
+    
+    if not client.may_manage(org):
+        return HttpResponseForbidden()
+    
+    if request.method == "POST":
+        group.user_set.remove(client_to_remove.user)
+        
+        return HttpResponseRedirect(reverse("manage_org_page", kwargs=dict(
+            org_id=org_id)))
+    
+    elif request.method == "GET":
+        return post_confirmation_page(
+            question="Remove %s from %s?" % (
+                client_to_remove.user.username,
+                group.name
+            ),
+            choices=[
+                ("Remove", reverse("remove_client_from_org_page", kwargs=dict(
+                    client_id=client_id,
+                    org_id=org_id
+                ))),
+                ("Cancel", reverse("manage_org_page", kwargs=dict(
+                    org_id=org_id
+                )))
+            ]
+        )
+    
+    else:
+        return HttpResponseNotAllowed(["GET", "POST"])
+
+@superuser_required
+def remove_admin_group_from_org_page(request, org_id, group_id):
+    client = request.session["client"]
+    org = get_object_or_404(Org, id=int(org_id))
+    group = get_object_or_404(Group, id=int(group_id))
+    
+    if request.method == "POST":
+        org.admin_group_set.remove(group)
+        
+        return HttpResponseRedirect(reverse("manage_org_page", kwargs=dict(
+            org_id=org_id)))
+    
+    elif request.method == "GET":
+        return post_confirmation_page(
+            question="Remove %s from the administrators of %s?" % (
+                group.name,
+                org.name
+            ),
+            choices=[
+                ("Remove", reverse("remove_admin_group_from_org_page", kwargs=dict(
+                    org_id=org_id,
+                    group_id=group_id,
+                ))),
+                ("Cancel", reverse("manage_org_page", kwargs=dict(
+                    org_id=org_id
+                )))
             ]
         )
     

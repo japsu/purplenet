@@ -126,3 +126,7 @@ td {
 	color: white;
 	font-weight: bold;
 }
+
+.inline_form {
+	display: inline;
+}

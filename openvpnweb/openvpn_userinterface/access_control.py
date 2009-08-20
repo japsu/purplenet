@@ -31,7 +31,7 @@ def manager_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
 
 def superuser_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
     actual_decorator = user_passes_test(
-        lambda u: Client.objects.get(user=u).is_superuser(),
+        lambda u: Client.objects.get(user=u).is_superuser,
         redirect_field_name=redirect_field_name
     )
     

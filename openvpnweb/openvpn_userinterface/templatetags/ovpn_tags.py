@@ -4,7 +4,8 @@
 from django import template
 from django.core.urlresolvers import reverse
 
-from openvpnweb.openvpn_userinterface.models import Client
+from openvpnweb.openvpn_userinterface.models import Client, Org
+
 
 register = template.Library()
 
@@ -31,8 +32,16 @@ def manage_client_link(user):
     ))
 
 @register.simple_tag
-def remove_client_link(user, group):
-    return reverse("remove_client_from_group_page", kwargs=dict(
-        client_id=_get_client_id(user),
-        group_id=group.id
-    ))
+def remove_client_link(user, group_or_org):
+    if isinstance(group_or_org, Org):
+        org = group_or_org
+        return reverse("remove_client_from_org_page", kwargs=dict(
+            client_id=_get_client_id(user),
+            org_id=org.id
+        ))
+    else:
+        group = group_or_org
+        return reverse("remove_client_from_group_page", kwargs=dict(
+            client_id=_get_client_id(user),
+            group_id=group.id
+        ))

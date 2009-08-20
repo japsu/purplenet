@@ -5,6 +5,23 @@ vim: shiftwidth=2 expandtab
 {% endcomment %}
 {% block content %}
 
+<h1>Administrative actions</h1>
+<p>You can perform the following administrative actions:</p>
+
+<ul>
+  <li>FIXME</li>
+</ul>
+
+{% if client.is_superuser %}
+  <h1>Superuser actions</h1>
+  <p>You can perform the following superuser actions:</p>
+  
+  <ul>
+    <li>FIXME</li>
+  </ul>
+{% endif %}
+
+<h1>Networks</h1>
 <p>From this page you can revoke certificates in the organizations you manage and proceed to editing the details of the organizations.</p>
 {% if data %}
   {% for org, networks in data %}
@@ -12,33 +29,37 @@ vim: shiftwidth=2 expandtab
       {{ org.name }}
       (<a href="{% url manage_org_page org_id=org.id %}">manage</a>)
     </h2>
-    {% for network, certificates in networks %}
-      <table>
-        <tr>
-          <th>{{ network.name }}</th>
-          <th></th>
-          <th>
-            <a href="{% url manage_network_page org_id=org.id network_id=network.id %}">manage</a>
-          </th>
-        </tr>
-        {% for cert in certificates %}
+    {% if networks %}
+      {% for network, certificates in networks %}
+        <table>
           <tr>
-            <td>{{ cert.common_name }}</td>
-            <td>{{ cert.owner.user.username }}</td>
-            <td>
-              {% if not cert.is_revoked %}
-                <form method="post" action="{% url revoke_page cert_id=cert.id%}">
-                  <input type="hidden" name="cert_id" value="{{cert.id}}" />
-                  <p class="submit"><input type="submit" value="Revoke" /></p>
-                </form>
-              {% else %}
-                <p>Revoked by {{cert.revoked_by.user.username}} at {{ cert.revoked|date }}</p>
-              {% endif %}
-            </td>
+            <th>{{ network.name }}</th>
+            <th></th>
+            <th>
+              <a href="{% url manage_network_page org_id=org.id network_id=network.id %}">manage</a>
+            </th>
           </tr>
-        {% endfor %}
-      </table>
-    {% endfor %}
+          {% for cert in certificates %}
+            <tr>
+              <td>{{ cert.common_name }}</td>
+              <td>{{ cert.owner.user.username }}</td>
+              <td>
+                {% if not cert.is_revoked %}
+                  <form method="post" action="{% url revoke_page cert_id=cert.id%}">
+                    <input type="hidden" name="cert_id" value="{{cert.id}}" />
+                    <p class="submit"><input type="submit" value="Revoke" /></p>
+                  </form>
+                {% else %}
+                  <p>Revoked by {{cert.revoked_by.user.username}} at {{ cert.revoked|date }}</p>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endfor %}
+    {% else %}
+      <p>No networks defined for this organization.</p>
+    {% endif %}
   {% endfor %}
 {% else %}
   <p>No organisations at the moment.</p>

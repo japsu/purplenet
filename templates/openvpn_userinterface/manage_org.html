@@ -22,24 +22,31 @@ vim: shiftwidth=2 expandtab
 
 <ul>
   {% for group in org.admin_group_set.all %}
-    <li>{{ group.name }}
+    <li>
+      {% if client.is_superuser %}
+        <form class="inline_form" action="{% url remove_admin_group_from_org_page org_id=org.id group_id=group.id %}" method="post">
+          <input type="submit" value="Remove" />
+        </form>
+      {% endif %}
+      {{ group.name }}
       <ul>
         {% for admin in group.user_set.all %}
           <li>
-            <a href="{% manage_client_link user %}">{{ admin.username }}</a>
-            
-            {% if superuser and not external_auth %}
-              (<a href="{% remove_client_link user group %}">remove</a>)
+            {% if client.is_superuser and not external_auth %}
+              <form class="inline_form" action="{% remove_client_link user group %}" action="post">
+                <input type="submit" value="Remove" />
+              </form>
             {% endif %}
+            <a href="{% manage_client_link user %}">{{ admin.username }}</a>
           </li>
         {% endfor %}
-        {% if superuser and not external_auth %}
+        {% if client.is_superuser and not external_auth %}
           <li class="group_add_client"><a href="{% url add_client_to_group_page group_id=group.id %}">Add administrators to this group...</a></li>
         {% endif %}
       </ul>
     </li>
   {% endfor %}
-  {% if superuser %}
+  {% if client.is_superuser %}
     <li class="group_add_client"><a href="{% url add_admin_group_to_org_page org_id=org.id %}">Add administrator groups to this organization...</a></li>
   {% endif %}
 </ul>
@@ -57,10 +64,12 @@ vim: shiftwidth=2 expandtab
 <ul>
   {% for user in org.group.user_set.all %}
     <li>
-      <a href="{% manage_client_link user %}">{{ user.username }}</a>
       {% if not external_auth %}
-        (<a href="{% remove_client_link user org.group %}">remove</a>)
+        <form class="inline_form" action="{% remove_client_link user org %}" action="post">
+          <input type="submit" value="Remove" />
+        </form>
       {% endif %}
+      <a href="{% manage_client_link user %}">{{ user.username }}</a>
     </li>
   {% endfor %}
   {% if not external_auth %}

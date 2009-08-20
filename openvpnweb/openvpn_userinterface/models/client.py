@@ -4,6 +4,7 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from openvpnweb.openvpn_userinterface.models.org import Org
+from openvpnweb.openvpn_userinterface.models.siteconfig import SiteConfig
 
 class Client(models.Model):
     user = models.OneToOneField(User)
@@ -18,8 +19,11 @@ class Client(models.Model):
 
     @property
     def managed_org_set(self):
-        return Org.objects.filter(
-            admin_group_set__in=self.user.groups.all())
+        if self.is_superuser:
+            return Org.objects.all()
+        else:
+            return Org.objects.filter(
+                admin_group_set__in=self.user.groups.all())
         
     @property
     def is_superuser(self):
@@ -54,7 +58,7 @@ class Client(models.Model):
                 .intersection(self.user.groups.all()))
 
     def may_view_management_pages(self):
-        return bool(self.managed_org_set)
+        return self.is_superuser or bool(self.managed_org_set)
 
     class Admin: pass
 
