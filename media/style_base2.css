@@ -5,7 +5,7 @@ body {
         background-repeat: repeat
 }
 
-p, .group_add_client {
+p, li.add_remove {
         padding: 0.3125em;
         margin: 0em;
         text-align:justify;

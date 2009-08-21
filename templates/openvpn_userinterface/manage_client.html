@@ -1,0 +1,50 @@
+{% extends "base/base.html" %}
+{% load ovpn_tags %}
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+{% block content %}
+
+{% with target.user.full_name as full_name %}
+  {% if full_name %}
+    <h1>{{full_name}} ({{ target.user.username }})</h1>
+  {% else %}
+    <h1>{{ target.user.username }}</h1>
+  {% endif %}
+{% endwith %}
+
+<p>TODO Basic info form goes here.</p>
+
+<h2>Organizations</h2>
+
+{% if orgs %}
+  <p>This user is belongs to the following organizations:</p>
+{% else %}
+  <p>This user does not belong to any organizations at the moment.</p>
+{% endif %}
+<ul>
+  {% for org, may_manage in orgs %}
+    <li>
+      {% if may_manage %}
+        {% if not external_auth %}
+          <form class="inline_form" action="{% remove_client_link target org %}" method="post">
+            <input type="submit" value="Remove" />
+          </form>
+        {% endif %}
+        <a href="{% url manage_org_page org_id=org.id %}">{{ org.name }}</a>
+      {% else %}
+        {{ org.name }}
+      {% endif %} 
+    </li>
+  {% endfor %}
+  {% if not external_auth %}
+    <li class="add_remove">
+      <a href="{% url manage_page %}">
+        Users can be added to organizations at organization management pages.
+      </a>
+    </li>
+  {% endif %}    
+</ul>
+
+{% endblock content %}

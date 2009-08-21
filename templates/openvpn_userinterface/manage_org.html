@@ -7,6 +7,32 @@ vim: shiftwidth=2 expandtab
 {% block content %}
 <h1>{{ org.name }}</h1>
 
+<h2>Networks</h2>
+<p>This organization has access to the following networks:</p>
+
+<ul>
+  {% with org.accessible_network_set.all as networks %}
+    {% for network in org.accessible_network_set.all %}
+      <li>
+        {% if client.is_superuser %}
+          <form action="{% url remove_network_from_org_page org_id=org.id network_id=network.id %}" method="post">
+            <input type="submit" value="Remove" />
+          </form>
+        {% endif %}
+        {{ network.name }}
+        (<a href="{% url manage_network_page network_id=network.id %})
+      </li>
+    {% endfor %}
+    <li class="add_remove">
+      {% if not networks %}
+        No networks at the moment.
+      {% endif %}
+      <a href="{% url add_network_to_org_page org_id=org.id %}">Add a network...</a>
+    </li> 
+    
+  {% endwith %}
+</ul>
+
 <h2>Administrators</h2>
 <p>
   This section lists the users that have administrative capabilities in
@@ -41,13 +67,13 @@ vim: shiftwidth=2 expandtab
           </li>
         {% endfor %}
         {% if client.is_superuser and not external_auth %}
-          <li class="group_add_client"><a href="{% url add_client_to_group_page group_id=group.id %}">Add administrators to this group...</a></li>
+          <li class="add_remove"><a href="{% url add_client_to_group_page group_id=group.id %}">Add administrators to this group...</a></li>
         {% endif %}
       </ul>
     </li>
   {% endfor %}
   {% if client.is_superuser %}
-    <li class="group_add_client"><a href="{% url add_admin_group_to_org_page org_id=org.id %}">Add administrator groups to this organization...</a></li>
+    <li class="add_remove"><a href="{% url add_admin_group_to_org_page org_id=org.id %}">Add administrator groups to this organization...</a></li>
   {% endif %}
 </ul>
 
@@ -65,7 +91,7 @@ vim: shiftwidth=2 expandtab
   {% for user in org.group.user_set.all %}
     <li>
       {% if not external_auth %}
-        <form class="inline_form" action="{% remove_client_link user org %}" action="post">
+        <form class="inline_form" action="{% remove_client_link user org %}" method="post">
           <input type="submit" value="Remove" />
         </form>
       {% endif %}
@@ -73,7 +99,7 @@ vim: shiftwidth=2 expandtab
     </li>
   {% endfor %}
   {% if not external_auth %}
-    <li class="group_add_client"><a href="{% url add_client_to_org_page org_id=org.id %}">Add clients to this organization...</a></li>
+    <li class="add_remove"><a href="{% url add_client_to_org_page org_id=org.id %}">Add clients to this organization...</a></li>
   {% endif %}
 </ul>
 

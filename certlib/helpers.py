@@ -15,6 +15,7 @@
 from __future__ import with_statement, absolute_import
 
 from django.template.loader import render_to_string
+from functools import wraps
 
 import sys, os
 import logging
@@ -124,3 +125,10 @@ def coalesce(*args):
 
 def import_module(module_name):
     return __import__(module_name, {}, {}, [''])
+
+def deprecated(func):
+    @wraps(func)
+    def __inner(*args, **kwargs):
+        warn(DeprecationWarning("%s is deprecated" % func.__name__))
+        return func(*args, **kwargs)
+    return __inner

@@ -52,29 +52,40 @@ Each template should begin with the following header:
     {% endcomment%}
 
 Templates are indented at two spaces per level. Each XHTML tag and template
-tag that has a closiong tag increases the indentation level, with the notable
-exception of {% block %} and {% comment %} that are not indented further.
+tag that has a closiong tag increases the indentation level, with the
+following exceptions:
+
+* Top-level {% block %} tags are not indented further.
+* Nested {% with %} tags are not indented further.
 
 Example:
 
     {# CORRECT #}
     {% block content %}
     <h1>Hello, World!</h1>
-    <ul>
-      {% for flurb in flurbs %}
-        <li>{{ flurb }}</li>
-      {% endfor %}
-    </ul>
+    {% with foo.flurbs as flurbs %}
+    {% with foo.flarbs as flarbs %}
+      <ul>
+        {% for flurb in flurbs %}
+          <li>{{ flurb }}</li>
+        {% endfor %}
+      </ul>
+    {% endwith %}
+    {% endwith %}
     {% endblock %}
 
     {# INCORRECT #}
     {% block content %}
-      <h1>Hello, World!</h1>    {# Wrong: block should not be indented #}
-      <ul>
-      {% for flurb in flurbs %} {# Wrong: this is inside <ul> #}
-        <li>{{ flurb }}</li>
-      {% endfor %}
-      </ul>
+      {% with foo.flurbs as flurbs %}
+        {% with foo.flarbs as flarbs %}
+          <h1>Hello, World!</h1>    {# Wrong: block should not be indented #}
+          <ul>
+          {% for flurb in flurbs %} {# Wrong: this is inside <ul> #}
+            <li>{{ flurb }}</li>
+          {% endfor %}
+          </ul>
+        {% endwith %}
+      {% endwith %}
     {% endblock %}
 
 Django models and views
