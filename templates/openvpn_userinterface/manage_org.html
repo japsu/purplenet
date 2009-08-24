@@ -63,7 +63,7 @@ vim: shiftwidth=2 expandtab
                 <input type="submit" value="Remove" />
               </form>
             {% endif %}
-            <a href="{% manage_client_link user %}">{{ admin.username }}</a>
+            {% manage_client_link admin %}
           </li>
         {% endfor %}
         {% if client.is_superuser and not external_auth %}
@@ -95,7 +95,7 @@ vim: shiftwidth=2 expandtab
           <input type="submit" value="Remove" />
         </form>
       {% endif %}
-      <a href="{% manage_client_link user %}">{{ user.username }}</a>
+      {% manage_client_link user %}
     </li>
   {% endfor %}
   {% if not external_auth %}

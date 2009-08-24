@@ -53,6 +53,11 @@ class Certificate(models.Model):
     class Meta:
         app_label = "openvpn_userinterface"
         abstract = True
+        
+    # XXX
+    def create_files(self):
+        return
+        raise AssertionError("Not implemented")
 
 class ClientCertificate(Certificate):
     ca = models.ForeignKey("ClientCA", related_name="certificate_set")
@@ -65,6 +70,7 @@ class ClientCertificate(Certificate):
 class ServerCertificate(Certificate):
     ca = models.ForeignKey("ServerCA", blank=True, null=True,
         related_name="certificate_set")
+    created_by = models.ForeignKey("Client", related_name="int_scrt_set")
     # REVERSE: user = OneToOne(Server)
 
     class Meta:

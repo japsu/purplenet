@@ -170,11 +170,10 @@ class NetworkAttribute(models.Model):
 
 class Network(models.Model):
     name = models.CharField(max_length=30)
-    owner = models.ForeignKey("Org", related_name="owned_network_set")
-    server_set = models.ManyToManyField("Server")
-    profile_set = models.ManyToManyField(NetworkProfile, blank=True,
-        null=True, related_name="user_set")
-    server_ca = models.ForeignKey("ServerCA")
+    #owner = models.ForeignKey("Org", related_name="owned_network_set")
+    server_set = models.ManyToManyField("Server", blank=True, null=True)
+    profile = models.ForeignKey(NetworkProfile, related_name="user_set")
+    #server_ca = models.ForeignKey("ServerCA")
 
     # REVERSE: orgs_that_have_access_set = ManyToMany(Org)
     

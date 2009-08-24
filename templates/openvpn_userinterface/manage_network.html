@@ -1,0 +1,52 @@
+{% extends "base/base.html" %}
+{% load ovpn_tags %}
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+{% block content %}
+
+<h1>{{ network.name }}</h1>
+
+<p>TODO Basic data form</p>
+
+<h2>Network settings</h2>
+<p>Current effective network settings:</p>
+
+<dl>
+  {% for name, value in network.profile.attributes.items %}
+    <dt>{{name}}</dt>
+    <dl>{{value}}</dl>
+  {% endfor %}
+</dl>
+
+<p><a href="{% url manage_profile_page profile_id=network.profile.id %}">Edit...</a></p> 
+
+<h2>Servers</h2>
+
+<p>This network can be accessed through the following servers:</p>
+
+<ul>
+  {% for server in network.server_set.all %}
+    <li>
+      {% if client.is_superuser %}
+        <form action="{% url remove_server_from_network network_id=network.id server_id=server.id %} method="post">
+          <input type="submit" value="Remove" />
+        </form>
+        <a href="{% url manage_network_page network_id=network.id %}">
+          {{ network.name }}
+        </a>
+      {% else %}
+        {{ network.name }}
+      {% endif %}
+    </li>
+  {% endfor %}
+  {% if client.is_superuser %}  
+    <li>
+      <a href="{% url add_server_to_network_page network_id=network.id %}">Add servers to this network...</a>
+    </li>
+  {% endif %}
+</ul>
+
+
+{% endblock content %}

@@ -1,5 +1,8 @@
 from django import forms
 
-class CreateServerForm(forms.Form):
-    # XXX stub
-    pass
+from openvpnweb.openvpn_userinterface.models import Server
+
+class CreateServerForm(forms.ModelForm):
+    class Meta:
+        model = Server
+        exclude = ["certificate"]
