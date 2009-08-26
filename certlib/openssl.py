@@ -118,9 +118,12 @@ def _make_dn(**kwargs):
         del kwargs["config"]
     else:
         config = DEFAULT_CONFIG
-
-    defaults = _parse_conf_value("req_distinguished_name", *DN_CKEYS,
-        config=config)
+        
+    pcv_pargs = ["req_distinguished_name"]
+    pcv_pargs.extend(DN_CKEYS)
+    pcv_kwargs = dict(config=config)
+    
+    defaults = _parse_conf_value(*pcv_pargs, **pcv_kwargs)
     defaults = ((DN_CKEY_SHORT[key], value) for key, value in
         defaults.iteritems())
     kwargs = dict((DN_KWA_SHORT[key], value) for key, value in
