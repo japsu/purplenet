@@ -118,7 +118,8 @@ def _make_dn(**kwargs):
         del kwargs["config"]
     else:
         config = DEFAULT_CONFIG
-        
+    
+    # XXX python 2.5    
     pcv_pargs = ["req_distinguished_name"]
     pcv_pargs.extend(DN_CKEYS)
     pcv_kwargs = dict(config=config)
@@ -206,7 +207,7 @@ def create_self_signed_certificate(key, common_name, extensions="crt_ext",
     if extensions is not None:
         params.extend(("-extensions", extensions))
 
-    return _run(*params, input=key)
+    return _run(input=key, *params)
 
 def create_self_signed_keypair(common_name, key_length=2048,
         config=DEFAULT_CONFIG):
@@ -236,7 +237,7 @@ def sign_certificate(csr, extensions="crt_ext", config=DEFAULT_CONFIG):
     if extensions is not None:
         params.extend(("-extensions", extensions))
 
-    return _run(*params, input=csr)
+    return _run(input=csr, *params)
 
 # TODO Find out if there's a way to do this without using a temporary file.
 # How would, perhaps, a named pipe interact with Popen.communicate()?
@@ -289,7 +290,7 @@ def create_pkcs12(crt, key, chain_dir=None, extra_crt_path=None,
 
         params.extend(("-in", crt_file.name))
 
-        return _run(*params, input=key)
+        return _run(input=key, *params)
 
 def revoke_certificate(common_name, config, ca_name=DEFAULT_CA_NAME):
     """revoke_certificate(common_name, config, ca_name=DEFAULT_CA_NAME)
