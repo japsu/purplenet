@@ -15,12 +15,13 @@ vim: shiftwidth=2 expandtab
     {% for network in org.accessible_network_set.all %}
       <li>
         {% if client.is_superuser %}
-          <form action="{% url remove_network_from_org_page org_id=org.id network_id=network.id %}" method="post">
+          <form class="inline_form" action="{% url remove_network_from_org_page org_id=org.id network_id=network.id %}" method="post">
             <input type="submit" value="Remove" />
           </form>
+          <a href="{% url manage_network_page network_id=network.id %}">{{ network.name }}</a>
+        {% else %}
+          {{ network.name }}
         {% endif %}
-        {{ network.name }}
-        (<a href="{% url manage_network_page network_id=network.id %})
       </li>
     {% endfor %}
     <li class="add_remove">

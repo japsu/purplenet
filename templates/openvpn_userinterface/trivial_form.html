@@ -1,0 +1,10 @@
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+<form action="{{ post_url }}" method="post">
+  <table>
+    {{ form.as_table }}
+  </table>
+  <input type="submit" value="{{ submit_text }}" />
+</form>

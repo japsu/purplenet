@@ -2,6 +2,8 @@
 # encoding: utf-8
 # vim: shiftwidth=4 expandtab
 
+from __future__ import with_statement
+
 from django.conf import settings
 
 import httplib

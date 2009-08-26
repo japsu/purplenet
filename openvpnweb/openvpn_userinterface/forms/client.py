@@ -4,13 +4,14 @@ from django.forms.util import ErrorList
 class PasswordField(forms.CharField):
     widget = forms.PasswordInput
 
-class CreateClientForm(forms.Form):
+class ClientForm(forms.Form):
     username = forms.CharField(max_length=30, label="Username")
     first_name = forms.CharField(max_length=30, required=False,
         label="First name")
     last_name = forms.CharField(max_length=30, required=False,
         label="Last name")
-    
+
+class CreateClientForm(ClientForm):
     password = PasswordField(max_length=2048, label="Password",
         required=False)
     password_again = PasswordField(max_length=2048, label="Password (again)",

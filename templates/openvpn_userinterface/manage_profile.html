@@ -1,0 +1,62 @@
+{% extends "base/base.html" %}
+{% load ovpn_tags %}
+{% comment %}
+encoding: utf-8
+vim: shiftwidth=2 expandtab
+{% endcomment %}
+{% block content %}
+<h1>{{ profile.name }}</h1>
+
+<h2>Effective settings</h2>
+
+<p>These settings take into account those from the inherited profiles.</p>
+
+<dl>
+  {% for name, value in network.profile.attributes.items %}
+    <dt>{{name}}</dt>
+    <dl>{{value}}</dl>
+  {% endfor %}
+</dl>
+
+<h2>Local settings</h2>
+
+<p>
+  These settings are stored locally in this profile and may be inherited by
+  other profiles.
+</p>
+
+{% trivial_form form %}
+
+<h2>Profile inheritance</h2>
+
+<p>This profile currently inherits the following profiles:</p> 
+
+<ul>
+  {% for inherited_profile in profile.inherited_profile_set.all %}
+    <li>
+      <form class="inline_form" action="{% url uninherit_profile_page inheritor_id=profile.id target_id=inherited_profile.id %}" method="post">
+        <input type="submit" value="Remove" />
+      </form>
+      <a href="{% url manage_profile_page profile_id=inherited_profile.id %}">{{ inherited_profile.name }}</a>
+    </li>
+  {% endfor %}
+  <li class="add_remove">
+    <a href="{% url inherit_profile_page inheritor_id=profile.id %}">Inherit another profile...</a>
+  </li>
+</ul>
+
+<p>This profile is currently inherited by the following profiles:</p>
+
+<ul>
+  {% for inheriting_profile in profile.inheriting_profile_set.all %}
+    <li>
+      <form class="inline_form" action="{% url uninherit_profile_page inheritor_id=inheriting_profile.id target_id=profile.id %}" method="post">
+        <input type="submit" value="Remove" />
+      </form>
+      <a href="{% url manage_profile_page profile_id=inheriting_profile.id %}">{{ inheriting_profile.name }}</a>
+    </li>
+  {% endfor %}
+</ul>
+
+{% endblock content %}
+

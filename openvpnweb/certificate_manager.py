@@ -9,11 +9,16 @@
 
 "Certificate manager is a module for creating and revokating x.509 certificates."
 
-__all__ = ["get_certificate_authoroties", "create_certificate", "create_pkcs12", "create_crl", "revoke_certificate"]
+
+from __future__ import with_statement
+
 
 import os
 import re
 from shutil import copyfile
+
+__all__ = ["get_certificate_authoroties", "create_certificate", "create_pkcs12", "create_crl", "revoke_certificate"]
+
 
 _SSL_DIR = "/etc/ssl/"
 _SSL_CONF = _SSL_DIR + "openssl.cnf"

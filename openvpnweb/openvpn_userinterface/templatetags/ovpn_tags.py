@@ -4,9 +4,9 @@
 from django import template
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.template.loader import render_to_string
 
 from openvpnweb.openvpn_userinterface.models import Client, Org
-
 
 register = template.Library()
 
@@ -67,3 +67,11 @@ def remove_client_link(user, group_or_org):
             client_id=_get_client_id(user),
             group_id=group.id
         ))
+
+@register.simple_tag
+def trivial_form(form, post_url="", submit_text="Save"):
+    return render_to_string("openvpn_userinterface/trivial_form.html", {
+        "form" : form,
+        "post_url" : post_url,
+        "submit_text" : submit_text,    
+    })

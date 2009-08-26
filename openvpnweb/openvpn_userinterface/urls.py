@@ -35,7 +35,16 @@ urlpatterns = patterns('',
         add_server_to_network_page, name="add_server_to_network_page"),
     url(r'^manage/network/(?P<network_id>\d+)/removeserver/(?P<server_id>\d+)/$',
         remove_network_from_server_page, name="remove_server_from_network_page"),
-        
+    
+    url(r'manage/profile/(?P<profile_id>\d+)/$',
+        manage_profile_page, name="manage_profile_page"),
+    url(r'manage/profile/create$',
+        manage_profile_page, name="create_profile_page"),
+    url(r'manage/profile/(?P<inheritor_id>\d+)/inherit/$',
+        inherit_profile_page, name="inherit_profile_page"),
+    url(r'manage/profile/(?P<inheritor_id>\d+)/uninherit/(?P<target_id>\d+)/$',
+        uninherit_profile_page, name="uninherit_profile_page"),
+    
     url(r'^manage/org/(?P<org_id>\d+)/$', manage_org_page,
         name="manage_org_page"),
     url(r'^manage/org/(?P<org_id>\d+)/addclient/$', add_client_to_org_page,

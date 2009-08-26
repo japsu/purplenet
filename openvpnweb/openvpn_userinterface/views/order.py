@@ -87,7 +87,7 @@ def order_page(request, org_id, network_id):
 
     elif request.method == "GET":
         return post_confirmation_page(request,
-            question="Order a certificate for {0}?".format(network),
+            question="Order a certificate for %s?" % network,
             choices=[
                 ("Order", reverse("order_page",
                     kwargs=dict(network_id=network_id, org_id=org_id))),

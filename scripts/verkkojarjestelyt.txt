@@ -1,0 +1,42 @@
+
+Ulospain verkkokortit eth0-ethX
+
+OpenVPN prosessien kaytossa tun0-tunX (vain yksi kappale per prosessi)
+
+learn-address scriptia voi kayttaa estamaan osoitteen/reitin lisaamisen OpenVPN omaan routing tableen/CAMiin.
+
+TUN-moodissa
+============
+
+Yksittaisen OpenVPN prosessin tun0 takana OpenVPN asiakasverkot vpnX-subnet0-Y
+
+Oletuksena liikennointia vpnX-subnet0-Y asiakasverkkojen valilla ei sallita.
+
+RPF tarkistus vpn asiakkaiden liikenteelle =>
+tunX liitynnan takaa sallitaan vain IP-paketit joissa lahteena on IP-osoite 
+liitynnan takana olevasta asiakasverkosta
+
+Tekeeko OpenVPN sisaisesti RPF tarkistuksen liikenteelle, jotta samassa asiakasverkossa
+olevat asiakkaat eivat voi spoofata toistensa osoitteita?
+
+http://openvpn.net/archive/openvpn-users/2004-11/msg00267.html Mukaan nahtavasti tekee.
+
+Sallitaan liikenne ulos ethX liitynnasta vain jos lahde on oikea.
+
+Tehdaanko salliminen lahde IP:n perusteella vai merkkaamalla paketti sen tullessa
+tunX liitynnasta ja sallimalla se ulos ethX liitynnasta merkin perusteella?
+
+TUN-moodissa yhdesta vpn asiakasverkosta voi paasta useampaan kohde IP-aliverkkoon, eli suhde
+on 1:M.
+
+TAP-moodissa
+============
+
+Liitetaan samaan siltaan eth0-ethX, vlanX-Y ja tap0 liitynnat.
+
+Merkataan paketteja niiden tullessa tapX:n takaa MAC-osoitteen perusteella ja paastetaan
+paketti/kehys pihalle eth0-ethX tai vlanX-Y liitynnasta markkerin perusteella.
+
+TAP-moodissa liityntojen suhde on 1:1, eli yhdesta vpn asiakasverkosta paasee tasan yhteen
+segmenttiin/vlaniin.
+

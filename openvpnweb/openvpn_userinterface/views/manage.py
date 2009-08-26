@@ -1,24 +1,23 @@
 # encoding: utf-8
 # vim: shiftwidth=4 expandtab
 
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from ..access_control import manager_required, superuser_required
+from ..forms import (CreateOrgForm, CreateClientForm, ClientSearchForm,
+    SelectGroupForm, ServerForm, NetworkForm, CreateGroupForm,
+    SelectNetworkForm, SelectServerForm, ClientForm, ProfileForm,
+    SelectProfileForm)
+from ..models import (ClientCertificate, Org, Network, Client, Server, SiteConfig,
+    InterestingEnvVar, ServerCertificate, NetworkProfile, ProfileInheritance)
+from .helpers import create_view, post_confirmation_page
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth.models import Group, User, UNUSABLE_PASSWORD
 from django.core.urlresolvers import reverse
-from django.views.decorators.http import require_POST
 from django.http import (HttpResponseForbidden, HttpResponseRedirect,
     HttpResponseNotAllowed)
-
-from ..access_control import manager_required, superuser_required
-from ..models import (ClientCertificate, Org, Network, Client, Server,
-    SiteConfig, InterestingEnvVar, ServerCertificate)
-from ..forms import (CreateOrgForm, CreateClientForm, ClientSearchForm,
-    SelectGroupForm, CreateServerForm, SimpleNetworkForm, CreateGroupForm,
-    SelectNetworkForm, SelectServerForm)
-from .helpers import create_view, post_confirmation_page
-
-from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404, render_to_response
+from django.template import RequestContext
+from django.views.decorators.http import require_POST, require_http_methods
 
 # TODO: Split into smaller files
 
@@ -207,9 +206,11 @@ def add_network_to_org_page(request, form, org_id):
     
     org.accessible_network_set.add(network)
     
-    return HttpResponseRedirect(reverse("manage_org_page", org_id=org_id))
+    return HttpResponseRedirect(reverse("manage_org_page",
+        kwargs=dict(org_id=org_id)))
 
 @manager_required
+@require_http_methods(["GET","POST"])
 def manage_client_page(request, client_id):
     client = request.session["client"]
     target = get_object_or_404(Client, id=int(client_id))
@@ -220,8 +221,23 @@ def manage_client_page(request, client_id):
     for org in target.orgs:
         orgs.append((org, org in managed_orgs))
 
+    if request.method == "POST":
+        form = ClientForm(request.POST, instance=target)
+        
+        if form.is_valid():
+            user = client.user
+            
+            user.username = form.cleaned_data["username"]
+            user.first_name = form.cleaned_data["first_name"]
+            user.last_name = form.cleaned_data["last_name"]
+            
+            user.save()
+    else:
+        form = Clientform(instance=target)
+
     context = RequestContext(request, {})
     vars = {
+        "form" : form,
         "orgs" : orgs,
         "client" : client,
         "target" : target,
@@ -264,7 +280,7 @@ def remove_network_from_server_page(request, form, server_id, network_id):
         kwargs={"server_id":server_id}))
 
 @superuser_required
-@create_view(CreateServerForm, "openvpn_userinterface/create_server.html")
+@create_view(ServerForm, "openvpn_userinterface/create_server.html")
 def create_server_page(request, form):
     client = request.session["client"]
     server_ca = SiteConfig.objects.get().server_ca
@@ -289,64 +305,71 @@ def create_server_page(request, form):
         kwargs={"server_id":server.id}))
 
 @superuser_required
-@create_view(SimpleNetworkForm, "openvpn_userinterface/create_network.html")
+@create_view(NetworkForm, "openvpn_userinterface/create_network.html")
 def create_network_page(request, form):
     name = form.cleaned_data["name"]
     
     profile = NetworkProfile(name=name)
     profile.save()
     
-    network = Network(
-        name=name,
-        profile=profile
-    )
+    network = form.save(commit=False)
+    network.profile = profile
     network.save()
     
     return HttpResponseRedirect(reverse("manage_network_page",
         kwargs={"network_id":network.id}))
 
 @superuser_required
-def manage_network_page(request, net_id):
+@require_http_methods(["GET", "POST"])
+def manage_network_page(request, network_id):
     client = request.session["client"]
-    network = get_object_or_404(Network, id=int(net_id))
+    network = get_object_or_404(Network, id=int(network_id))
+    
+    if request.method == "POST":    
+        form = NetworkForm(request.POST, instance=network)
+        
+        if form.is_valid():
+            form.save()
+    else:
+        form = NetworkForm(instance=network)
     
     vars = {
+        "form" : form,
         "network" : network,
         "client" : client,
     }
     context = RequestContext(request, {})
     
-    if request.method == "POST":    
-        # TODO Process basic data form
-        pass
-    
-    elif request.method == "GET":
-        return render_to_response("openvpn_userinterface/manage_network.html",
-            vars, context_instance=context)
+    return render_to_response("openvpn_userinterface/manage_network.html",
+        vars, context_instance=context)
         
-
 @superuser_required
+@require_http_methods(["GET", "POST"])
 def manage_server_page(request, server_id):
     client = request.session["client"]
     server = get_object_or_404(Server, id=int(server_id))
-
+    
+    if request.method == "POST":
+        form = ServerForm(request.POST, instance=server)
+        
+        if form.is_valid():
+            form.save()
+    else:
+        form = ServerForm(instance=server)
+        
     vars = {
         "server" : server,
         "client" : client,
+        "form" : form,
     }
     context = RequestContext(request, {})
-    
-    if request.method == "POST":
-        # TODO process basic data form
-        pass
-    
-    elif request.method == "GET":
-        return render_to_response("openvpn_userinterface/manage_server.html",
-            vars, context_instance=context)
+
+    return render_to_response("openvpn_userinterface/manage_server.html",
+        vars, context_instance=context)
 
 @superuser_required
 @create_view(CreateGroupForm, "openvpn_userinterface/create_server.html")
-def create_group_page(request):
+def create_group_page(request, form):
     group = form.save()
     
     return HttpResponseRedirect(reverse("manage_group_page",
@@ -366,6 +389,65 @@ def manage_group_page(request, group_id):
     return render_to_response("openvpn_userinterface/manage_group.html",
         vars, context_instance=context)
 
+@superuser_required
+def uninherit_profile_page(request, inheritor_id,
+    target_id):
+    
+    inheritor = get_object_or_404(NetworkProfile, id=int(inheritor_id))
+    target = get_object_or_404(NetworkProfile, id=int(target_id))
+    
+    heirloom = ProfileInheritance.objects.get(
+        inheritor=inheritor,
+        target=target
+    )
+    heirloom.delete()
+    
+    return HttpResponseRedirect(reverse("manage_profile_page",
+        kwargs={"profile_id":inheritor_id}))
+
+@superuser_required
+@create_view(ProfileForm, "openvpn_userinterface/create_profile.html")
+def create_profile_page(request, form):
+    profile = form.save()
+    
+    return HttpResponseRedirect(reverse("manage_profile_page",
+        kwargs={"profile_id":profile_id}))
+
+@superuser_required
+@create_view(SelectProfileForm, "openvpn_userinterface/inherit_profile.html")
+def inherit_profile_page(request, form, inheritor_id):
+    inheritor = get_object_or_404(NetworkProfile, id=int(inheritor_id))
+    
+    target = form.cleaned_data["profile"]
+    
+    inheritor.inherit(target)
+    
+    return HttpResponseRedirect(reverse("manage_profile_page",
+        kwargs={"profile_id":inheritor_id}))
+
+@superuser_required
+@require_http_methods(["GET","POST"])
+def manage_profile_page(request, profile_id):
+    client = request.session["client"]
+    profile = get_object_or_404(NetworkProfile, id=int(profile_id))
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance=profile)
+        
+        if form.is_valid():
+            form.save()
+    else:
+        form = ProfileForm(instance=profile)
+    
+    vars = {
+        "form" : form,
+        "profile" : profile,
+        "client" : client,
+    }
+    context = RequestContext(request, {})
+    
+    return render_to_response("openvpn_userinterface/manage_profile.html",
+        vars, context_instance=context)
 
 # XXX The following are stubs
 

@@ -28,7 +28,7 @@ vim: shiftwidth=2 expandtab
   </ul>
 {% endif %}
 
-<h1 id="networks">Networks</h1>
+<h1 id="networks">Organizations and networks</h1>
 <p>From this page you can revoke certificates in the organizations you manage and proceed to editing the details of the organizations.</p>
 {% if data %}
   {% for org, networks in data %}
@@ -43,7 +43,7 @@ vim: shiftwidth=2 expandtab
             <th>{{ network.name }}</th>
             <th></th>
             <th>
-              <a href="{% url manage_network_page org_id=org.id network_id=network.id %}">manage</a>
+              <a href="{% url manage_network_page network_id=network.id %}">manage</a>
             </th>
           </tr>
           {% for cert in certificates %}

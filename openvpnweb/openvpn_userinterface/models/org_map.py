@@ -26,10 +26,10 @@ class OrgMapping(models.Model):
     # REVERSE: element_set = ForeignKey(MappingElement)
 
     def __unicode__(self):
-        return u"{0} ({1})".format(
+        return u"%s %s" % (
             self.group.name,
     
-            u", ".join(u'{0}:{1}="{2}"'.format(
+            u", ".join(u'%s:%s="%s"' % (
                 elem.type.namespace,
                 elem.type.source_name,
                 elem.value

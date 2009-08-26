@@ -49,14 +49,14 @@ def revoke_page(request, cert_id):
     else: # request.method == 'GET'
         if not client.may_revoke(certificate):
             return post_confirmation_page(request,
-                question="You may not revoke certificate {0}.",
+                question="You may not revoke certificate %s." % certificate,
                 choices=[
                     ("Return", reverse("main_page"))
                 ]
             )
         else:
             return post_confirmation_page(request,
-                question="Really revoke certificate {0}?".format(certificate),
+                question="Really revoke certificate %s" % certificate,
                 choices=[
                     ("Revoke", reverse("revoke_page", kwargs=
                         dict(cert_id=cert_id))),
