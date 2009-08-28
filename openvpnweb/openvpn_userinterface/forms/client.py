@@ -1,6 +1,8 @@
 from django import forms
 from django.forms.util import ErrorList
 
+from django.contrib.auth.models import User
+
 class PasswordField(forms.CharField):
     widget = forms.PasswordInput
 
@@ -32,3 +34,8 @@ class CreateClientForm(ClientForm):
             del cleaned_data["password_again"]
             
         return cleaned_data
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username", "first_name", "last_name"]

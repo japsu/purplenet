@@ -19,7 +19,7 @@ vim: shiftwidth=2 expandtab
 <h2>Organizations</h2>
 
 {% if orgs %}
-  <p>This user is belongs to the following organizations:</p>
+  <p>This user belongs to the following organizations:</p>
 {% else %}
   <p>This user does not belong to any organizations at the moment.</p>
 {% endif %}
@@ -40,11 +40,16 @@ vim: shiftwidth=2 expandtab
   {% endfor %}
   {% if not external_auth %}
     <li class="add_remove">
-      <a href="{% url manage_page %}">
-        Users can be added to organizations at organization management pages.
-      </a>
+      <a href="{% url add_org_to_client_page client_id=target.id %}">Add organizations...</a>
     </li>
   {% endif %}    
 </ul>
+
+<h2>Administrator groups</h2>
+{% if admin_groups %}
+  <p>This user belongs to the following administrator groups:</p>
+{% else %}
+  <p>This user does not belong to any administrator groups at the moment.</p>
+{% endif %}
 
 {% endblock content %}

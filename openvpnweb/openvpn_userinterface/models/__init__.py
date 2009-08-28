@@ -15,7 +15,7 @@ from .client import Client
 from .logging import LogEntry
 from .network import (NetworkProfile, NetworkAttribute, NetworkAttributeType,
     Network, ProfileInheritance)
-from .org import Org
+from .org import Org, AdminGroup
 from .org_map import (OrgMapping, MappingType, MappingElement)
 from .server import Server
 from .siteconfig import SiteConfig, InterestingEnvVar

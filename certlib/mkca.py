@@ -35,6 +35,9 @@ CA_KEY_FILE_NAME = "ca.key"
 CA_CSR_FILE_NAME = "ca.csr"
 CA_CERT_FILE_NAME = "ca.crt"
 
+MIN_SERIAL = 0
+MAX_SERIAL = 2**31-1
+
 log = None
 
 def mkca(dir, common_name, ca_type=CAType.CLIENT, 
@@ -74,8 +77,8 @@ def mkca(dir, common_name, ca_type=CAType.CLIENT,
     write_file(database_file, '', force)
     
     # Generate random serials for certs and CRLs and write them down
-    cert_serial = random.randint(0, 2**31-1)
-    crl_serial = random.randint(0, 2**31-1)
+    cert_serial = random.randint(MIN_SERIAL, MAX_SERIAL)
+    crl_serial = random.randint(MIN_SERIAL, MAX_SERIAL)
     write_file(cert_serial_file, '%08x' % cert_serial, force)
     write_file(crl_serial_file, '%08x' % crl_serial, force)
 

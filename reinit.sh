@@ -26,8 +26,6 @@ fi
 dropdb -U $DBUSER $DBNAME
 createdb -U $DBUSER -E UNICODE $DBNAME
 python openvpnweb/manage.py syncdb --noinput
-#python bin/reinit_hard.py
-python bin/reinit_soft.py
 
 echo "Restarting Apache with sudo."
 if [ -x /etc/init.d/httpd ]; then
@@ -39,3 +37,6 @@ elif [ -x /etc/init/apache2 ]; then
 else
     echo "No known init script found for apache. Please restart it yourself."
 fi
+
+#python bin/reinit_hard.py
+python bin/reinit_soft.py

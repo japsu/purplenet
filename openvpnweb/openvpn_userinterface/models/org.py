@@ -9,7 +9,7 @@ class Org(models.Model):
     group = models.OneToOneField(Group, related_name="org")
     cn_suffix = models.CharField(max_length=30)    
         
-    admin_group_set = models.ManyToManyField(Group, null=True, blank=True,
+    admin_group_set = models.ManyToManyField("AdminGroup", null=True, blank=True,
         related_name="managed_org_set")
     client_ca = models.ForeignKey("ClientCA", null=True, blank=True,
         related_name="user_set")    
@@ -30,7 +30,13 @@ class Org(models.Model):
         return self.name
 
     def get_random_cn(self):
-        return generate_random_string() + self.cn_suffix
+        prefix = generate_random_string()
+        suffix = self.cn_suffix
+        
+        if suffix.startswith("."):
+            return prefix + suffix
+        else:
+            return prefix + "." + suffix
 
     def may_access(self, network):
         return network in self.accessible_network_set.all()
@@ -40,3 +46,15 @@ class Org(models.Model):
     class Meta:
         app_label = "openvpn_userinterface"
 
+class AdminGroup(models.Model):
+    group = models.OneToOneField(Group, related_name="int_agrp_ref", unique=True)
+    
+    @property
+    def name(self):
+        return self.group.name
+    
+    def __unicode__(self):
+        return self.group.name
+    
+    class Meta:
+        app_label = "openvpn_userinterface"

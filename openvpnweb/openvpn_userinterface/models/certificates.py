@@ -5,6 +5,8 @@ from django.db import models
 from certlib.helpers import coalesce
 from datetime import datetime
 
+from certlib import openssl
+
 class Certificate(models.Model):
     common_name = models.CharField(max_length=30)
     granted = models.DateTimeField()
@@ -54,15 +56,21 @@ class Certificate(models.Model):
         app_label = "openvpn_userinterface"
         abstract = True
         
-    # XXX
-    def create_files(self):
-        return
-        raise AssertionError("Not implemented")
+    def _create_certificate(self):
+        # TODO expiration
+        key = openssl.generate_rsa_key()
+        csr = openssl.create_csr(key=key, common_name=self.common_name, config=self.ca.config)
+        crt = self.ca.sign_certificate(csr)
+        
+        return key, crt
 
 class ClientCertificate(Certificate):
     ca = models.ForeignKey("ClientCA", related_name="certificate_set")
     network = models.ForeignKey("Network")
     owner = models.ForeignKey("Client", related_name="certificate_set")
+
+    def create_certificate(self):
+        return self._create_certificate()
 
     class Meta:
         app_label = "openvpn_userinterface"
@@ -72,6 +80,20 @@ class ServerCertificate(Certificate):
         related_name="certificate_set")
     created_by = models.ForeignKey("Client", related_name="int_scrt_set")
     # REVERSE: user = OneToOne(Server)
+
+    key = models.TextField(blank=True, null=True)
+    certificate = models.TextField(blank=True, null=True)
+
+    def create_certificate(self):
+        if self.key is not None:
+            raise AttributeError("Already created")
+        
+        key, crt = self._create_certificate()
+        
+        self.key = key
+        self.crt = crt
+        
+        return key, crt
 
     class Meta:
         app_label = "openvpn_userinterface"
@@ -93,4 +115,6 @@ class CACertificate(Certificate):
 
     class Meta:
         app_label = "openvpn_userinterface"
+    
+    # No create_certificate here because mkca manages their own.
 

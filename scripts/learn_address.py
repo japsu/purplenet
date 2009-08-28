@@ -52,11 +52,13 @@ def main():
 		common_name = sys.argv[3]
 		cert = ClientCertificate.objects.get(common_name=common_name)
 
-		if cert.revoked:
+		if cert.is_revoked:
 			return EXIT_FAILURE
 		
 		attributes = cert.network.profile.attributes 
 		vlans = attributes.get("vlan")
+
+		# TODO vlanX -> ethX map
 
 		if vlans:
 			vlan = vlans[0].value

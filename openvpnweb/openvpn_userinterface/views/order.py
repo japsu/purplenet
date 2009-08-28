@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.http import (HttpResponseForbidden, HttpResponseRedirect,
     HttpResponseNotAllowed, HttpResponse)
 
-from ..models import Org, Network, ClientCertificate
+from ..models import Org, Network, ClientCertificate, SiteConfig
 from ..logging import log
 
 from certlib import openssl
@@ -18,6 +18,7 @@ import zipfile
 def order_page(request, org_id, network_id):
     org = get_object_or_404(Org, id=int(org_id))
     network = get_object_or_404(Network, id=int(network_id))
+    siteconfig = SiteConfig.objects.get()
 
     if request.method == 'POST':
         client = request.session["client"]
@@ -35,7 +36,7 @@ def order_page(request, org_id, network_id):
         ca = org.client_ca
         config = ca.config
         chain_dir = settings.OPENVPNWEB_OPENSSL_CHAIN_DIR
-        server_ca_crt = network.server_ca.get_ca_certificate_path()
+        server_ca_crt = siteconfig.server_ca.get_ca_certificate_path()
         
         # TODO user-supplied CSR
         key = openssl.generate_rsa_key(config=config)

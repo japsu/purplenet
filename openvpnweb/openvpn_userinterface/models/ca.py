@@ -9,15 +9,22 @@ from certlib import openssl
 from certlib.enums import CAType, SignMode
 from certlib.data import MKCA_CONFIG
 
+from .siteconfig import SiteConfig
+
 import os
 
 class CertificateAuthority(models.Model):
-    dir = models.CharField(max_length=200)
+    dir_name = models.CharField(max_length=200, unique=True)
     owner = models.ForeignKey("Org", null=True, blank=True,
         related_name="%(class)s_set")
 
     certificate = models.OneToOneField("CACertificate", null=True,
         blank=True, related_name="%(class)s_user")
+
+    @property
+    def dir(self):
+        siteconfig = SiteConfig.objects.get()
+        return os.path.join(siteconfig.ca_base_dir, self.dir_name)
 
     @property
     def config(self):
@@ -44,11 +51,12 @@ class CertificateAuthority(models.Model):
         return openssl.generate_crl(config=self.config)
 
     def revoke_certificate(self, common_name):
-        return openssl.revoke_certificate(common_name, config=self.config)    
+        return openssl.revoke_certificate(common_name, config=self.config)  
     def get_ca_certificate_path(self):
         return openssl.get_ca_certificate_path(config=self.config)
 
     def _create_ca(self, ca_type):
+        siteconfig = SiteConfig.objects.get()
         ca = self.certificate.ca        
 
         mkca.mkca(
@@ -56,7 +64,7 @@ class CertificateAuthority(models.Model):
             common_name=self.certificate.common_name,
             ca_type=ca_type,
             sign_mode=SignMode.USE_CA if ca else SignMode.SELF_SIGN,
-            copy_dir=settings.OPENVPNWEB_OPENSSL_CHAIN_DIR,
+            copy_dir=siteconfig.copies_dir,
             config=ca.config if ca else MKCA_CONFIG,
             force=False
         )
@@ -94,4 +102,3 @@ class IntermediateCA(CertificateAuthority):
 
     class Meta:
         app_label = "openvpn_userinterface"
-

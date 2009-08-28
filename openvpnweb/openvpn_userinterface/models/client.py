@@ -23,7 +23,7 @@ class Client(models.Model):
             return Org.objects.all()
         else:
             return Org.objects.filter(
-                admin_group_set__in=self.user.groups.all())
+                admin_group_set__group__in=self.user.groups.all())
         
     @property
     def is_superuser(self):
@@ -52,11 +52,16 @@ class Client(models.Model):
                 # admin or other group
                 return self.is_superuser()
         else:
+            if self.is_superuser:
+                return True
+            
             # assume Org
             org = org_or_group
-            return self.is_superuser or bool(set(org.admin_group_set.all())
-                .intersection(self.user.groups.all()))
-
+            
+            groups = set(ag.group for ag in org.admin_group_set.all())
+            return bool(groups.intersection(self.user.groups.all()))
+            
+            
     def may_view_management_pages(self):
         return self.is_superuser or bool(self.managed_org_set)
 

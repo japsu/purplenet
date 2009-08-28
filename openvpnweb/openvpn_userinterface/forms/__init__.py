@@ -4,9 +4,9 @@
 from .setup import SetupForm
 from .network import NetworkForm, ProfileForm
 from .org import CreateOrgForm
-from .client import CreateClientForm, ClientForm
+from .client import CreateClientForm, ClientForm, UserForm
 from .search import ClientSearchForm, GroupSearchForm
-from .select import (SelectGroupForm, SelectNetworkForm, SelectServerForm,
-    SelectProfileForm)
+from .select import (SelectAdminGroupForm, SelectNetworkForm, SelectServerForm,
+    SelectProfileForm, SelectOrgForm)
 from .server import ServerForm
 from .group import CreateGroupForm

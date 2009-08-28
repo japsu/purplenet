@@ -1,5 +1,7 @@
 from django import forms
+from django.contrib.auth.models import Group
 
-class CreateGroupForm(forms.Form):
-    # XXX stub
-    pass
+class CreateGroupForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ["name"]

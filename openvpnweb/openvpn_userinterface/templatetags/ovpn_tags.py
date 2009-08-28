@@ -61,12 +61,14 @@ def remove_client_link(user, group_or_org):
             client_id=_get_client_id(user),
             org_id=org.id
         ))
-    else:
-        group = group_or_org
-        return reverse("remove_client_from_group_page", kwargs=dict(
+    elif isinstance(group_or_org, AdminGroup):
+        admin_group = group_or_org
+        return reverse("remove_client_from_admin_group_page", kwargs=dict(
             client_id=_get_client_id(user),
-            group_id=group.id
+            admin_group_id=admin_group.id
         ))
+    else:
+        raise AssertionError("remove_client_link called with something else than Org or AdminGroup")
 
 @register.simple_tag
 def trivial_form(form, post_url="", submit_text="Save"):

@@ -30,7 +30,7 @@ vim: shiftwidth=2 expandtab
   {% for server in network.server_set.all %}
     <li>
       {% if client.is_superuser %}
-        <form class="inline_form" action="{% url remove_server_from_network_page network_id=network.id server_id=server.id %} method="post">
+        <form class="inline_form" action="{% url remove_server_from_network_page network_id=network.id server_id=server.id %}" method="post">
           <input type="submit" value="Remove" />
         </form>
         <a href="{% url manage_server_page server_id=server.id %}">

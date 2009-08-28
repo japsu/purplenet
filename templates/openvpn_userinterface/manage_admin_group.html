@@ -5,17 +5,17 @@ encoding: utf-8
 vim: shiftwidth=2 expandtab
 {% endcomment %}
 {% block content %}
-<h1>{{ group.name }}</h1>
+<h1>{{ admin_group.name }}</h1>
 
 <h2>Members</h2>
 
-<p>The following users are members of this group:</p>
+<p>The following users are members of this admin group:</p>
 
 <ul>
-  {% for user in group.user_set %}
+  {% for user in admin_group.group.user_set %}
     <li>
       {% if client.is_superuser %}
-        <form action="{% remove_link user group %}" method=post>
+        <form action="{% remove_client_link user admin_group %}" method=post>
           <input type="submit" value="Remove" />
         </form>
         {% manage_client_link user %}
@@ -25,19 +25,19 @@ vim: shiftwidth=2 expandtab
     </li>
   {% endfor %}
   <li class="add_remove">
-    <a href="{% url add_client_to_group_page group_id=group.id %}">Add members...</a>
+    <a href="{% url add_client_to_admin_group_page admin_group_id=admin_group.id %}">Add members...</a>
   </li>
 </ul>
 
 <h2>Administrator access</h2>
 
-<p>This group manages the following organizations:</p>
+<p>This admin group manages the following organizations:</p>
 
 <ul>
   {% for org, may_manage in orgs %}
     {% if may_manage %}
       {% if client.is_superuser %}
-        <form action="{% remove_admin_group_from_org org_id=org.id group_id=group.id %}">
+        <form action="{% remove_admin_group_from_org org_id=org.id admin_group_id=admin_group.id %}">
           <input type="submit" value="Remove" />
         </form>
       {% endif %}

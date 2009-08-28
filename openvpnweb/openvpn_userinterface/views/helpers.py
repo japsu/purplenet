@@ -8,7 +8,9 @@ This module provides helpful generic views and view decorators.,
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, HttpResponseRedirect
+from django.views.decorators.http import require_http_methods
+from django.core.urlresolvers import reverse
 
 from functools import wraps
 
@@ -69,6 +71,7 @@ def create_view(form_class, template):
     """
     def __outer(func):
         @wraps(func)
+        @require_http_methods(["GET","POST"])
         def __inner(request, *args, **kwargs):
             client = request.session.get("client")
             vars = dict(client=client)
@@ -80,7 +83,7 @@ def create_view(form_class, template):
                 
                 # fall_through
             
-            elif request.method == "POST":
+            else: # request.method == "POST"
                 form = form_class(request.POST)
                 vars["form"] = form
                 
@@ -91,11 +94,11 @@ def create_view(form_class, template):
                     # Fall through
                     pass
             
-            else:
-                return HttpResponseNotAllowed(["GET", "POST"])
-            
             return render_to_response(template, vars,
                 context_instance=context)
         
         return __inner
     return __outer
+
+def redirect(view_name, **kwargs):
+    return HttpResponseRedirect(reverse(view_name, kwargs=kwargs))

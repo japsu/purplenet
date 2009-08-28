@@ -40,18 +40,8 @@ def login_page(request):
 
             request.session["client"] = client
             
-            # Validate the redirect URL
-            next_url = request.GET.get('next')
-            if next_url:
-                try:
-                    resolve(next_url)
-                except Resolver404:
-                    next_url = None
-            
-            if next_url is None:
-                # Invalid or no next_url specified
-                next_url = reverse("main_page")
-            
+            # TODO Does next_url need validation?
+            next_url = request.GET.get('next', reverse("main_page"))
             return HttpResponseRedirect(next_url)
         else:
             vars = RequestContext(request, {
