@@ -35,7 +35,7 @@ def order_page(request, org_id, network_id):
         common_name = org.get_random_cn()
         ca = org.client_ca
         config = ca.config
-        chain_dir = settings.OPENVPNWEB_OPENSSL_CHAIN_DIR
+        chain_dir = siteconfig.copies_dir
         server_ca_crt = siteconfig.server_ca.get_ca_certificate_path()
         
         # TODO user-supplied CSR
