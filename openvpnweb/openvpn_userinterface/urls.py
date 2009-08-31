@@ -26,7 +26,9 @@ urlpatterns = patterns('',
         add_network_to_server_page, name="add_network_to_server_page"),
     url(r'^manage/server/(?P<server_id>\d+)/removenetwork/(?P<network_id>\d+)/$',
         remove_network_from_server_page, name="remove_network_from_server_page"),
-        
+    url(r'^manage/server/(?P<server_id>\d+)/config/$',
+        download_server_config_page, name="download_server_config_page"),
+    
     url(r'^manage/network/(?P<network_id>\d+)/$',
         manage_network_page, name="manage_network_page"),
     url(r'^manage/network/create/$', create_network_page,

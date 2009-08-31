@@ -12,9 +12,9 @@ vim: shiftwidth=2 expandtab
 <p>These settings take into account those from the inherited profiles.</p>
 
 <dl>
-  {% for name, value in network.profile.attributes.items %}
+  {% for name, value in profile.attributes.items %}
     <dt>{{name}}</dt>
-    <dl>{{value}}</dl>
+    <dd>{{value}}</dd>
   {% endfor %}
 </dl>
 

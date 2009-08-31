@@ -10,19 +10,19 @@
 # 
 #
 
-import sys
-sys.path.append('/var/www')
-
-from django.core.management import setup_environ
-import settings
-
-setup_environ(settings)
-
-from openvpn.openvpn_userinterface.models import ClientCertificate
-
+import site
 import os
 
-MODIFY_FW = os.path.join(os.path.dirname(__file__), "modify_ebtables.sh")
+SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+site.addsitedir(SITE_DIR)
+
+os.environ["DJANGO_SETTINGS_MODULE"] = "openvpnweb.settings"
+from django.conf import settings
+
+from openvpnweb.openvpn_userinterface.models import ClientCertificate
+
+
+MODIFY_FW = os.path.abspath(os.path.join(os.path.dirname(__file__), "modify_ebtables.sh"))
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -70,7 +70,7 @@ def main():
 
 	return EXIT_FAILURE
 
-if __name__ == "__main__":
+if __name__ == "__main__" and False:
 	try:
 		sys.exit(main())
 	except Exception, e:

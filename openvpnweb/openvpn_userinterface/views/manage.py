@@ -2,13 +2,8 @@
 # vim: shiftwidth=4 expandtab
 
 from ..access_control import manager_required, superuser_required
-from ..forms import (CreateOrgForm, CreateClientForm, ClientSearchForm,
-    SelectAdminGroupForm, ServerForm, NetworkForm, CreateGroupForm,
-    SelectNetworkForm, SelectServerForm, ClientForm, ProfileForm,
-    SelectProfileForm, SelectOrgForm, UserForm)
-from ..models import (ClientCertificate, Org, Network, Client, Server, SiteConfig,
-    InterestingEnvVar, ServerCertificate, NetworkProfile, ProfileInheritance,
-    AdminGroup, ClientCA)
+from ..forms import *
+from ..models import *
 from .helpers import create_view, post_confirmation_page, redirect
 from .setup import create_ca
 
@@ -17,10 +12,11 @@ from django.conf import settings
 from django.contrib.auth.models import Group, User, UNUSABLE_PASSWORD
 from django.core.urlresolvers import reverse
 from django.http import (HttpResponseForbidden, HttpResponseRedirect,
-    HttpResponseNotAllowed)
+    HttpResponseNotAllowed, HttpResponse)
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import (require_POST, require_http_methods,
+    require_GET)
 
 # TODO: Split into smaller files
 
@@ -259,8 +255,7 @@ def add_server_to_network_page(request, form, network_id):
     
     network.server_set.add(server)
     
-    return HttpResponseRedirect(reverse("manage_network_page",
-        kwargs={"network_id":network_id}))
+    return redirect("manage_network_page", network_id=network_id)
 
 @superuser_required
 @create_view(SelectNetworkForm, "openvpn_userinterface/add_network_to_server.html")
@@ -370,6 +365,14 @@ def manage_server_page(request, server_id):
         vars, context_instance=context)
 
 @superuser_required
+@require_GET
+def download_server_config_page(request, server_id):
+    server = get_object_or_404(Server, id=int(server_id))
+    response = HttpResponse(mimetype="text/plain")
+    response.write(server.server_config)
+    return response
+
+@superuser_required
 @create_view(CreateGroupForm, "openvpn_userinterface/create_admin_group.html")
 def create_admin_group_page(request, form):
     group = form.save()
@@ -435,12 +438,23 @@ def manage_profile_page(request, profile_id):
     profile = get_object_or_404(NetworkProfile, id=int(profile_id))
 
     if request.method == "POST":
-        form = ProfileForm(request.POST, instance=profile)
+        form = ExtendedProfileForm(request.POST)
         
         if form.is_valid():
-            form.save()
+            profile.name = form.cleaned_data["name"]
+            profile.save()
+            
+            for attr_type in NetworkAttributeType.objects.all():
+                value = form.cleaned_data[attr_type.name]
+                
+                if value:
+                    profile.set_attribute(attr_type, value)
+                else:
+                    profile.clear_attribute(attr_type)
+            
     else:
-        form = ProfileForm(instance=profile)
+        initial = dict(profile.local_attributes, name=profile.name)
+        form = ExtendedProfileForm(initial=initial)
     
     vars = {
         "form" : form,

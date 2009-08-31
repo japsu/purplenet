@@ -32,5 +32,11 @@ vim: shiftwidth=2 expandtab
   {% endif %}
 </ul>
 
+<h2>OpenVPN configuration</h2>
+
+<p>Here you can view and <a href="{% url download_server_config_page server_id=server.id %}">download the server configuration file</a>.</p>
+
+<pre>{{server.server_config}}</pre>
+
 {% endblock content %}
 

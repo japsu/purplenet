@@ -130,3 +130,11 @@ td {
 .inline_form {
 	display: inline;
 }
+
+dl {
+	margin-left: 2em;
+}
+
+dt {
+	font-weight: bold;
+}

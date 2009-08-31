@@ -79,6 +79,28 @@ class NetworkProfile(models.Model):
         
         return attr
     
+    def clear_attribute(self, attr_type):
+        """clear_attribute(self, attr_type) -> bool
+        
+        Removes a local attribute. The attribute type may be specified by
+        either an attribute type object or the name of an attribute type.
+        
+        The return value indicates whether an attribute was found and removed
+        or not.
+        """
+        if isinstance(attr_type, str):
+            attr_type = NetworkAttributeType.objects.get(name=attr_type)
+        
+        try:
+            attr = self.attribute_set.get(
+                profile=self,
+                type=attr_type
+            )
+            attr.delete()
+            return True
+        except NetworkAttribute.DoesNotExist:
+            return False
+    
     def inherit(self, profile, priority=0):
         """inherit(self, profile, priority=0)
         

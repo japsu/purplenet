@@ -2,7 +2,7 @@
 # vim: shiftwidth=4 expandtab
 
 from .setup import SetupForm
-from .network import NetworkForm, ProfileForm
+from .network import NetworkForm, ProfileForm, ExtendedProfileForm
 from .org import CreateOrgForm
 from .client import CreateClientForm, ClientForm, UserForm
 from .search import ClientSearchForm, GroupSearchForm
