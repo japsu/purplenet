@@ -58,7 +58,7 @@ def manage_org_page(request, org_id):
         certificates = ClientCertificate.objects.filter(
             ca__owner__exact=org,
             network=network
-        ).order("granted")
+        ).order_by("granted")
         networks.append((network, certificates))
 
     vars = {

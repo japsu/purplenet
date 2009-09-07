@@ -100,7 +100,7 @@ def _common_setup(request, form):
     siteconfig.client_ca=client_ca
     siteconfig.save()
 
-@create_view(SetupForm, "openvpn_userinterface/setup.html")
+@create_view(StandaloneSetupForm, "openvpn_userinterface/setup.html")
 def _standalone_setup_page(request, form):
     _common_setup(request, form)
     
