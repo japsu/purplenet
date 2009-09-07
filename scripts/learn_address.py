@@ -61,7 +61,7 @@ def main():
 	# TODO vlanX -> ethX map
 
 	if vlans:
-		vlan = vlans[0]
+		vlan = vlans
 		os.system("%s add %s %s" % (MODIFY_FW, address, vlan))
 
 		return EXIT_SUCCESS
