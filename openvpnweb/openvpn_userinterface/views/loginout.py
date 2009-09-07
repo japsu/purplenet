@@ -61,6 +61,8 @@ def _shibboleth_login_page(request):
     
     client, created = Client.objects.get_or_create(user=user)
     request.session["client"] = client
+    
+    update_group_membership(client)
         
     # TODO Does next_url need validation?
     next_url = request.GET.get('next', reverse("main_page"))
