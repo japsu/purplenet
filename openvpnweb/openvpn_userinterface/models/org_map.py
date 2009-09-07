@@ -4,6 +4,8 @@
 from django.db import models
 from django.contrib.auth.models import Group
 
+from .siteconfig import InterestingEnvVar
+
 class MappingType(models.Model):
     name = models.CharField(max_length=60)
     description = models.CharField(max_length=400)
@@ -74,6 +76,10 @@ def load_org_map(org_map):
             source_name, value = element_str.split("=", 1)
             source_name, value = source_name.strip(), value.strip()
             namespace = "env"
+            
+            # Make sure this environment variable is queried in
+            # update_group_membership.
+            InterestingEnvVar.objects.get_or_create(name="source_name")
 
             mapping_type, created = MappingType.objects.get_or_create(
                 namespace=namespace,

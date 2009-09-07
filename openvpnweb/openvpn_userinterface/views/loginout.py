@@ -13,7 +13,7 @@ from os import environ
 from openvpnweb.openvpn_userinterface.models import Client
 from openvpnweb.openvpn_userinterface.access_control import update_group_membership
 
-from .helpers import post_confirmation_page
+from .helpers import post_confirmation_page, redirect
 from ..logging import log
 
 def _standalone_login_page(request):
@@ -83,7 +83,11 @@ def logout_page(request):
             pass
         
         logout(request)
-        return HttpResponseRedirect(reverse("login_page"))
+        
+        if settings.OPENVPNWEB_LOGOUT_URL:
+            return HttpResponseRedirect(settings.OPENVPNWEB_LOGOUT_URL)
+        else:
+            return redirect("login_page")
     elif request.method == "GET":
         return post_confirmation_page(request,
             question="Really log out?",
