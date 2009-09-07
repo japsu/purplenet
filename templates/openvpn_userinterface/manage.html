@@ -1,4 +1,5 @@
 {% extends "base/base.html" %}
+{% load ovpn_tags %}
 {% comment %}
 encoding: utf-8
 vim: shiftwidth=2 expandtab
@@ -16,60 +17,77 @@ vim: shiftwidth=2 expandtab
   
 </ul>
 
+<h1 id="networks">Organizations and networks</h1>
+
+{% with client.managed_org_set.all as managed_orgs %}
+  {% if managed_orgs %}
+    <p>Below are the organizations that your can manage, and the networks those organizations have access to.</p>
+  {% else %}
+    <p>You do not currently manage any organizations.</p>
+  {% endif %}
+
+  <ul>
+    {% for org in managed_orgs %}
+      <li>
+        {% manage_link org client %}
+        <ul>
+          {% for network in org.accessible_network_set.all %}
+            <li>{% manage_link network client %}</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+{% endwith %}
+
 {% if client.is_superuser %}
-  <h1>Superuser actions</h1>
-  <p>You can perform the following superuser actions:</p>
+  <h1>Superuser access</h1>
+  
+  <h2>Organizations</h2>
   
   <ul>
-    <li><a href="{% url create_org_page %}">Create organizations...</a></li>
-    {# <li><a href="{% url manage_org_map_page %}">Configure organization mapping...</a></li> #}
-    <li><a href="{% url create_server_page %}">Create servers...</a></li>
-    <li><a href="{% url create_network_page %}">Create networks...</a></li>
+    {% for org in all_orgs %}
+      <li>{% manage_link org client %}</li>
+    {% endfor %}
+    <li class="add_remove">
+      <a href="{% url create_org_page %}">Create a new organization...</a>
+    </li>
   </ul>
+  
+  <h2>Admin groups</h2>
+  
+  <ul>
+    {% for admin_group in all_admin_groups %}
+      <li>{% manage_link admin_group client %}</li>
+    {% endfor %}
+    <li class="add_remove">
+      <a href="{% url create_admin_group_page %}">Create a new admin group...</a>
+    </li>
+  </ul>
+  
+  <h2>Networks</h2>
+  
+  <ul>
+    {% for network in all_networks %}
+      <li>{% manage_link network client %}</li>
+    {% endfor %}
+    <li class="add_remove">
+      <a href="{% url create_network_page %}">Create a new network...</a>
+    </li>
+  </ul>
+  
+  <h2>Servers</h2>
+  
+  <ul>
+    {% for server in all_servers %}
+      <li>{% manage_link server client %}</li>
+    {% endfor %}
+    <li class="add_remove">
+      <a href="{% url create_server_page %}">Create a new server...</a>
+    </li>
+  </ul>
+  
 {% endif %}
 
-<h1 id="networks">Organizations and networks</h1>
-<p>From this page you can revoke certificates in the organizations you manage and proceed to editing the details of the organizations.</p>
-{% if data %}
-  {% for org, networks in data %}
-    <h2>
-      {{ org.name }}
-      (<a href="{% url manage_org_page org_id=org.id %}">manage</a>)
-    </h2>
-    {% if networks %}
-      {% for network, certificates in networks %}
-        <table>
-          <tr>
-            <th>{{ network.name }}</th>
-            <th></th>
-            <th>
-              <a href="{% url manage_network_page network_id=network.id %}">manage</a>
-            </th>
-          </tr>
-          {% for cert in certificates %}
-            <tr>
-              <td>{{ cert.common_name }}</td>
-              <td>{{ cert.owner.user.username }}</td>
-              <td>
-                {% if not cert.is_revoked %}
-                  <form method="post" action="{% url revoke_page cert_id=cert.id%}">
-                    <input type="hidden" name="cert_id" value="{{cert.id}}" />
-                    <p class="submit"><input type="submit" value="Revoke" /></p>
-                  </form>
-                {% else %}
-                  <p>Revoked by {{cert.revoked_by.user.username}} at {{ cert.revoked|date }}</p>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </table>
-      {% endfor %}
-    {% else %}
-      <p>No networks defined for this organization.</p>
-    {% endif %}
-  {% endfor %}
-{% else %}
-  <p>No organisations at the moment.</p>
-{% endif %}
 {% endblock %}
 

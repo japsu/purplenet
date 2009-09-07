@@ -69,6 +69,8 @@ def order_page(request, org_id, network_id):
             chain_dir=chain_dir,
             extra_crt_path=server_ca_crt
         )
+        
+        client_config = network.client_config
 
         response = HttpResponse(mimetype='application/zip')
         response['Content-Disposition'] = 'filename=openvpn-certificates.zip'
@@ -78,6 +80,7 @@ def order_page(request, org_id, network_id):
         buffer=StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
         zip.writestr("keys.p12", pkcs12)
+        zip.writestr("openvpn.conf", client_config)
         zip.close()
         buffer.flush()
         ret_zip = buffer.getvalue()

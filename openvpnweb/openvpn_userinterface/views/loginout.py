@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse, resolve, Resolver404
 from django.conf import settings
+from os import environ
 
 from openvpnweb.openvpn_userinterface.models import Client
 from openvpnweb.openvpn_userinterface.access_control import update_group_membership
@@ -16,6 +17,7 @@ from ..logging import log
 
 def login_page(request):
     vars = {
+        "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH,
         'type': "info", 
         'message_login': ""
     }
@@ -24,7 +26,20 @@ def login_page(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(username=username, password=password)
+
+        if settings.OPENVPNWEB_USE_SHIBBOLETH:
+            # Assume Shibboleth authentication has been successfully performed
+            # and trust values found in the environment.
+            username = environ["uid"]
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults=dict(
+                    first_name=environ["givenName"],
+                    last_name=environ["sn"]
+                )    
+            )
+        else:
+            user = authenticate(username=username, password=password)
 
         if user is not None and user.is_active:
             login(request, user)    
@@ -35,7 +50,7 @@ def login_page(request):
                 client = Client(user=user)
                 client.save()
 
-            if settings.OPENVPNWEB_USE_GROUP_MAPPINGS:
+            if settings.OPENVPNWEB_USE_SHIBBOLETH:
                 update_group_membership(client)
 
             request.session["client"] = client

@@ -50,20 +50,31 @@ vim: shiftwidth=2 expandtab
 
 <h2>Organizations</h2>
 
-<p>The following organizations have access to this server:</p>
+{% with network.orgs_that_have_access_set.all as orgs %}
+  {% if orgs %}
+    <p>The following organizations have access to this network:</p>
+  {% else %}
+    <p>No organizations currently have access to this network.</p>
+  {% endif %}
 
-<ul>
-  {% for org in network.orgs_that_have_access_set.all %}
-    <li>
-      {% if client.is_superuser %}
-        <form class="inline_form" action="{% url remove_network_from_org_page network_id=network.id org_id=org.id %} method="post">
-          <input type="submit" value="Remove" />
-        </form>
-        <a href="{% url manage_org_page org_id=org.id %}">{{ org.name }}</a>
-      {% else %}
-        {{ org.name }}
-      {% endif %}    
-  {% endfor %}
-</ul>
+  <ul>
+    {% for org in orgs %}
+      <li>
+        {% if client.is_superuser %}
+          <form class="inline_form" action="{% url remove_network_from_org_page network_id=network.id org_id=org.id %} method="post">
+            <input type="submit" value="Remove" />
+          </form>
+          <a href="{% url manage_org_page org_id=org.id %}">{{ org.name }}</a>
+        {% else %}
+          {{ org.name }}
+        {% endif %}    
+    {% endfor %}
+    {% if client.is_superuser %}
+      <li class="add_remove">
+        <a href="{% url add_org_to_network_page network_id=network.id %}">Add organization...</a>
+      </li>
+    {% endif %}
+  </ul>
+{% endwith %}
 
 {% endblock content %}

@@ -13,8 +13,8 @@ if [ -d "$CADIR" ]; then
         sudo rm -rf "$CADIR"
 fi
 
-mkdir -p "$CADIR/copies"
-chmod -R a+rwX "$CADIR"
+mkdir -p "$CADIR"
+chmod a+rwx "$CADIR"
 
 if [ -x $SELINUXENABLED ]; then
     if $SELINUXENABLED; then

@@ -3,7 +3,7 @@
 
 from django.db import models
 from django.template.loader import render_to_string
-
+from django.core.urlresolvers import reverse
 
 class Server(models.Model):
     name = models.CharField(max_length=30)
@@ -50,10 +50,17 @@ class Server(models.Model):
     
     @property
     def server_config(self):
-        return render_to_string("openvpn_conf/server.ovpn", self._config_vars)
+        return render_to_string("openvpn_conf/server.conf", self._config_vars)
     
     def __unicode__(self):
         return self.name
+    
+    def may_be_managed_by(self, client):
+        return client.is_superuser
+    
+    @property
+    def manage_url(self):
+        return reverse("manage_server_page", kwargs={"server_id":self.id})
 
     class Admin: pass
 

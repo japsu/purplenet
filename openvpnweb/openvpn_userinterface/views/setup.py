@@ -14,6 +14,7 @@ from ..forms import SetupForm
 from ..models import (IntermediateCA, ServerCA, CACertificate, Client,
     SiteConfig, AdminGroup)
 from .helpers import create_view
+from certlib.helpers import mkdir_check
 
 import os
 
@@ -33,6 +34,8 @@ def create_ca(common_name, ca, ca_cls):
         granted=now,
         expires=then
     )
+    new_ca_cert.save()
+    
     new_ca = ca_cls(
         dir_name=sanitized_common_name,
         owner=None,
@@ -40,7 +43,6 @@ def create_ca(common_name, ca, ca_cls):
     )
 
     new_ca.create_ca()
-    new_ca_cert.save()
     new_ca.save()
 
     return new_ca
@@ -51,6 +53,9 @@ def setup_page(request, form):
         return HttpResponseForbidden()
 
     base_dir = form.cleaned_data["ca_dir"]
+    
+    copies_dir = os.path.join(base_dir, "copies")
+    mkdir_check(copies_dir, False)
 
     # CREATE THE SUPERUSER GROUP AND ACCOUNT
     superuser = User(username=form.cleaned_data["superuser_name"])

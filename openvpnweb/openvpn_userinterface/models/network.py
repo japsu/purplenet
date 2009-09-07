@@ -2,13 +2,27 @@
 # vim: shiftwidth=4 expandtab
 
 from django.db import models
+from django.core.urlresolvers import reverse
+from django.template.loader import render_to_string
 
-class CircularInheritance(Exception):
+class ConfigurationError(Exception):
+    pass
+
+class CircularInheritance(ConfigurationError):
     """CircularInheritance(Exception)
     
     This exception is raised by NetworkProfile.attributes if a circular
     inheritance is detected.
     """
+    pass
+
+class MixedModes(ConfigurationError):
+    pass
+
+class MixedProtocols(ConfigurationError):
+    pass
+
+class NoServers(ConfigurationError):
     pass
 
 class NetworkProfile(models.Model):
@@ -151,6 +165,13 @@ class NetworkProfile(models.Model):
         # inheritance
         stack_contents.remove(self)
 
+    def may_be_managed_by(self, client):
+        return client.is_superuser
+    
+    @property
+    def manage_url(self):
+        return reverse("manage_network_page", kwargs={"network_id":self.id})
+
     def __unicode__(self):
         return self.name
 
@@ -201,6 +222,41 @@ class Network(models.Model):
     
     def __unicode__(self):
         return self.name
+
+    def may_be_managed_by(self, client):
+        return client.is_superuser
+    
+    @property
+    def manage_url(self):
+        return reverse("manage_network_page", kwargs={"network_id":self.id})
+
+    @property
+    def _config_vars(self):
+        servers = self.server_set.all()
+        if not servers:
+            raise NoServers()
+    
+        some_server = servers[0]
+        mode = some_server.mode
+        protocol = some_server.protocol
+        
+        if not all(server.mode == mode for server in servers):
+            raise MixedModes()
+        
+        if not all(server.protocol == protocol for server in servers):
+            raise MixedProtocols()
+        
+        vars = dict(
+            tun_tap="tun" if mode == "routed" else "tap",
+            protocol=protocol,
+            servers=servers
+        )
+        
+        return vars
+
+    @property
+    def client_config(self):
+        return render_to_string("openvpn_conf/client.conf", self._config_vars)
 
     class Admin: pass
 

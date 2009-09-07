@@ -24,23 +24,24 @@ from django.views.decorators.http import (require_POST, require_http_methods,
 def manage_page(request):
     client = request.session["client"]
 
-    data = list()
-    for org in client.managed_org_set.all():
-        networks = []
-        for net in org.accessible_network_set.all():
-            certificates = ClientCertificate.objects.filter(
-                network=net,
-                ca__owner__exact=org
-            ).order_by('owner__user__username')
-            networks.append((net, certificates))
-        data.append((org, networks))
+    orgs = client.managed_org_set.all()
 
-    vars = RequestContext(request, {
-        "external_auth" : settings.OPENVPNWEB_USE_GROUP_MAPPINGS,
+    context = RequestContext(request, {})
+    vars = {
+        "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH,
         "client" : client,
-        "data" : data,
-    })
-    return render_to_response("openvpn_userinterface/manage.html", vars)
+    }
+    
+    if client.is_superuser:
+        vars.update(
+            all_orgs=Org.objects.all(),
+            all_networks=Network.objects.all(),
+            all_admin_groups=AdminGroup.objects.all(),
+            all_servers=Server.objects.all()
+        )
+    
+    return render_to_response("openvpn_userinterface/manage.html", vars,
+        context_instance=context)
 
 @manager_required
 def manage_org_page(request, org_id):
@@ -53,7 +54,7 @@ def manage_org_page(request, org_id):
     vars = {
         "client" : client,
         "org" : org,
-        "external_auth" : settings.OPENVPNWEB_USE_GROUP_MAPPINGS,
+        "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH,
     }
     context = RequestContext(request, {})
 
@@ -89,6 +90,9 @@ def create_org_page(request, form):
     )
     org.save()
     
+    org_ca.owner = org
+    org_ca.save()
+    
     return HttpResponseRedirect(reverse("manage_org_page",
         kwargs=dict(org_id=org.id)))
 
@@ -117,12 +121,12 @@ def create_client_page(request, form):
 @superuser_required
 @create_view(ClientSearchForm, "openvpn_userinterface/add_client_to_admin_group.html")
 def add_client_to_admin_group_page(request, form, admin_group_id):
-    admin_group = get_object_or_404(AdminGroup, id=int(group_id))
+    admin_group = get_object_or_404(AdminGroup, id=int(admin_group_id))
     client_to_add = form.search_result
     
     admin_group.group.user_set.add(client_to_add.user)
     
-    return HttpResponseRedirect(reverse("manage_page"))
+    return redirect("manage_admin_group_page", admin_group_id=admin_group_id)
 
 @manager_required
 @create_view(ClientSearchForm, "openvpn_userinterface/add_client_to_org.html")
@@ -155,10 +159,10 @@ def add_admin_group_to_org_page(request, form, org_id):
 @superuser_required
 @require_POST
 def remove_client_from_admin_group_page(request, client_id, admin_group_id):
-    client_to_remove = get_object_or_404(Client, id=int(client_id))
-    group = get_object_or_404(Group, id=int(group_id))
+    target = get_object_or_404(Client, id=int(client_id))
+    admin_group = get_object_or_404(AdminGroup, id=int(admin_group_id))
     
-    group.user_set.remove(client_to_remove.user)
+    admin_group.group.user_set.remove(target.user)
     
     return redirect("manage_admin_group_page", admin_group_id=admin_group_id)
 
@@ -166,17 +170,16 @@ def remove_client_from_admin_group_page(request, client_id, admin_group_id):
 @require_POST
 def remove_client_from_org_page(request, client_id, org_id):
     client = request.session["client"]
-    client_to_remove = get_object_or_404(Client, id=int(client_id))
+    target = get_object_or_404(Client, id=int(client_id))
     org = get_object_or_404(Org, id=int(org_id))
     group = org.group
     
     if not client.may_manage(org):
         return HttpResponseForbidden()
     
-    group.user_set.remove(client_to_remove.user)
+    group.user_set.remove(target.user)
     
-    return HttpResponseRedirect(reverse("manage_org_page", kwargs=dict(
-        org_id=org_id)))
+    return redirect("manage_org_page", org_id=org_id)
 
 @superuser_required
 @require_POST
@@ -222,10 +225,14 @@ def manage_client_page(request, client_id):
     target = get_object_or_404(Client, id=int(client_id))
 
     orgs = []
+    admin_groups = []
     managed_orgs = client.managed_org_set
     
-    for org in target.orgs:
+    for org in target.org_set.all():
         orgs.append((org, org in managed_orgs))
+    
+    for admin_group in target.admin_group_set.all():
+        admin_groups.append((admin_group, admin_group.may_be_managed_by(client)))
 
     if request.method == "POST":
         form = UserForm(request.POST, instance=target.user)
@@ -239,9 +246,10 @@ def manage_client_page(request, client_id):
     vars = {
         "form" : form,
         "orgs" : orgs,
+        "admin_groups" : admin_groups,
         "client" : client,
         "target" : target,
-        "external_auth" : settings.OPENVPNWEB_USE_GROUP_MAPPINGS,
+        "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH,
     }
     
     return render_to_response("openvpn_userinterface/manage_client.html",
@@ -339,7 +347,17 @@ def manage_network_page(request, network_id):
     
     return render_to_response("openvpn_userinterface/manage_network.html",
         vars, context_instance=context)
-        
+
+@superuser_required
+@create_view(SelectOrgForm, "openvpn_userinterface/add_org_to_network.html")
+def add_org_to_network_page(request, form, network_id):
+    network = get_object_or_404(Network, id=int(network_id))
+    org = form.cleaned_data["org"]
+    
+    network.orgs_that_have_access_set.add(org)
+    
+    return redirect("manage_network_page", network_id=network_id)
+
 @superuser_required
 @require_http_methods(["GET", "POST"])
 def manage_server_page(request, server_id):
@@ -389,6 +407,7 @@ def manage_admin_group_page(request, admin_group_id):
     vars = {
         "client" : client,
         "admin_group" : admin_group,
+        "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH
     }
     context = RequestContext(request, {})
     
@@ -477,7 +496,21 @@ def add_org_to_client_page(request, form, client_id):
         # XXX
         return HttpResponseForbidden()
     
-    org.group.user_set.add(client.user)
+    org.group.user_set.add(target.user)
+    
+    return redirect("manage_client_page", client_id=client_id)
+
+@manager_required
+@create_view(SelectAdminGroupForm, "openvpn_userinterface/add_admin_group_to_client.html")
+def add_admin_group_to_client_page(request, form, client_id):
+    client = request.session["client"]
+    target = get_object_or_404(Client, id=int(client_id))
+    admin_group = form.cleaned_data["group"]
+    
+    if not admin_group.may_be_managed_by(client):
+        return HttpResponseForbidden()
+    
+    admin_group.group.user_set.add(target.user)
     
     return redirect("manage_client_page", client_id=client_id)
 

@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 
-from openvpnweb.openvpn_userinterface.models import Client, Org
+from openvpnweb.openvpn_userinterface.models import Client, Org, AdminGroup
 
 register = template.Library()
 
@@ -77,3 +77,15 @@ def trivial_form(form, post_url="", submit_text="Save"):
         "post_url" : post_url,
         "submit_text" : submit_text,    
     })
+
+@register.simple_tag
+def manage_link(obj, client_or_user):
+    if isinstance(client_or_user, User):
+        client = Client.objects.get(user=client_or_user)
+    else:
+        client = client_or_user
+    
+    if obj.may_be_managed_by(client):
+        return u'<a href="%s">%s</a>' % (obj.manage_url, obj.name)
+    else:
+        return obj.name

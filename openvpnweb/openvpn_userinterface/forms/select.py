@@ -6,7 +6,7 @@ from django import forms
 from ..models import Network, Server, NetworkProfile, Org, AdminGroup
 
 class SelectAdminGroupForm(forms.Form):
-    group = forms.ModelChoiceField(queryset=AdminGroup.objects.all(), label="Group")
+    group = forms.ModelChoiceField(queryset=AdminGroup.objects.all(), label="Admin group")
     
 class SelectNetworkForm(forms.Form):
     network = forms.ModelChoiceField(queryset=Network.objects.all(), label="Network")

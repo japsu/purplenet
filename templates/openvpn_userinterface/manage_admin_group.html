@@ -12,10 +12,10 @@ vim: shiftwidth=2 expandtab
 <p>The following users are members of this admin group:</p>
 
 <ul>
-  {% for user in admin_group.group.user_set %}
+  {% for user in admin_group.group.user_set.all %}
     <li>
-      {% if client.is_superuser %}
-        <form action="{% remove_client_link user admin_group %}" method=post>
+      {% if not external_auth %}
+        <form  class="inline_form" action="{% remove_client_link user admin_group %}" method=post>
           <input type="submit" value="Remove" />
         </form>
         {% manage_client_link user %}
@@ -31,20 +31,20 @@ vim: shiftwidth=2 expandtab
 
 <h2>Administrator access</h2>
 
-<p>This admin group manages the following organizations:</p>
+{% if orgs %}
+  <p>This admin group manages the following organizations:</p>
+{% else %}
+  <p>This admin group does not manage any organizations at the moment. Adminship may be granted at the organizations' pages.</p>
+{% endif %}
 
 <ul>
   {% for org, may_manage in orgs %}
     {% if may_manage %}
-      {% if client.is_superuser %}
-        <form action="{% remove_admin_group_from_org org_id=org.id admin_group_id=admin_group.id %}">
-          <input type="submit" value="Remove" />
-        </form>
-      {% endif %}
-      <a href="{% manage_org_page org_id=org.id %}">{{ org.name }}</a>
-    {% else %}
-      {{ org.name }}
+      <form class="inline_form" action="{% url remove_admin_group_from_org org_id=org.id admin_group_id=admin_group.id %}">
+        <input type="submit" value="Remove" />
+      </form>
     {% endif %}
+    {% manage_link org client %}
   {% endfor %}
 </ul>
 

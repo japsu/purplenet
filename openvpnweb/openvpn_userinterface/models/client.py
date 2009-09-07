@@ -3,8 +3,9 @@
 
 from django.db import models
 from django.contrib.auth.models import User, Group
-from openvpnweb.openvpn_userinterface.models.org import Org
+from openvpnweb.openvpn_userinterface.models.org import Org, AdminGroup
 from openvpnweb.openvpn_userinterface.models.siteconfig import SiteConfig
+from openvpnweb.openvpn_userinterface.models.certificates import ClientCertificate
 
 class Client(models.Model):
     user = models.OneToOneField(User)
@@ -15,6 +16,10 @@ class Client(models.Model):
 
     @property
     def orgs(self):
+        return self.org_set
+    
+    @property
+    def org_set(self):
         return Org.objects.filter(group__in=self.user.groups.all())
 
     @property
@@ -24,6 +29,10 @@ class Client(models.Model):
         else:
             return Org.objects.filter(
                 admin_group_set__group__in=self.user.groups.all())
+    
+    @property
+    def admin_group_set(self):
+        return AdminGroup.objects.filter(group__in=self.user.groups.all())
         
     @property
     def is_superuser(self):
@@ -64,6 +73,21 @@ class Client(models.Model):
             
     def may_view_management_pages(self):
         return self.is_superuser or bool(self.managed_org_set)
+
+    def get_certificates(self):
+        data = []
+        for org in self.orgs.all():
+            networks = []
+            for net in org.accessible_network_set.all():
+                certificates = ClientCertificate.objects.filter(
+                    network=net,
+                    ca__owner__exact=org,
+                    owner=self
+                )
+                networks.append((net, certificates))
+            data.append((org, org.may_be_managed_by(self), networks))
+        
+        return data
 
     class Admin: pass
 

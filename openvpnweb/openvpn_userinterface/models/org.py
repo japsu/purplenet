@@ -3,6 +3,7 @@
 
 from django.db import models
 from django.contrib.auth.models import Group
+from django.core.urlresolvers import reverse
 from openvpnweb.helper_functions import generate_random_string 
 
 class Org(models.Model):
@@ -41,6 +42,14 @@ class Org(models.Model):
     def may_access(self, network):
         return network in self.accessible_network_set.all()
     
+    def may_be_managed_by(self, client):
+        # TODO: move access control logic here from client
+        return client.may_manage(self)
+    
+    @property
+    def manage_url(self):
+        return reverse("manage_org_page", kwargs={"org_id":self.id})
+    
     class Admin: pass
 
     class Meta:
@@ -55,6 +64,13 @@ class AdminGroup(models.Model):
     
     def __unicode__(self):
         return self.group.name
+    
+    def may_be_managed_by(self, client):
+        return client.is_superuser or client.user in self.group.user_set.all()
+    
+    @property
+    def manage_url(self):
+        return reverse("manage_admin_group_page", kwargs={"admin_group_id":self.id})
     
     class Meta:
         app_label = "openvpn_userinterface"

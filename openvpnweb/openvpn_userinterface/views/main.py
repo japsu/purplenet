@@ -13,17 +13,7 @@ def main_page(request):
     client = request.session["client"]
     
     # XXX try to replace with smarter queries
-    data = []
-    for org in client.orgs.all():
-        networks = []
-        for net in org.accessible_network_set.all():
-            certificates = ClientCertificate.objects.filter(
-                network=net,
-                ca__owner__exact=org,
-                owner=client
-            )
-            networks.append((net, certificates))
-        data.append((org, networks))
+    data = client.get_certificates()
 
     variables = RequestContext(request, {
         'data': data,

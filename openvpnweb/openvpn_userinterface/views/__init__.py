@@ -16,7 +16,8 @@ from .manage import (manage_page,
     add_network_to_server_page, remove_network_from_server_page,
     add_server_to_network_page, create_profile_page, manage_profile_page,
     inherit_profile_page, uninherit_profile_page, add_org_to_client_page,
-    download_server_config_page)
+    download_server_config_page, add_admin_group_to_client_page,
+    add_org_to_network_page)
 from .logs import manage_log_page
 from .revoke import revoke_page
 from .order import order_page
