@@ -18,7 +18,7 @@ from .network import (NetworkProfile, NetworkAttribute, NetworkAttributeType,
     MixedProtocols, NoServers)
 from .org import Org, AdminGroup
 from .org_map import (OrgMapping, MappingType, MappingElement, load_org_map,
-    dump_org_map)
+    dump_org_map, validate_org_map)
 from .server import Server
 from .siteconfig import SiteConfig, InterestingEnvVar
 

@@ -7,13 +7,14 @@ from django.http import (HttpResponseRedirect, HttpResponseForbidden,
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.models import User, Group
+from django.conf import settings
 
 from datetime import datetime, timedelta
 
-from ..forms import SetupForm
+from ..forms import StandaloneSetupForm, ShibbolethSetupForm
 from ..models import (IntermediateCA, ServerCA, CACertificate, Client,
     SiteConfig, AdminGroup)
-from .helpers import create_view
+from .helpers import create_view, redirect
 from certlib.helpers import mkdir_check
 
 import os
@@ -47,8 +48,7 @@ def create_ca(common_name, ca, ca_cls):
 
     return new_ca
 
-@create_view(SetupForm, "openvpn_userinterface/setup.html")
-def setup_page(request, form):
+def _common_setup(request, form):
     if SiteConfig.objects.all():
         return HttpResponseForbidden()
 
@@ -58,15 +58,12 @@ def setup_page(request, form):
     mkdir_check(copies_dir, False)
 
     # CREATE THE SUPERUSER GROUP AND ACCOUNT
-    superuser = User(username=form.cleaned_data["superuser_name"])
-    superuser.set_password(form.cleaned_data["password"])
-    superuser.save()
+
     
-    supergroup = superuser.groups.create(name="Superusers")
-    superadm = AdminGroup(group=supergroup).save()
-    
-    superclient = Client(user=superuser)
-    superclient.save()
+    supergroup = Group(name="Superusers")
+    supergroup.save()
+    superadm = AdminGroup(group=supergroup)
+    superadm.save()
     
     # CREATE THE SITE CONFIG
     siteconfig = SiteConfig(
@@ -103,4 +100,33 @@ def setup_page(request, form):
     siteconfig.client_ca=client_ca
     siteconfig.save()
 
-    return HttpResponseRedirect(reverse("setup_complete_page"))
+@create_view(SetupForm, "openvpn_userinterface/setup.html")
+def _standalone_setup_page(request, form):
+    _common_setup(request, form)
+    
+    siteconfig = SiteConfig.objects.get()
+    
+    superuser = User(username=form.cleaned_data["superuser_name"])
+    superuser.set_password(form.cleaned_data["password"])
+    superuser.save()
+    
+    superclient = Client(user=superuser)
+    superclient.save()
+    
+    siteconfig.superuser_group.user_set.add(superuser)
+    
+    return redirect("setup_complete_page")
+    
+@create_view(ShibbolethSetupForm, "openvpn_userinterface/setup.html")
+def _shibboleth_setup_page(request, form):
+    _common_setup(request, form)
+    
+    load_org_map(form.cleaned_data["initial_org_map"])
+    
+    return redirect("setup_complete_page")
+    
+def setup_page(*args, **kwargs):
+    if settings.OPENVPNWEB_USE_SHIBBOLETH:
+        return _shibboleth_setup_page(*args, **kwargs)
+    else:
+        return _standalone_setup_page(*args, **kwargs)

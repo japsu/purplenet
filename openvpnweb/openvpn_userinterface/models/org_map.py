@@ -101,3 +101,7 @@ def dump_org_map():
             " & ".join("%s=%s" % (element.type.source_name, element.value)
                 for element in mapping.element_set.all())
         )
+    
+def validate_org_map(org_map):
+    # XXX Stub
+    return

@@ -68,6 +68,7 @@ class SetupForm(forms.Form):
     client_ca_cn = forms.CharField(max_length=30, initial="Client CA",
         label="Common Name for the client CA")
     
+class StandaloneSetupForm(SetupForm):
     superuser_name = forms.CharField(max_length=30, initial="Superuser",
         label="Superuser account name")
     
@@ -90,5 +91,24 @@ class SetupForm(forms.Form):
             
             del cleaned_data["password"]
             del cleaned_data["password_again"]
+            
+        return cleaned_data
+    
+class ShibbolethSetupForm(SetupForm):
+    org_map = forms.CharField(max_length=32768, widget=forms.widgets.Textarea,
+        initial="Superusers <- uid=pajukans", label="Organizational mapping")
+    
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        
+        org_map = cleaned_data.get("org_map")
+        
+        if org_map:
+            try:
+                validate_org_map(org_map)
+            except OrgMapSyntaxError, e:
+                msg = "Syntax error: " + str(e)
+                self._errors["org_map"] = ErrorList([msg])
+                del cleaned_data["org_map"]
             
         return cleaned_data
