@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 from ..forms import StandaloneSetupForm, ShibbolethSetupForm
 from ..models import (IntermediateCA, ServerCA, CACertificate, Client,
-    SiteConfig, AdminGroup)
+    SiteConfig, AdminGroup, load_org_map, validate_org_map)
 from .helpers import create_view, redirect
 from certlib.helpers import mkdir_check
 
@@ -121,7 +121,7 @@ def _standalone_setup_page(request, form):
 def _shibboleth_setup_page(request, form):
     _common_setup(request, form)
     
-    load_org_map(form.cleaned_data["initial_org_map"])
+    load_org_map(form.cleaned_data["org_map"])
     
     return redirect("setup_complete_page")
     

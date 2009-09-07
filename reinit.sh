@@ -31,7 +31,7 @@ echo "Restarting Apache with sudo."
 if [ -x /etc/init.d/httpd ]; then
     # Fedora
     sudo /etc/init.d/httpd reload
-elif [ -x /etc/init/apache2 ]; then
+elif [ -x /etc/init.d/apache2 ]; then
     # Debian
     sudo /etc/init.d/apache2 force-reload
 else
@@ -39,4 +39,4 @@ else
 fi
 
 #python bin/reinit_hard.py
-python bin/reinit_soft.py
+#python bin/reinit_soft.py
