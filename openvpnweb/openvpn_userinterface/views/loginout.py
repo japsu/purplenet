@@ -52,14 +52,10 @@ def _standalone_login_page(request):
 def _shibboleth_login_page(request):
     # Assume Shibboleth authentication has been successfully performed
     # and trust values found in the environment.
-    username = environ["uid"]
-    user, created = User.objects.get_or_create(
-        username=username,
-        defaults=dict(
-            first_name=environ["givenName"],
-            last_name=environ["sn"]
-        )    
-    )
+    user = authenticate()
+    
+    if user is None:
+        return render_to_response("openvpn_userinterface/shibboleth_login_failed.html")
 
     login(request, user)
     

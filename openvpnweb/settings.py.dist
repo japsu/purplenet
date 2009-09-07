@@ -97,8 +97,9 @@ INSTALLED_APPS = (
     'openvpnweb.openvpn_userinterface',
 )
 
+#AUTHENTICATION_BACKENDS = ('openvpnweb.auth.backends.ShibbolethBackend')
+
 DATE_FORMAT = "Y-m-d H:i:s"
 
-OPENVPNWEB_OPENSSL_CHAIN_DIR = "/home/pajukans/Temp/testca/copies"
-OPENVPNWEB_USE_GROUP_MAPPINGS = False
+OPENVPNWEB_USE_SHIBBOLETH = False
 OPENVPNWEB_SETUP_KEY = "foobar"
