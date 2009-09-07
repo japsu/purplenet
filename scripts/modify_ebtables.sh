@@ -30,22 +30,40 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# vlan address action
-# e.g. 20 00:11:22:33:44:55 add
+# action address vlan
+# e.g. add 00:11:22:33:44:55 20
 
 in_intf="tap0"
-out_intf_suffix="tap1."
+out_intf_suffix="vlan"
 
 # either "add" or "delete"
 action=$1
 mac_address=$2
 
+add_rule() {
+    mac_address=$1
+    vlan=$2
+
+    ebtables -t filter -A FORWARD -i $in_intf -s $mac_address -o ${out_intf_suffix}${vlan} -j ACCEPT &> /dev/null
+}
+
+delete_rule() {
+    mac_address=$1
+    out_intf=`ebtables -L --Lmac2|grep "$mac_address"|awk '{ print $6; }'`
+
+
+    if [ ! -z "$out_intf" ]; then
+        ebtables -t filter -D FORWARD -i $in_intf -s $mac_address -o $out_intf -j ACCEPT &> /dev/null
+    fi
+}
+
 if [ "$action" = "add" ]; then
     vlan=$3
 
-    ebtables -A FORWARD -i $in_intf -s $mac_address -o ${out_intf_suffix}${vlan} -j ACCEPT
+    delete_rule $mac_address
+    add_rule $mac_address $vlan
 elif [ "$action" = "delete" ]; then
-    out_intf=`ebtables -L --Lmac2|grep "$mac_address"|awk '{ print $6; }'`
-
-    ebtables -D FORWARD -i $in_intf -s $mac_address -o $out_intf -j ACCEPT
+    delete_rule $mac_address
 fi
+
+exit 0
