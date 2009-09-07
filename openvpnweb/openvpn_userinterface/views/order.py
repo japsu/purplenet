@@ -14,6 +14,11 @@ from cStringIO import StringIO
 
 import zipfile
 
+def _zip_write_file(zip, filename, contents, mode=0666):
+    info = zipfile.ZipInfo(filename)
+    info.external_attr = mode << 16L
+    zip.writestr(info, contents)
+
 @login_required
 def order_page(request, org_id, network_id):
     org = get_object_or_404(Org, id=int(org_id))
@@ -79,8 +84,8 @@ def order_page(request, org_id, network_id):
         # TODO write directly into response?
         buffer=StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-        zip.writestr("keys.p12", pkcs12)
-        zip.writestr("openvpn.conf", client_config)
+        _zip_write_file(zip, "keys.p12", pkcs12)
+        _zip_write_file(zip, "openvpn.conf", client_config)
         zip.close()
         buffer.flush()
         ret_zip = buffer.getvalue()
