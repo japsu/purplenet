@@ -12,6 +12,7 @@
 
 import site
 import os
+import sys
 
 SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 site.addsitedir(SITE_DIR)
@@ -48,29 +49,26 @@ def main():
 		
 		return EXIT_SUCCESS
 
-	try:
-		common_name = sys.argv[3]
-		cert = ClientCertificate.objects.get(common_name=common_name)
+	common_name = sys.argv[3]
+	cert = ClientCertificate.objects.get(common_name=common_name)
 
-		if cert.is_revoked:
-			return EXIT_FAILURE
+	if cert.is_revoked:
+		return EXIT_FAILURE
 		
-		attributes = cert.network.profile.attributes 
-		vlans = attributes.get("vlan")
+	attributes = cert.network.profile.attributes
+	vlans = attributes.get("vlan")
 
-		# TODO vlanX -> ethX map
+	# TODO vlanX -> ethX map
 
-		if vlans:
-			vlan = vlans[0].value
-			os.system("%s add %s %s" % (MODIFY_FW, address, vlan))
+	if vlans:
+		vlan = vlans[0]
+		os.system("%s add %s %s" % (MODIFY_FW, address, vlan))
 
-			return EXIT_SUCCESS
-	except:
-		pass
+		return EXIT_SUCCESS
 
 	return EXIT_FAILURE
 
-if __name__ == "__main__" and False:
+if __name__ == "__main__":
 	try:
 		sys.exit(main())
 	except Exception, e:
