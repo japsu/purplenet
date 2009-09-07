@@ -312,7 +312,9 @@ def create_server_page(request, form):
     )
     
     cert.save()
+    
     cert.create_certificate()
+    cert.save()
     
     server.certificate = cert
     server.save()
@@ -410,12 +412,17 @@ def create_admin_group_page(request, form):
     
     return redirect("manage_admin_group_page", admin_group_id=admin_group.id)
 
-@superuser_required
+@manager_required
 def manage_admin_group_page(request, admin_group_id):
     client = request.session["client"]
     admin_group = get_object_or_404(AdminGroup, id=int(admin_group_id))
 
+    orgs = []
+    for org in admin_group.managed_org_set.all():
+        orgs.append((org, org.may_be_managed_by(client)))
+
     vars = {
+        "orgs" : org,
         "client" : client,
         "admin_group" : admin_group,
         "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH
@@ -525,9 +532,15 @@ def add_admin_group_to_client_page(request, form, client_id):
     
     return redirect("manage_client_page", client_id=client_id)
 
-# XXX The following are stubs
-
 @superuser_required
-def manage_org_map_page(request):
-    pass
+@create_view(OrgMapForm, "openvpn_userinterface/manage_org_map.html")
+def manage_org_map_page(request, form):
+    new_org_map = form.cleaned_data["org_map"]
     
+    # Bulldoze old mappings
+    for mapping in OrgMapping.objects.all():
+        mapping.delete()
+    
+    load_org_map(new_org_map)
+    
+    return redirect("manage_page")

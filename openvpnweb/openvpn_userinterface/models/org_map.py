@@ -99,14 +99,14 @@ def load_org_map(org_map):
             element.save()
 
 def dump_org_map():
-    mappings = OrgMapping.objects.all()
-    
-    for mapping in mappings:
-        print "%s <- %s;" % (
+    # TODO Inflate this code, it's way too dense
+    return "\n".join(
+        "%s <- %s;" % (
             mapping.group.name,
             " & ".join("%s=%s" % (element.type.source_name, element.value)
                 for element in mapping.element_set.all())
-        )
+        ) for mapping in OrgMapping.objects.order_by("group__name")
+    )
     
 def validate_org_map(org_map):
     # XXX Stub

@@ -4,6 +4,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.views.decorators.http import require_POST
 from django.http import (HttpResponseForbidden, HttpResponseRedirect,
     HttpResponseNotAllowed)
 
@@ -13,54 +14,33 @@ from .helpers import post_confirmation_page
 from ..logging import log
 
 @login_required
-def revoke_page(request, cert_id):
-    if request.method not in ("GET", "POST"):
-        return HttpMethodNotAllowed(["GET", "POST"])    
-
+@require_POST
+def revoke_page(request, cert_id):   
     certificate = get_object_or_404(ClientCertificate, id=int(cert_id))
     org = certificate.org
+    client = request.session["client"]
 
-    if request.method == 'POST':
-        client = request.session["client"]
-        if not client.may_revoke(certificate):
-            log(
-                event="client_certificate.revoke",
-                denied=True,
-                client=client,
-                group=org.group,
-                network=certificate.network,
-                client_certificate=certificate
-            )
-            return HttpResponseForbidden()
-
-        certificate.revoke(revoked_by=client)
-        certificate.save()
-
+    if not client.may_revoke(certificate):
         log(
             event="client_certificate.revoke",
+            denied=True,
             client=client,
             group=org.group,
             network=certificate.network,
             client_certificate=certificate
         )
+        return HttpResponseForbidden()
 
-        return HttpResponseRedirect(reverse("main_page"))
+    certificate.revoke(revoked_by=client)
+    certificate.save()
 
-    else: # request.method == 'GET'
-        if not client.may_revoke(certificate):
-            return post_confirmation_page(request,
-                question="You may not revoke certificate %s." % certificate,
-                choices=[
-                    ("Return", reverse("main_page"))
-                ]
-            )
-        else:
-            return post_confirmation_page(request,
-                question="Really revoke certificate %s" % certificate,
-                choices=[
-                    ("Revoke", reverse("revoke_page", kwargs=
-                        dict(cert_id=cert_id))),
-                    ("Cancel", reverse("main_page"))
-                ]
-            )
+    log(
+        event="client_certificate.revoke",
+        client=client,
+        group=org.group,
+        network=certificate.network,
+        client_certificate=certificate
+    )
 
+    return_url = request.META.get("HTTP_REFERER", reverse("main_page"))
+    return HttpResponseRedirect(return_url)

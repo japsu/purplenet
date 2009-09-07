@@ -3,7 +3,7 @@
 
 from .setup import StandaloneSetupForm, ShibbolethSetupForm
 from .network import NetworkForm, ProfileForm, ExtendedProfileForm
-from .org import CreateOrgForm
+from .org import CreateOrgForm, OrgMapForm
 from .client import CreateClientForm, ClientForm, UserForm
 from .search import ClientSearchForm, GroupSearchForm
 from .select import (SelectAdminGroupForm, SelectNetworkForm, SelectServerForm,

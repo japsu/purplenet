@@ -161,7 +161,7 @@ def generate_crl(config):
     log.debug("Generating CRL into %s", crl_file_name)
 
     params = ["ca", "-config", config, "-gencrl", "-out", crl_file_name]
-    run(*params)
+    _run(*params)
 
 def create_csr(key, common_name, config=DEFAULT_CONFIG):
     """create_csr(common_name, key, config=DEFAULT_CONFIG) -> String

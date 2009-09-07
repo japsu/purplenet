@@ -18,15 +18,15 @@ vim: shiftwidth=2 expandtab
         <form  class="inline_form" action="{% remove_client_link user admin_group %}" method=post>
           <input type="submit" value="Remove" />
         </form>
-        {% manage_client_link user %}
-      {% else %}
-        {% format_username user %}
       {% endif %}
+      {% manage_client_link user %}
     </li>
   {% endfor %}
-  <li class="add_remove">
-    <a href="{% url add_client_to_admin_group_page admin_group_id=admin_group.id %}">Add members...</a>
-  </li>
+  {% if not external_auth %}
+    <li class="add_remove">
+      <a href="{% url add_client_to_admin_group_page admin_group_id=admin_group.id %}">Add members...</a>
+    </li>
+  {% endif %}
 </ul>
 
 <h2>Administrator access</h2>

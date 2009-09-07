@@ -43,6 +43,10 @@ vim: shiftwidth=2 expandtab
 {% if client.is_superuser %}
   <h1>Superuser access</h1>
   
+  <ul>
+    <li><a href="{% url manage_org_map_page %}">Manage organizational mappings...</a></li>
+  </ul>
+  
   <h2>Organizations</h2>
   
   <ul>

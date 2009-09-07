@@ -19,6 +19,7 @@ vim: shiftwidth=2 expandtab
           <p>
             {% if user.is_authenticated %}
               welcome, {{ user.username }}.
+              <a href="{% url main_page %}">main</a>
               {% if client.may_view_management_pages %}
                 <a href="{% url manage_page %}">manage</a>
               {% endif %}
