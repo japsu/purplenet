@@ -51,8 +51,19 @@ def manage_org_page(request, org_id):
     if not client.may_manage(org):
         return HttpResponseForbidden()
 
+    networks = []
+    
+    for network in org.accessible_network_set.all():
+        # TODO encapsulate this query as a function somewhere
+        certificates = ClientCertificate.objects.filter(
+            ca__owner__exact=org,
+            network=network
+        )
+        networks.append((network, certificates))
+
     vars = {
         "client" : client,
+        "networks" : networks,
         "org" : org,
         "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH,
     }

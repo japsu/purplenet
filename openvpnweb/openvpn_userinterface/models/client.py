@@ -70,7 +70,6 @@ class Client(models.Model):
             groups = set(ag.group for ag in org.admin_group_set.all())
             return bool(groups.intersection(self.user.groups.all()))
             
-            
     def may_view_management_pages(self):
         return self.is_superuser or bool(self.managed_org_set)
 
@@ -83,7 +82,7 @@ class Client(models.Model):
                     network=net,
                     ca__owner__exact=org,
                     owner=self
-                )
+                ).order_by("granted")
                 networks.append((net, certificates))
             data.append((org, org.may_be_managed_by(self), networks))
         

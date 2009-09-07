@@ -42,7 +42,7 @@ vim: shiftwidth=2 expandtab
     </li>
   {% endfor %}
   {% if client.is_superuser %}  
-    <li>
+    <li class="add_remove">
       <a href="{% url add_server_to_network_page network_id=network.id %}">Add servers to this network...</a>
     </li>
   {% endif %}

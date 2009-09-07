@@ -7,29 +7,47 @@ vim: shiftwidth=2 expandtab
 {% block content %}
 <h1>{{ org.name }}</h1>
 
-<h2>Networks</h2>
-<p>This organization has access to the following networks:</p>
+<h2>Networks and certificates</h2>
+{% if networks %}
+  <p>Below are the networks accessible by this organization and the certificates granted to them.</p>
+{% else %}
+  <p>This organization cannot currently access any networks.</p>
+{% endif %}
 
 <ul>
-  {% with org.accessible_network_set.all as networks %}
-    {% for network in org.accessible_network_set.all %}
-      <li>
-        {% if client.is_superuser %}
-          <form class="inline_form" action="{% url remove_network_from_org_page org_id=org.id network_id=network.id %}" method="post">
-            <input type="submit" value="Remove" />
-          </form>
-        {% endif %}
-        {% manage_link network client %}
-      </li>
-    {% endfor %}
+  {% for network, certificates in networks %}
+    <li>
+      {% if client.is_superuser %}
+        <form class="inline_form" action="{% url remove_network_from_org_page org_id=org.id network_id=network.id %}" method="post">
+          <input type="submit" value="Remove" />
+        </form>
+      {% endif %}
+      {% manage_link network client %}
+      
+      <ul>
+        {% for certificate in certificates %}
+          <li>
+            {% if certificate.is_revoked %}
+              <span class="revoked">Revoked</span>
+            {% else %}
+              <form class="inline_form" action="{% url revoke_page cert_id=certificate.id %}" method="post">
+                <input type="submit" value="Revoke" />
+              </form>
+            {% endif %}
+            {{ certificate.common_name }} ({{ certificate.owner }})
+          </li>        
+        {% endfor %}
+      </ul>
+    </li>
+  {% endfor %}
+  {% if client.is_superuser %}
     <li class="add_remove">
       {% if not networks %}
         No networks at the moment.
       {% endif %}
       <a href="{% url add_network_to_org_page org_id=org.id %}">Add a network...</a>
     </li>
-    
-  {% endwith %}
+  {% endif %}
 </ul>
 
 <h2>Administrators</h2>
@@ -103,4 +121,3 @@ vim: shiftwidth=2 expandtab
 </ul>
 
 {% endblock content %}
-

@@ -69,9 +69,6 @@ def load_org_map(org_map):
         mapping = OrgMapping(group=target)
         mapping.save()
         
-        # XXX
-        print mapping
-        
         elements = the_rest.split("&")
         for element_str in elements:
             source_name, value = element_str.split("=", 1)
@@ -94,9 +91,6 @@ def load_org_map(org_map):
                 value=value
             )
             element.save()
-            
-            # XXX
-            print element
 
 def dump_org_map():
     mappings = OrgMapping.objects.all()
@@ -104,5 +98,6 @@ def dump_org_map():
     for mapping in mappings:
         print "%s <- %s;" % (
             mapping.group.name,
-            " & ".join("%s=%s" % (element.type.source_name, element.value) for element in mapping.element_set.all())
+            " & ".join("%s=%s" % (element.type.source_name, element.value)
+                for element in mapping.element_set.all())
         )
