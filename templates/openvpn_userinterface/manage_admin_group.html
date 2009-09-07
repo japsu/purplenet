@@ -39,12 +39,14 @@ vim: shiftwidth=2 expandtab
 
 <ul>
   {% for org, may_manage in orgs %}
-    {% if may_manage %}
-      <form class="inline_form" action="{% url remove_admin_group_from_org org_id=org.id admin_group_id=admin_group.id %}">
-        <input type="submit" value="Remove" />
-      </form>
-    {% endif %}
-    {% manage_link org client %}
+    <li>
+      {% if may_manage %}
+        <form class="inline_form" action="{% url remove_admin_group_from_org_page org_id=org.id admin_group_id=admin_group.id %}">
+          <input type="submit" value="Remove" />
+        </form>
+      {% endif %}
+      {% manage_link org client %}
+    </li>
   {% endfor %}
 </ul>
 

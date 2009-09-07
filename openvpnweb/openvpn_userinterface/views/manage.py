@@ -422,7 +422,7 @@ def manage_admin_group_page(request, admin_group_id):
         orgs.append((org, org.may_be_managed_by(client)))
 
     vars = {
-        "orgs" : org,
+        "orgs" : orgs,
         "client" : client,
         "admin_group" : admin_group,
         "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH
