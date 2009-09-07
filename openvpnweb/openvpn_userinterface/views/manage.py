@@ -1,6 +1,8 @@
 # encoding: utf-8
 # vim: shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 from ..access_control import manager_required, superuser_required
 from ..forms import *
 from ..models import *
