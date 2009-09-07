@@ -15,7 +15,7 @@ from openvpnweb.openvpn_userinterface.access_control import update_group_members
 from .helpers import post_confirmation_page
 from ..logging import log
 
-def login_page(request):
+def _standalone_login_page(request):
     vars = {
         "external_auth" : settings.OPENVPNWEB_USE_SHIBBOLETH,
         'type': "info", 
@@ -27,32 +27,12 @@ def login_page(request):
         username = request.POST['username']
         password = request.POST['password']
 
-        if settings.OPENVPNWEB_USE_SHIBBOLETH:
-            # Assume Shibboleth authentication has been successfully performed
-            # and trust values found in the environment.
-            username = environ["uid"]
-            user, created = User.objects.get_or_create(
-                username=username,
-                defaults=dict(
-                    first_name=environ["givenName"],
-                    last_name=environ["sn"]
-                )    
-            )
-        else:
-            user = authenticate(username=username, password=password)
+        user = authenticate(username=username, password=password)
 
         if user is not None and user.is_active:
             login(request, user)    
-            client = None
-            try:
-                client = Client.objects.get(user=user)
-            except Client.DoesNotExist:
-                client = Client(user=user)
-                client.save()
 
-            if settings.OPENVPNWEB_USE_SHIBBOLETH:
-                update_group_membership(client)
-
+            client, created = Client.objects.get_or_create(user=user)
             request.session["client"] = client
             
             # TODO Does next_url need validation?
@@ -67,6 +47,34 @@ def login_page(request):
                           
     return render_to_response('openvpn_userinterface/login.html', vars,
         context_instance=context)
+
+def _shibboleth_login_page(request):
+    # Assume Shibboleth authentication has been successfully performed
+    # and trust values found in the environment.
+    username = environ["uid"]
+    user, created = User.objects.get_or_create(
+        username=username,
+        defaults=dict(
+            first_name=environ["givenName"],
+            last_name=environ["sn"]
+        )    
+    )
+
+    login(request, user)
+    
+    client, created = Client.objects.get_or_create(user=user)
+    request.session["client"] = client
+        
+    # TODO Does next_url need validation?
+    next_url = request.GET.get('next', reverse("main_page"))
+    return HttpResponseRedirect(next_url)
+        
+
+def login_page(*args, **kwargs):
+    if settings.OPENVPNWEB_USE_SHIBBOLETH:
+        return _shibboleth_login_page(*args, **kwargs)
+    else:
+        return _standalone_login_page(*args, **kwargs)
                 
 def logout_page(request):
     if request.method == "POST":
