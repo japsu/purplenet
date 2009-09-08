@@ -28,7 +28,7 @@ vim: shiftwidth=2 expandtab
         {% for certificate in certificates %}
           <li>
             {% if certificate.is_revoked %}
-              <span class="revoked">Revoked</span>
+              <span class="revoked">Revoked by {{ certificate.revoked_by }} at {{ certificate.revoked|date }}</span>
             {% else %}
               <form class="inline_form" action="{% url revoke_page cert_id=certificate.id %}" method="post">
                 <input type="submit" value="Revoke" />
