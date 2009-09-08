@@ -6,7 +6,7 @@ vim: shiftwidth=2 expandtab
 {% endcomment %}
 {% block content %}
 
-{% with target.user.full_name as full_name %}
+{% with target.user.get_full_name as full_name %}
   {% if full_name %}
     <h1>{{full_name}} ({{ target.user.username }})</h1>
   {% else %}
@@ -14,7 +14,9 @@ vim: shiftwidth=2 expandtab
   {% endif %}
 {% endwith %}
 
-{% trivial_form form %}
+{% if not external_auth %}
+  {% trivial_form form %}
+{% endif %}
 
 <h2>Organizations, networks and certificates</h2>
 
