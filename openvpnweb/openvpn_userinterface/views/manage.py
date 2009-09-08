@@ -545,9 +545,13 @@ def manage_org_map_page(request):
         client_groups = Group.objects.all()
     else:
         managed_orgs = client.managed_org_set.all()
-        client_groups = set(i.group for i in managed_orgs)
-        for org in managed_orgs:
-            client_groups.update(i.group for i in org.admin_group_set.all())
+
+        # Select all admin groups to which the client belongs
+        client_groups = set(i.group for i in AdminGroup.objects.filter(
+            group__in=client.user.groups.all()))
+        # Also select all user groups the client manages
+        client_groups.update(i.group for i in managed_orgs)
+
         mappings = OrgMapping.objects.filter(group__in=client_groups).order_by("group__name")
     
     if request.method == "GET":
