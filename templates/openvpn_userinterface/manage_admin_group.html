@@ -40,7 +40,7 @@ vim: shiftwidth=2 expandtab
 <ul>
   {% for org, may_manage in orgs %}
     <li>
-      {% if may_manage %}
+      {% if client.is_superuser and not external_auth %}
         <form class="inline_form" action="{% url remove_admin_group_from_org_page org_id=org.id admin_group_id=admin_group.id %}">
           <input type="submit" value="Remove" />
         </form>
@@ -48,6 +48,11 @@ vim: shiftwidth=2 expandtab
       {% manage_link org client %}
     </li>
   {% endfor %}
+  {% if client.is_superuser and not external_auth %}
+    <li class="add_remove">
+      <a href="{% url add_org_to_admin_group_page admin_group_id=admin_group.id %}">Add an organization...</a>
+    </li>
+  {% endif %}
 </ul>
 
 {% endblock content %}

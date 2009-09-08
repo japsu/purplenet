@@ -6,16 +6,14 @@ vim: shiftwidth=2 expandtab
 {% endcomment %}
 {% block content %}
 
+{% if not external_auth %}
 <h1>Administrative actions</h1>
 <p>You can perform the following administrative actions:</p>
 
 <ul>
-  <li><a href="#networks">Manage your organizations and networks (below)</a></li>
-  {% if not external_auth %}
-    <li><a href="{% url create_client_page %}">Create new users...</a></li>
-  {% endif %}
-  
+  <li><a href="{% url create_client_page %}">Create new users...</a></li>
 </ul>
+{% endif %}
 
 <h1 id="networks">Organizations and networks</h1>
 
@@ -90,7 +88,6 @@ vim: shiftwidth=2 expandtab
       <a href="{% url create_server_page %}">Create a new server...</a>
     </li>
   </ul>
-  
 {% endif %}
 
 {% endblock %}
