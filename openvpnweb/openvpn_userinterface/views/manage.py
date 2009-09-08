@@ -532,15 +532,39 @@ def add_admin_group_to_client_page(request, form, client_id):
     
     return redirect("manage_client_page", client_id=client_id)
 
-@superuser_required
-@create_view(OrgMapForm, "openvpn_userinterface/manage_org_map.html")
-def manage_org_map_page(request, form):
-    new_org_map = form.cleaned_data["org_map"]
+@manager_required
+@require_http_methods(["GET","POST"])
+def manage_org_map_page(request):
+    client = request.session["client"]
+
+    vars = dict(client=client)
+    context = RequestContext(request, {})
+
+    if client.is_superuser:
+        mappings = OrgMapping.objects.order_by("group__name")
+        client_groups = Group.objects.all()
+    else:
+        managed_orgs = client.managed_org_set.all()
+        client_groups = set(i.group for i in managed_orgs)
+        for org in managed_orgs:
+            client_groups.update(i.group for i in org.admin_group_set.all())
+        mappings = OrgMapping.objects.filter(group__in=client_groups).order_by("group__name")
     
-    # Bulldoze old mappings
-    for mapping in OrgMapping.objects.all():
-        mapping.delete()
-    
-    load_org_map(new_org_map)
-    
-    return redirect("manage_page")
+    if request.method == "GET":
+        form = OrgMapForm(initial={"org_map":dump_org_map(mappings)})
+        vars["form"] = form
+
+    else: # POST
+        form = OrgMapForm(request.POST)
+        vars["form"] = form
+
+        if form.is_valid():
+            # Bulldoze old mappings
+            for mapping in mappings:
+                mapping.delete()
+            
+            load_org_map(form.cleaned_data["org_map"], restrict_groups=client_groups)
+            
+            return redirect("manage_page")
+
+    return render_to_response("openvpn_userinterface/manage_org_map.html", vars, context_instance=context)

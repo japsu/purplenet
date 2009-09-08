@@ -59,7 +59,9 @@ class MappingElement(models.Model):
     class Meta:
         app_label = "openvpn_userinterface"
 
-def load_org_map(org_map):
+def load_org_map(org_map, restrict_groups=None):
+    # XXX restrict_groups unimplemented
+
     for line in org_map.split(";"):
         line = line.strip()
         if not line:
@@ -98,14 +100,17 @@ def load_org_map(org_map):
             )
             element.save()
 
-def dump_org_map():
+def dump_org_map(mappings=None):
+    if mappings is None:
+        mappings = OrgMapping.objects.order_by("group__name")
+
     # TODO Inflate this code, it's way too dense
     return "\n".join(
         "%s <- %s;" % (
             mapping.group.name,
             " & ".join("%s=%s" % (element.type.source_name, element.value)
                 for element in mapping.element_set.all())
-        ) for mapping in OrgMapping.objects.order_by("group__name")
+        ) for mapping in mappings
     )
     
 def validate_org_map(org_map):
