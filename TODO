@@ -1,8 +1,71 @@
-# TODO
+vim: shiftwidth=4 expandtab
+encoding: utf-8
 
-- admin: create certificate authorities from the web front-end
-- admin: revoke certificates of other users
 
-# DONE
 
-- make existing functionality work with separate CAs
+============================================
+Known Bugs and Missing Features in PurpleNet
+============================================
+
+Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
+		Department of Communications Engineering
+		Tampere University of Technology
+		
+Release-critical
+================
+
+Process
+-------
+
+- Get some project hosting, a mailing list and a bug tracker.
+
+- Get approval for release from the steering group
+
+Documentation
+-------------
+
+- Example httpd configuration
+
+- A template for the Finnish privacy policy ("Rekisteriseloste")
+
+Bugs
+----
+
+- Some exceptions still get through, eg. unique constraint violations. Hunt
+  them down and kill them with fire.
+
+New features
+------------
+
+Further improvement
+===================
+
+Security
+--------
+
+- At the moment the CA needs to reside in the same file system with the web
+  server running the portal. To be able to grant certificates the portal needs
+  read access to certain CA files, such as the CA certificate and private key,
+  and read/write access to others, such as the CA database and CRL. As the web
+  server is probably the most likely attack vector, it should be made possible
+  to separate the CA from the web server using some form of RPC.
+  
+  A generic RESTful CA interface might also be useful on its own.
+
+Incomplete functionality
+------------------------
+
+- Even though multiple server support is planned and built into the database
+  schema, certain assumptions are currently being made that will not hold in a
+  true multi-server setup. First of all, the learn-address.py script needs a
+  database connection to the database of the portal to determine the network
+  to which an incoming VPN connection should be dropped. Secondly, the OpenVPN
+  server requires a copy of the CRL that, unless the OpenVPN server and PKI
+  reside in the same file system, needs to be periodically refreshed using
+  cron or other means.
+  
+New functionality
+-----------------
+
+- An "Advanced order form" where you can eg. specify the CN of the certificate
+  and/or get an existing CSR signed.

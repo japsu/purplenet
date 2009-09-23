@@ -15,8 +15,8 @@ try:
 except ImportError:
     pass
 
-OPENVPNWEB_HOST="localhost"
-OPENVPNWEB_SETUP_PATH="/openvpn/setup/"
+PURPLENET_HOST="localhost"
+PURPLENET_SETUP_PATH="/openvpn/setup/"
 
 def mangle(data):
     try:
@@ -29,7 +29,7 @@ def mangle(data):
 
 def reinit_soft():
     params = {
-        "setup_key" : settings.OPENVPNWEB_SETUP_KEY,
+        "setup_key" : settings.PURPLENET_SETUP_KEY,
         "ca_dir" : "/home/pajukans/Temp/testca",
         "root_ca_cn": "Root CA",
         "server_ca_cn": "Server CA",
@@ -44,8 +44,8 @@ def reinit_soft():
         "Content-Type" : "application/x-www-form-urlencoded"
     }
     
-    with closing(httplib.HTTPConnection(OPENVPNWEB_HOST)) as conn:
-        conn.request("POST", OPENVPNWEB_SETUP_PATH, post_data, headers)
+    with closing(httplib.HTTPConnection(PURPLENET_HOST)) as conn:
+        conn.request("POST", PURPLENET_SETUP_PATH, post_data, headers)
         response = conn.getresponse()
         status, reason = response.status, response.reason
         data = response.read()

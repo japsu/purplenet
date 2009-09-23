@@ -1,3 +1,96 @@
-PYTHONPATH=. bin/mkca -h
+vim: shiftwidth=4 expandtab
+encoding: utf-8
 
-setup.py lacks stuff.
+
+
+================================
+PurpleNet OpenVPN User Interface
+================================
+
+Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
+		Department of Communications Engineering
+		Tampere University of Technology
+
+Copyright
+=========
+
+    PurpleNet - a Web User Interface for OpenVPN
+    Copyright (C) 2009  Santtu Pajukanta
+    Copyright (C) 2008, 2009  Tuure Vartiainen, Antti Niemelä, Vesa Salo
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Introduction
+============
+
+PurpleNet is a web user interface for managing OpenVPN servers. Current
+features include:
+
+	* Management of the PKI
+		* creating the CA hierarchy
+		* granting certificates
+		* revoking your own certificates
+		* administrator access to revoking others' certificates
+	
+	* Config generation for client and server
+		* Customizable through Django templates
+	
+	* Shibboleth integration
+		* Login via Shibboleth
+		* Mapping of Shibboleth properties (envvars) into groups
+
+For missing and incomplete functionality, see the file TODO.
+
+Concepts
+========
+
+ORGANIZATIONS - Several organizations may be configured in the system, each of
+which has access to one or more networks.
+
+CLIENTS, ADMINISTRATORS AND SUPERUSERS - Three levels of access are available
+in this release of PurpleNet:
+
+	* Clients are normal users that may request certificates and revoke their
+	  own existing certificates.
+	
+	* Administrators have management access to one or more organizations. They
+	  can revoke certificates of users in their organizations and (in
+	  standalone mode) manage their membership.
+	
+	* Superusers can change and configure just about anything in the system.
+
+ORGANIZATIONAL MAPPING - The system can be configured to use Shibboleth as its
+authentication backend. 
+
+Installation
+============
+
+1. Put the purplenet and libpurplenet packages in your PYTHON_PATH.
+
+2. Create a database in an RDBMS supported by Django (PostgreSQL recommended).
+
+3. Copy purplenet/settings.py.dist to purplenet/settings.py and edit it to
+   match your installation.
+
+4. Configure the web server (see configuration examples below)
+
+5. Point your browser to http://path/to/purplenet/setup and fill in the
+   setup form.
+
+6. Log in as a superuser and create at least one organization, network and
+   server.
+   
+7. Download the OpenVPN server configuration from your PurpleNet portal and
+   use it to deploy the OpenVPN server.

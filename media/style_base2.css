@@ -2,7 +2,8 @@
 
 body {
         font-family: Arial, Helvetica, sans-serif;
-        background-repeat: repeat
+        background-repeat: repeat;
+        background-color: #400040;
 }
 
 p, li.add_remove, .revoked {
@@ -66,11 +67,25 @@ td {
 	min-width:4em;
 }
 
+a {
+	color: #560056;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
 #top_bar {
         min-width:30em;
         min-height:4em;
         z-index:2;
-        background-color:#BAE0D1;
+        background-color:#800080;
+        color: white;
+}
+
+#top_bar h1, #top_bar a {
+		color: white;
 }
 
 #text {
@@ -78,7 +93,7 @@ td {
         min-width:30em;
         min-height:30em;
         z-index:2;
-        background-color:#E8E8E8;
+        background-color:white;
         text-align:justify;
 }
 	
@@ -87,8 +102,8 @@ td {
         min-width:30em;
 	min-height:34em;
         margin:1.5em 12em 1.5em 12em;
-        border: 0.063em solid #ccc;
-	background-color:#E8E8E8;
+        border: 2px solid #560056;
+	background-color:#560056;
 	z-index:1;
 }
 

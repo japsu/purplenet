@@ -14,10 +14,10 @@ print """
 """
 
 from os import environ as env
-env["DJANGO_SETTINGS_MODULE"] = "openvpnweb.settings"
+env["DJANGO_SETTINGS_MODULE"] = "purplenet.settings"
 
-from openvpnweb.openvpn_userinterface.models import *
-from openvpnweb.tut_org_map import setup_org_map
+from purplenet.openvpn_userinterface.models import *
+from purplenet.tut_org_map import setup_org_map
 from django.contrib.auth.models import User, Group
 
 from datetime import datetime, timedelta

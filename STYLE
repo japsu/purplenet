@@ -1,11 +1,15 @@
+vim: shiftwidth=4 expandtab
+encoding: utf-8
+
+
+
 =================================
 Coding Conventions for OpenVPNweb
 =================================
 
-vim: shiftwidth=4 expandtab
-encoding: utf-8
-
 Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
+		Department of Communications Engineering
+		Tampere University of Technology
 
 Introduction
 ============
@@ -87,21 +91,6 @@ Example:
         {% endwith %}
       {% endwith %}
     {% endblock %}
-
-Django models and views
-=======================
-
-FIXME check if app_label is enough
-
-Models and views should be placed in the .models and .views sub-packages of
-their applications. Due to a braindamage in Django, splitting models over many
-files requires a hack an example of which may be found in openvpnweb/
-openvpn_userinterface/models/__init__.py. Such a hack is not required for
-views. This hack should be removed once Django fixes their braindamage. For
-more information, see
-
-http://www.ifisgeek.com/2009/01/26/splitting-django-models-into-separate-files/
-
 
 TODO, XXX and FIXME comments
 ============================

@@ -1,0 +1,49 @@
+vim: shiftwidth=4 expandtab
+encoding: utf-8
+
+
+
+==================================
+Copyright and authors of PurpleNet
+==================================
+
+Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
+		Department of Communications Engineering
+		Tampere University of Technology
+
+Copyright
+=========
+
+    PurpleNet - a Web User Interface for OpenVPN
+    Copyright (C) 2009  Santtu Pajukanta
+    Copyright (C) 2008, 2009  Tuure Vartiainen, Antti Niemelä, Vesa Salo
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+   
+Authors and contributors
+========================
+
+PurpleNet has been designed and implemented at the Deparment of Communications
+Engineering of the Tampere University of Technology. The following people have
+taken part in the work.
+
+	* Karri Huhtanen
+	* Antti Niemelä
+	* Santtu Pajukanta
+	* Vesa Salo
+	* Tuure Vartiainen
+
+Copyright notices in each file state, which of the above have contributed to
+the contents of the file.
