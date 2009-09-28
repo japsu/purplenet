@@ -67,7 +67,7 @@ def order_page(request, org_id, network_id):
                 network=network
             )
 
-        common_name = org.get_random_cn()
+        common_name = "%s-%s" % (client_san, org.get_random_cn())
         ca = org.client_ca
         config = ca.config
         chain_dir = siteconfig.copies_dir

@@ -31,7 +31,7 @@ from datetime import datetime
 from libpurplenet import openssl
 
 class Certificate(models.Model):
-    common_name = models.CharField(max_length=30)
+    common_name = models.CharField(max_length=128)
     granted = models.DateTimeField()
     expires = models.DateTimeField()
     revoked = models.DateTimeField(null=True, blank=True)
