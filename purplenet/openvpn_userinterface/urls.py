@@ -76,6 +76,8 @@ urlpatterns = patterns('',
     
     url(r'^manage/org/(?P<org_id>\d+)/$', manage_org_page,
         name="manage_org_page"),
+    url(r'^manage/org/(?P<org_id>\d+)/more/$', manage_org_page,
+        {"show_revoked":True}, name="manage_org_page_revoked"),
     url(r'^manage/org/(?P<org_id>\d+)/addclient/$', add_client_to_org_page,
         name="add_client_to_org_page"),
     url(r'^manage/org/(?P<org_id>\d+)/removeclient/(?P<client_id>\d+)/$',

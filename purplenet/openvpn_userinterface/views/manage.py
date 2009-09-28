@@ -67,8 +67,11 @@ def manage_page(request):
     return render_to_response("openvpn_userinterface/manage.html", vars,
         context_instance=context)
 
+NUM_REVOKED=5
+
 @manager_required
-def manage_org_page(request, org_id):
+@require_GET
+def manage_org_page(request, org_id, show_revoked=False):
     org = get_object_or_404(Org, id=int(org_id))
     client = request.session["client"]
     
@@ -82,27 +85,31 @@ def manage_org_page(request, org_id):
         certificates = ClientCertificate.objects.filter(
             ca__owner__exact=org,
             network=network
-        ).order_by("granted")
-        networks.append((network, certificates))
+        )
+        
+        active_certificates = certificates.filter(revoked__isnull=True).order_by("granted")
+        all_revoked_certificates = certificates.filter(revoked__isnull=False).order_by("-revoked")
+        
+        if show_revoked:
+            revoked_certificates = all_revoked_certificates
+            more_revoked_certificates = False
+        else:
+            revoked_certificates = all_revoked_certificates[0:NUM_REVOKED].reverse()
+            more_revoked_certificates = all_revoked_certificates.count() > NUM_REVOKED
+        
+        networks.append((network, active_certificates, revoked_certificates, more_revoked_certificates))
 
     vars = {
         "client" : client,
         "networks" : networks,
         "org" : org,
         "external_auth" : settings.PURPLENET_USE_SHIBBOLETH,
+        "num_revoked" : NUM_REVOKED,
     }
     context = RequestContext(request, {})
-
-    if request.method == "POST":
-        # XXX Do something.
-        pass
     
-    elif request.method == "GET":
-        return render_to_response("openvpn_userinterface/manage_org.html",
-            vars, context_instance=context)
-    
-    else:
-        return HttpResponseNotAllowed(["GET", "POST"])            
+    return render_to_response("openvpn_userinterface/manage_org.html",
+        vars, context_instance=context) 
 
 @superuser_required
 @create_view(CreateOrgForm, "openvpn_userinterface/create_org.html")

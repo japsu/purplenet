@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 {% endif %}
 
 <ul>
-  {% for network, certificates in networks %}
+  {% for network, active_certificates, revoked_certificates, more_revoked_certificates in networks %}
     <li>
       {% if client.is_superuser %}
         <form class="inline_form" action="{% url remove_network_from_org_page org_id=org.id network_id=network.id %}" method="post">
@@ -43,18 +43,40 @@ with this program; if not, write to the Free Software Foundation, Inc.,
       {% manage_link network client %}
       
       <ul>
-        {% for certificate in certificates %}
-          <li>
-            {% if certificate.is_revoked %}
-              <span class="revoked">Revoked by {{ certificate.revoked_by }} at {{ certificate.revoked|date }}</span>
-            {% else %}
-              <form class="inline_form" action="{% url revoke_page cert_id=certificate.id %}" method="post">
-                <input type="submit" value="Revoke" />
-              </form>
-            {% endif %}
-            {{ certificate.common_name }} ({{ certificate.owner }})
-          </li>        
-        {% endfor %}
+        {% if active_certificates %}
+          <li>Active:
+            <ul>
+              {% for certificate in active_certificates %}
+                <li>
+                  <form class="inline_form" action="{% url revoke_page cert_id=certificate.id %}" method="post">
+                    <input type="submit" value="Revoke" />
+                  </form>
+                  {{ certificate.common_name }} ({{ certificate.owner }})
+                </li>          
+              {% endfor %}
+            </ul>
+          </li>
+        {% else %}
+          <li>No active certificates.</li>
+        {% endif %}
+        
+        {% if revoked_certificates %}
+          <li>Revoked:
+            <ul>
+              {% for certificate in revoked_certificates %}
+                <li>
+                  <span class="revoked">Revoked by {{ certificate.revoked_by }} at {{ certificate.revoked|date }}</span>
+                  {{ certificate.common_name }} ({{ certificate.owner }})
+                </li>
+              {% endfor %}
+              {% if more_revoked_certificates %}
+                <li class="add_remove"><a href="{% url manage_org_page_revoked org_id=org.id %}">More...</a></li>
+              {% endif %}
+            </ul>
+          </li>
+        {% else %}
+          <li>No revoked certificates.</li>
+        {% endif %}
       </ul>
     </li>
   {% endfor %}
