@@ -29,6 +29,7 @@ from django.contrib.auth.models import User, Group
 from purplenet.openvpn_userinterface.models.org import Org, AdminGroup
 from purplenet.openvpn_userinterface.models.siteconfig import SiteConfig
 from purplenet.openvpn_userinterface.models.certificates import ClientCertificate
+from libpurplenet.helpers import sanitize_name
 
 class Client(models.Model):
     user = models.OneToOneField(User)
@@ -36,6 +37,10 @@ class Client(models.Model):
     @property
     def name(self):
         return self.user.username
+
+    @property
+    def sanitized_name(self):
+        return sanitize_name(self.name) 
 
     @property
     def orgs(self):

@@ -23,10 +23,10 @@
 export PYTHONPATH=$PWD
 export PATH=$PWD/bin:$PATH
 export OPENVPN_WEB_DIR=$PWD
-export DJANGO_SETTINGS_MODULE=openvpnweb.settings
+export DJANGO_SETTINGS_MODULE=purplenet.settings
 
 function manage {
-	python $OPENVPN_WEB_DIR/openvpnweb/manage.py $@
+	python $OPENVPN_WEB_DIR/purplenet/manage.py $@
 }
 
 function hop {

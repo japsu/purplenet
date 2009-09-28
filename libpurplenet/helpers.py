@@ -128,19 +128,59 @@ def mkdir_check(dir, force=False):
                 " force.", dir)
             raise FileExists(dir)
 
-def coalesce(*args):
+def coalesce(*args, **kwargs):
+    """coalesce(*args, return_none=False) -> one of args or None
+    
+    Returns the first non-None argument. If all arguments are None, behaviour
+    is controlled by return_none: On return_none=True, None is returned. On
+    return_none=False, a ValueError is raised.
+    """
     for arg in args:
         if arg is not None:
             return arg
 
-    return None
+    if return_none:
+        return None
+    else:
+        raise ValueError("coalesce with all Nones")
 
 def import_module(module_name):
+    """import_module(module_name) -> module
+    
+    Imports a module by name and returns it. Error behaviour is identical to
+    that of __import__, that is, you'll mostly get ImportErrors.
+    """
     return __import__(module_name, {}, {}, [''])
 
 def deprecated(func):
+    """@deprecated def ...
+    
+    Tells the reader and user of the code that a function is deprecated.
+    A DeprecationWarning is emitted when the wrapped function is called.
+    """
+    
     @wraps(func)
     def __inner(*args, **kwargs):
         warn(DeprecationWarning("%s is deprecated" % func.__name__))
         return func(*args, **kwargs)
     return __inner
+
+def sanitize_name(name):
+    """sanitize_name(name) -> sanitized_name
+    
+    Sanitizes a name. This means that the name is stripped of non-alphanumeric
+    characters and converted to lower case. If the name is reduced to zero
+    characters, the bytes seven to ten of the MD5 checksum of the input are
+    returned instead.
+    """
+    # Bytes seven to ten are choosed completely arbitrarily. If someone can
+    # think of a better way to handle values that get reduced ad absurdum, go
+    # ahead.
+    sanitized_name = "".join(i for i in name if i.isalnum()).lower()
+    if sanitized_name:
+        return sanitized_name
+    else:
+        from md5 import md5
+        hasher = md5()
+        hasher.update(name)
+        return hasher.hexdigest()[12:20]

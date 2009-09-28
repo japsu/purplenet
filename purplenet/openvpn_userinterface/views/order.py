@@ -37,6 +37,7 @@ from ..logging import log
 from libpurplenet import openssl
 from datetime import datetime, timedelta
 from cStringIO import StringIO
+from contextlib import closing
 
 import zipfile
 
@@ -53,6 +54,9 @@ def order_page(request, org_id, network_id):
 
     if request.method == 'POST':
         client = request.session["client"]
+        
+        client_san = client.sanitized_name
+        network_san = network.sanitized_name
 
         if not client.may_access(org, network):
             log(
@@ -69,6 +73,7 @@ def order_page(request, org_id, network_id):
         chain_dir = siteconfig.copies_dir
         server_ca_crt = siteconfig.server_ca.get_ca_certificate_path()
         
+        # Generate keys
         # TODO user-supplied CSR
         key = openssl.generate_rsa_key(config=config)
         csr = openssl.create_csr(common_name=common_name, key=key,
@@ -101,23 +106,29 @@ def order_page(request, org_id, network_id):
             extra_crt_path=server_ca_crt
         )
         
-        client_config = network.client_config
+        # Define file names
+        
+        # Assuming a user called "FooGrande" and network "PurpleNet VLAN 721",
+        # the resulting file name for the key/config archive is
+        # "foogrande-purplenetvlan721.zip". 
+        
+        filename_base = "%s-%s" % (client_san, network_san)
+        keys_filename = filename_base + ".p12"
+        config_filenames = (filename_base + ".ovpn", filename_base + ".conf")
+        
+        client_config = network.client_config(keys_filename=keys_filename)
 
+        # Start the response, stating it's a zip file with a specific filename
         response = HttpResponse(mimetype='application/zip')
-        response['Content-Disposition'] = 'filename=openvpn-certificates.zip'
+        response['Content-Disposition'] = 'filename=%s.zip' % filename_base 
 
-        # TODO with ZipFile(...) as zip?
-        # TODO write directly into response?
-        buffer=StringIO()
-        zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-        _zip_write_file(zip, "keys.p12", pkcs12)
-        _zip_write_file(zip, "openvpn.conf", client_config)
-        zip.close()
-        buffer.flush()
-        ret_zip = buffer.getvalue()
-        buffer.close()
-        response.write(ret_zip)
-
+        # Write config and key files into the zip file
+        with closing(zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)) as zip:
+            _zip_write_file(zip, keys_filename, pkcs12)
+            
+            for config_filename in config_filenames:
+                _zip_write_file(zip, config_filename, client_config)
+            
         return response
 
     elif request.method == "GET":

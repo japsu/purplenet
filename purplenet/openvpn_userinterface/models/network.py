@@ -29,6 +29,8 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 
+from libpurplenet.helpers import sanitize_name
+
 class ConfigurationError(Exception):
     pass
 
@@ -255,6 +257,10 @@ class Network(models.Model):
         return reverse("manage_network_page", kwargs={"network_id":self.id})
 
     @property
+    def sanitized_name(self):
+        return sanitize_name(self.name)
+
+    @property
     def _config_vars(self):
         servers = self.server_set.all()
         if not servers:
@@ -278,9 +284,9 @@ class Network(models.Model):
         
         return vars
 
-    @property
-    def client_config(self):
-        return render_to_string("openvpn_conf/client.conf", self._config_vars)
+    def client_config(self, keys_filename="keys.p12"):
+        return render_to_string("openvpn_conf/client.conf",
+            dict(self._config_vars, keys_filename=keys_filename))
 
     class Admin: pass
 
