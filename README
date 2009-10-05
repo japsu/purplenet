@@ -8,8 +8,8 @@ PurpleNet OpenVPN User Interface
 ================================
 
 Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
-		Department of Communications Engineering
-		Tampere University of Technology
+        Department of Communications Engineering
+        Tampere University of Technology
 
 Copyright
 =========
@@ -35,8 +35,14 @@ Copyright
 Introduction
 ============
 
-PurpleNet is a web user interface for managing OpenVPN servers. Current
-features include:
+Purplenet is a web user interface for OpenVPN tunnelling servers aimed
+to make it easier to control, manage, deploy OpenVPN based
+connectivity services to the end users and devices. This kind of
+connectivity services can be utilised for example for providing secure
+VPN connectivity as well as in general providing better access and
+connectivity to the network services offered by the service provider.
+
+Current features include:
 
 	* Management of the PKI
 		* creating the CA hierarchy
@@ -94,3 +100,13 @@ Installation
    
 7. Download the OpenVPN server configuration from your PurpleNet portal and
    use it to deploy the OpenVPN server.
+
+Authors and acknowledgements
+============================
+
+See the file AUTHORS for a full list of people that have contributed to
+PurpleNet.
+
+PurpleNet is licensed under the GNU General Public License, version 2 or
+later. See the files LICENSE.GPLv2 and LICENSE.GPLv3 for the full legal text
+of the licenses.

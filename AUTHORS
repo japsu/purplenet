@@ -7,9 +7,12 @@ encoding: utf-8
 Copyright and authors of PurpleNet
 ==================================
 
-Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
-		Department of Communications Engineering
-		Tampere University of Technology
+Authors:
+        Santtu Pajukanta <santtu.pajukanta@tut.fi>
+        Karri Huhtanen <karri.huhtanen@tut.fi>
+
+        Department of Communications Engineering
+        Tampere University of Technology
 
 Copyright
 =========
@@ -35,15 +38,22 @@ Copyright
 Authors and contributors
 ========================
 
-PurpleNet has been designed and implemented at the Deparment of Communications
-Engineering of the Tampere University of Technology. The following people have
-taken part in the work.
-
-	* Karri Huhtanen
-	* Antti Niemelä
-	* Santtu Pajukanta
-	* Vesa Salo
-	* Tuure Vartiainen
+The initial version of the software was developed at the Tampere
+University of Technology, Department of Communications Engineering in
+2009. The work was led and coordinated by Karri Huhtanen
+<karri.huhtanen@tut.fi> and Tuure Vartiainen <tuure.vartiainen@tut.fi>
+and the implementation was mainly programmed by Santtu Pajukanta
+<santtu.pajukanta@tut.fi> with previous source code from Tuure
+Vartiainen, Antti Niemelä <antti.j.niemela@tut.fi> and Vesa Salo
+<vesa.salo@tut.fi>.
 
 Copyright notices in each file state, which of the above have contributed to
 the contents of the file.
+
+Acknowledgements
+================
+
+This work was supported by TEKES as part of the Future Internet
+program of TIVIT (Finnish Strategic Centre for Science, Technology and
+Innovation in the field of ICT)
+
