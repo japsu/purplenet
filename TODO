@@ -14,17 +14,8 @@ Author: Santtu Pajukanta <santtu.pajukanta@tut.fi>
 Release-critical
 ================
 
-Process
--------
-
-- Get some project hosting, a mailing list and a bug tracker.
-
-- Get approval for release from the steering group
-
 Documentation
 -------------
-
-- Example httpd configuration
 
 - A template for the Finnish privacy policy ("Rekisteriseloste")
 
