@@ -177,6 +177,11 @@ def sanitize_name(name):
     # think of a better way to handle values that get reduced ad absurdum, go
     # ahead.
     sanitized_name = "".join(i for i in name if i.isalnum()).lower()
+
+    # Django might give us Unicode input.
+    if type(sanitized_name) is unicode:
+        sanitized_name = sanitized_name.encode("UTF-8")
+
     if sanitized_name:
         return sanitized_name
     else:

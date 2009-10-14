@@ -26,6 +26,7 @@ tags used across the templates.
 """
 
 from django import template
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
@@ -113,3 +114,7 @@ def manage_link(obj, client_or_user):
         return u'<a href="%s">%s</a>' % (obj.manage_url, obj.name)
     else:
         return obj.name
+
+@register.simple_tag
+def media_path():
+    return settings.MEDIA_URL

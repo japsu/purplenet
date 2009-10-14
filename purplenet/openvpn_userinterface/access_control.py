@@ -111,7 +111,7 @@ def require_shibboleth(func):
     installed in Shibboleth mode.
     """
     @wraps(func)
-    def _inner(*args, **kwars):
+    def _inner(*args, **kwargs):
         if not settings.PURPLENET_USE_SHIBBOLETH:
             return HttpResponseForbidden()
         else:
@@ -126,7 +126,7 @@ def require_standalone(func):
     installed in standalone (ie. non-Shibboleth) mode.
     """
     @wraps(func)
-    def _inner(*args, **kwars):
+    def _inner(*args, **kwargs):
         if settings.PURPLENET_USE_SHIBBOLETH:
             return HttpResponseForbidden()
         else:
