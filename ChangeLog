@@ -1,3 +1,11 @@
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : config template selection
+
+2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* ChangeLog: add ChangeLog, release 0.6.0
+
 2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
 	* TODO: removed done TODO items
@@ -219,9 +227,9 @@
 
 2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
-	* : commit badbe90f6a8a6295e9bd43fbf3cac042163e95fa Merge:
-	df8509e... 9983eb4...  Author: Santtu Pajukanta
-	<santtu.pajukanta@tut.fi> Date:   Mon Sep 7 20:07:00 2009 +0300
+	* : commit badbe90f6a8a6295e9bd43fbf3cac042163e95fa Merge: df8509e
+	9983eb4 Author: Santtu Pajukanta <santtu.pajukanta@tut.fi> Date:
+	Mon Sep 7 20:07:00 2009 +0300
 
 2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
