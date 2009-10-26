@@ -77,7 +77,7 @@ class Server(models.Model):
     
     @property
     def server_config(self):
-        return render_to_string(self.template, self._config_vars)
+        return render_to_string(self.config_template, self._config_vars)
     
     def __unicode__(self):
         return self.name
