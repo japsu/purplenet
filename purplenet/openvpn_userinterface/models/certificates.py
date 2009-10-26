@@ -114,7 +114,7 @@ class ServerCertificate(Certificate):
         key, crt = self._create_certificate()
         
         self.key = key
-        self.crt = crt
+        self.certificate = crt
         
         return key, crt
 

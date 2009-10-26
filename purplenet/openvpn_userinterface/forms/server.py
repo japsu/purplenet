@@ -26,8 +26,11 @@ Forms related to the Server model.
 from django import forms
 
 from purplenet.openvpn_userinterface.models import Server
+from libpurplenet.helpers import get_config_templates
 
 class ServerForm(forms.ModelForm):
+    config_template = forms.ChoiceField(choices = get_config_templates(config_type="server"))
+    
     class Meta:
         model = Server
         exclude = ["certificate"]

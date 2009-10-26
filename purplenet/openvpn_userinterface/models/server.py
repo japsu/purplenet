@@ -28,6 +28,8 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.core.urlresolvers import reverse
 
+from libpurplenet.helpers import sanitize_name
+
 class Server(models.Model):
     name = models.CharField(max_length=30)
     address = models.IPAddressField()
@@ -44,6 +46,8 @@ class Server(models.Model):
     mode = models.CharField(max_length=30, choices=MODE_CHOICES) 
     certificate = models.OneToOneField("ServerCertificate",
         related_name="user")
+    
+    config_template = models.CharField(max_length=30)
 
     # REVERSE: network_set = ManyToMany(Network)
     
@@ -73,7 +77,7 @@ class Server(models.Model):
     
     @property
     def server_config(self):
-        return render_to_string("openvpn_conf/server.conf", self._config_vars)
+        return render_to_string(self.template, self._config_vars)
     
     def __unicode__(self):
         return self.name
@@ -84,6 +88,10 @@ class Server(models.Model):
     @property
     def manage_url(self):
         return reverse("manage_server_page", kwargs={"server_id":self.id})
+
+    @property
+    def sanitized_name(self):
+        return sanitize_name(self.name)
 
     class Admin: pass
 

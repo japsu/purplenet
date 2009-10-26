@@ -27,10 +27,13 @@ Useful helper functions that are used in several places in PurpleNet.
 from __future__ import with_statement, absolute_import
 
 from django.template.loader import render_to_string
+from django.conf import settings
 from functools import wraps
+from glob import glob
 
 import sys, os
 import logging
+import zipfile
 
 log = logging.getLogger()
 
@@ -94,6 +97,10 @@ def write_file(filename, contents, force=False, mode=0644):
         f.write(contents)
 
     os.chmod(filename, mode)
+
+def read_file(filename):
+    with open(filename, "r") as f:
+        return f.read()
 
 def render_to_file(filename, template_name, context, force):
     write_file(filename, render_to_string(template_name, context), force)
@@ -189,3 +196,27 @@ def sanitize_name(name):
         hasher = md5()
         hasher.update(name)
         return hasher.hexdigest()[12:20]
+    
+def zip_write_file(zip, filename, contents, mode=0666):
+    """zip_write_file(zip, filename, contents, mode=0666)
+    
+    Writes a file into a ZipFile. Also sets the mode of the file, which
+    a plain zip.writestr won't do (resulting in mode=0000).
+    """
+    
+    info = zipfile.ZipInfo(filename)
+    info.external_attr = mode << 16L
+    zip.writestr(info, contents)
+
+def get_config_templates(config_type="server"):
+    # XXX kludge
+    templates = set()
+    for base in settings.TEMPLATE_DIRS:
+        template_files = glob(os.path.join(base, "openvpn_conf/%s/*" % config_type))
+        for filename in template_files:
+            if filename.startswith(base):
+                filename = filename[len(base):]
+            if filename.startswith("/"):
+                filename = filename[1:]
+            templates.add((filename, filename)) 
+    return list(templates)
