@@ -81,7 +81,7 @@ def load_org_map(org_map, restrict_groups=None):
             
             # Make sure this environment variable is queried in
             # update_group_membership.
-            InterestingEnvVar.objects.get_or_create(name="source_name")
+            InterestingEnvVar.objects.get_or_create(name=source_name)
 
             mapping_type, created = MappingType.objects.get_or_create(
                 namespace=namespace,
