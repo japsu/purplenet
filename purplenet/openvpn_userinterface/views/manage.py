@@ -208,6 +208,17 @@ def add_admin_group_to_org_page(request, form, org_id):
     return HttpResponseRedirect(reverse("manage_org_page", kwargs=dict(
         org_id=org.id)))
 
+@superuser_required
+@create_view(SelectOrgForm,
+    "openvpn_userinterface/add_org_to_admin_group.html")
+def add_org_to_admin_group_page(request, form, admin_group_id):
+    admin_group = get_object_or_404(AdminGroup, id=int(admin_group_id))
+    org = form.cleaned_data["org"]
+
+    org.admin_group_set.add(admin_group)
+
+    return redirect("manage_admin_group_page", admin_group_id=admin_group_id)
+
 @require_standalone    
 @superuser_required
 @require_POST
@@ -244,7 +255,8 @@ def remove_admin_group_from_org_page(request, org_id, admin_group_id):
     
     org.admin_group_set.remove(admin_group)
     
-    return redirect("manage_org_page", org_id=org_id)
+    return_url = request.META.get("HTTP_REFERER", reverse(manage_org_page, kwargs={"org_id":org_id}))
+    return HttpResponseRedirect(return_url)
     
 @superuser_required
 @require_POST
