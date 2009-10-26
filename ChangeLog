@@ -8,6 +8,14 @@
 
 2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
+	* TODO: removed done TODO items
+
+2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* ChangeLog: add ChangeLog, release 0.6.0
+
+2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
 	* bin/add_relevant_files_to_version_control.sh,
 	bin/network_attribute_types.py, bin/reinit_hard.py,
 	bin/reinit_soft.py, bin/test_network_profiles.py, reinit.sh: deleted
