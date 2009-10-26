@@ -24,6 +24,8 @@
 The certificate download view.
 """
 
+from __future__ import with_statement
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.conf import settings

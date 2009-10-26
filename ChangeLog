@@ -1,0 +1,1006 @@
+2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/add_relevant_files_to_version_control.sh,
+	bin/network_attribute_types.py, bin/reinit_hard.py,
+	bin/reinit_soft.py, bin/test_network_profiles.py, reinit.sh: deleted
+	a few extra files
+
+2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* README: README fixes
+
+2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* libpurplenet/helpers.py,
+	purplenet/openvpn_userinterface/access_control.py,
+	purplenet/openvpn_userinterface/templatetags/ovpn_tags.py,
+	purplenet/openvpn_userinterface/views/order.py,
+	templates/base/base.html: fixed a host of bugs and breakage - CSS location was hardcoded - setup was broken - ordering certificates had encoding problems
+
+2009-10-05  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* AUTHORS, LICENSE.GPLv2, LICENSE.GPLv3, README: license stuff
+
+2009-09-28  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* purplenet/openvpn_userinterface/urls.py,
+	purplenet/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/manage_org.html: Only show a certain
+	amount of revoked certificates by default.
+
+2009-09-28  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* purplenet/helper_functions.py,
+	purplenet/openvpn_userinterface/models/certificates.py,
+	purplenet/openvpn_userinterface/views/order.py: made certificate CN
+	more informative Note that due to increased space requirements in the CN field, a
+	database rebuild is necessary.
+
+2009-09-28  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* .gitignore, env.sh, libpurplenet/helpers.py,
+	purplenet/openvpn_userinterface/models/client.py,
+	purplenet/openvpn_userinterface/models/network.py,
+	purplenet/openvpn_userinterface/views/order.py,
+	templates/openvpn_conf/client.conf: better file names for clients +
+	assorted fixen
+
+2009-09-23  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* .gitignore, AUTHORS, BUGS, README, STYLE, TODO,
+	bin/reinit_hard.py, bin/reinit_soft.py, certlib/__init__.py,
+	certlib/data.py, certlib/enums.py, certlib/helpers.py,
+	certlib/keygen.py, certlib/mkca.cnf, certlib/mkca.py,
+	certlib/openssl.py, certlib/openssl_service.proto, env.sh,
+	libpurplenet/__init__.py, libpurplenet/data.py,
+	libpurplenet/enums.py, libpurplenet/helpers.py,
+	libpurplenet/mkca.cnf, libpurplenet/mkca.py,
+	libpurplenet/openssl.py, libpurplenet/openssl_service.proto,
+	media/style_base2.css, openvpnweb/__init__.py,
+	openvpnweb/auth/__init__.py, openvpnweb/auth/backends.py,
+	openvpnweb/certificate_manager.py, openvpnweb/helper_functions.py,
+	openvpnweb/manage.py, openvpnweb/openvpn_userinterface/__init__.py,
+	openvpnweb/openvpn_userinterface/access_control.py,
+	openvpnweb/openvpn_userinterface/admin.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/client.py,
+	openvpnweb/openvpn_userinterface/forms/group.py,
+	openvpnweb/openvpn_userinterface/forms/network.py,
+	openvpnweb/openvpn_userinterface/forms/org.py,
+	openvpnweb/openvpn_userinterface/forms/search.py,
+	openvpnweb/openvpn_userinterface/forms/select.py,
+	openvpnweb/openvpn_userinterface/forms/server.py,
+	openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/logging.py,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/ca.py,
+	openvpnweb/openvpn_userinterface/models/certificates.py,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/models/logging.py,
+	openvpnweb/openvpn_userinterface/models/network.py,
+	openvpnweb/openvpn_userinterface/models/org.py,
+	openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/models/server.py,
+	openvpnweb/openvpn_userinterface/models/siteconfig.py,
+	openvpnweb/openvpn_userinterface/templatetags/__init__.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/helpers.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/logs.py,
+	openvpnweb/openvpn_userinterface/views/main.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/order.py,
+	openvpnweb/openvpn_userinterface/views/revoke.py,
+	openvpnweb/openvpn_userinterface/views/setup.py,
+	openvpnweb/settings.py.dist, openvpnweb/tut_org_map.py,
+	openvpnweb/urls.py, purplenet/__init__.py,
+	purplenet/auth/__init__.py, purplenet/auth/backends.py,
+	purplenet/certificate_manager.py, purplenet/helper_functions.py,
+	purplenet/manage.py, purplenet/openvpn_userinterface/__init__.py,
+	purplenet/openvpn_userinterface/access_control.py,
+	purplenet/openvpn_userinterface/admin.py,
+	purplenet/openvpn_userinterface/forms/__init__.py,
+	purplenet/openvpn_userinterface/forms/client.py,
+	purplenet/openvpn_userinterface/forms/group.py,
+	purplenet/openvpn_userinterface/forms/network.py,
+	purplenet/openvpn_userinterface/forms/org.py,
+	purplenet/openvpn_userinterface/forms/search.py,
+	purplenet/openvpn_userinterface/forms/select.py,
+	purplenet/openvpn_userinterface/forms/server.py,
+	purplenet/openvpn_userinterface/forms/setup.py,
+	purplenet/openvpn_userinterface/logging.py,
+	purplenet/openvpn_userinterface/models/__init__.py,
+	purplenet/openvpn_userinterface/models/ca.py,
+	purplenet/openvpn_userinterface/models/certificates.py,
+	purplenet/openvpn_userinterface/models/client.py,
+	purplenet/openvpn_userinterface/models/logging.py,
+	purplenet/openvpn_userinterface/models/network.py,
+	purplenet/openvpn_userinterface/models/org.py,
+	purplenet/openvpn_userinterface/models/org_map.py,
+	purplenet/openvpn_userinterface/models/server.py,
+	purplenet/openvpn_userinterface/models/siteconfig.py,
+	purplenet/openvpn_userinterface/templatetags/__init__.py,
+	purplenet/openvpn_userinterface/templatetags/ovpn_tags.py,
+	purplenet/openvpn_userinterface/urls.py,
+	purplenet/openvpn_userinterface/views/__init__.py,
+	purplenet/openvpn_userinterface/views/helpers.py,
+	purplenet/openvpn_userinterface/views/loginout.py,
+	purplenet/openvpn_userinterface/views/logs.py,
+	purplenet/openvpn_userinterface/views/main.py,
+	purplenet/openvpn_userinterface/views/manage.py,
+	purplenet/openvpn_userinterface/views/order.py,
+	purplenet/openvpn_userinterface/views/revoke.py,
+	purplenet/openvpn_userinterface/views/setup.py,
+	purplenet/settings.py.dist, purplenet/urls.py, reinit.sh,
+	scripts/__init__.py, scripts/alusta_openvpn_tun_verkko.sh,
+	scripts/alusta_vde.sh, scripts/generate_crl.py,
+	scripts/generate_crl.sh, scripts/initialize_ebtables.sh,
+	scripts/learn_address.py, scripts/openvpn_auth-user-pass-verify.sh,
+	scripts/openvpn_functions.sh,
+	scripts/openvpn_initialize_network.sh, scripts/openvpn_verkko.conf,
+	scripts/test.py, setup.py, templates/admin/base_site.html,
+	templates/base/base.html, templates/certlib/openssl.cnf,
+	templates/mkca/openssl.cnf,
+	templates/openvpn_userinterface/add_admin_group_to_client.html,
+	templates/openvpn_userinterface/add_admin_group_to_org.html,
+	templates/openvpn_userinterface/add_client_to_admin_group.html,
+	templates/openvpn_userinterface/add_client_to_org.html,
+	templates/openvpn_userinterface/add_network_to_org.html,
+	templates/openvpn_userinterface/add_network_to_server.html,
+	templates/openvpn_userinterface/add_org_to_client.html,
+	templates/openvpn_userinterface/add_org_to_network.html,
+	templates/openvpn_userinterface/add_server_to_network.html,
+	templates/openvpn_userinterface/client_link.html,
+	templates/openvpn_userinterface/confirmation.html,
+	templates/openvpn_userinterface/create.html,
+	templates/openvpn_userinterface/create_admin_group.html,
+	templates/openvpn_userinterface/create_client.html,
+	templates/openvpn_userinterface/create_network.html,
+	templates/openvpn_userinterface/create_org.html,
+	templates/openvpn_userinterface/create_server.html,
+	templates/openvpn_userinterface/inherit_profile.html,
+	templates/openvpn_userinterface/login.html,
+	templates/openvpn_userinterface/main_page.html,
+	templates/openvpn_userinterface/manage.html,
+	templates/openvpn_userinterface/manage_admin_group.html,
+	templates/openvpn_userinterface/manage_client.html,
+	templates/openvpn_userinterface/manage_log.html,
+	templates/openvpn_userinterface/manage_network.html,
+	templates/openvpn_userinterface/manage_org.html,
+	templates/openvpn_userinterface/manage_org_map.html,
+	templates/openvpn_userinterface/manage_profile.html,
+	templates/openvpn_userinterface/manage_server.html,
+	templates/openvpn_userinterface/setup.html,
+	templates/openvpn_userinterface/setup_complete.html,
+	templates/openvpn_userinterface/trivial_form.html: re-licensed,
+	branded as PurpleNet
+
+2009-09-09  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/manage.py: redefined access
+	condition for org_map
+
+2009-09-09  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/manage.html: (untested) allow org_map access to managers
+
+2009-09-08  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* templates/openvpn_userinterface/manage_org.html: they asked for it
+
+2009-09-08  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* templates/openvpn_userinterface/manage_client.html: that'd be
+	gross enough to get us R-rated so let's hide it
+
+2009-09-08  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* templates/openvpn_userinterface/manage.html,
+	templates/openvpn_userinterface/manage_admin_group.html,
+	templates/openvpn_userinterface/manage_client.html: cleaned up the
+	manager user experience (tm)
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* scripts/learn_address.py, templates/openvpn_conf/client.conf,
+	templates/openvpn_conf/server.conf: script and config fixes
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : commit badbe90f6a8a6295e9bd43fbf3cac042163e95fa Merge:
+	df8509e... 9983eb4...  Author: Santtu Pajukanta
+	<santtu.pajukanta@tut.fi> Date:   Mon Sep 7 20:07:00 2009 +0300
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* scripts/learn_address.py, scripts/modify_ebtables.sh: chmod
+
+2009-09-07  Tuure Vartiainen <tuure.vartiainen@tut.fi>
+
+	* scripts/modify_ebtables.sh: paivitetty modify_ebtables.sh
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* templates/openvpn_conf/server.conf: it is super beneficial to use
+	the same cipher at both ends
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/order.py: fixed zip file
+	content privileges
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/manage_admin_group.html: small fixes
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/openssl.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/org.py,
+	openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/revoke.py,
+	scripts/generate_crl.py, templates/base/base.html,
+	templates/openvpn_userinterface/manage.html,
+	templates/openvpn_userinterface/manage_admin_group.html,
+	templates/openvpn_userinterface/manage_org_map.html: added org map
+	UI, fixed return from revoke
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/models/siteconfig.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/settings.py.dist: Shibbolethified logout
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/loginout.py: remember to
+	update group membership
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/auth/backends.py: get_user
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/auth/__init__.py, openvpnweb/auth/backends.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/settings.py.dist: try 2 at shibboleth authentication
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/loginout.py: yet another
+	stupid import fix oneliner
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/setup.py, reinit.sh: 
+	tuohitorvi-specific fixes
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/loginout.py: split login
+	into Shibboleth and non-Shibboleth variants
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/manage.py: well obviously
+	that didn't work so let's try this instead
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : commit 16c4aaf5f6b572c255d35c700dba12d74af06b1e Author: Santtu
+	Pajukanta <santtu.pajukanta@tut.fi> Date:   Mon Sep 7 17:36:28 2009
+	+0300
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : chmod
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/setup.py: split setup process
+	into Shibboleth and non-Shibboleth ones
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* media/style_base2.css,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/manage_network.html,
+	templates/openvpn_userinterface/manage_org.html: added cert list at
+	manage_org
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : commit 13f63271e2c1efc17e8412ff6e9c90d7c04c6600 Author: Tuure
+	Vartiainen <tuure.vartiainen@tut.fi> Date:   Mon Sep 7 16:52:53 2009
+	+0300
+
+2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/forms/select.py,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/models/network.py,
+	openvpnweb/openvpn_userinterface/models/org.py,
+	openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/models/server.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/main.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/order.py,
+	openvpnweb/openvpn_userinterface/views/setup.py, reinit.sh,
+	scripts/test.py, templates/openvpn_conf/client.conf,
+	templates/openvpn_conf/server.conf,
+	templates/openvpn_conf/server.ovpn,
+	templates/openvpn_userinterface/add_admin_group_to_client.html,
+	templates/openvpn_userinterface/add_org_to_network.html,
+	templates/openvpn_userinterface/main_page.html,
+	templates/openvpn_userinterface/manage.html,
+	templates/openvpn_userinterface/manage_admin_group.html,
+	templates/openvpn_userinterface/manage_client.html,
+	templates/openvpn_userinterface/manage_network.html,
+	templates/openvpn_userinterface/manage_org.html: management
+	interface work
+
+2009-09-07  Tuure Vartiainen <tuure.vartiainen@tut.fi>
+
+	* templates/openvpn_conf/server.conf: Lisasin server.conf tiedoston
+	templaten pohjaksi.
+
+2009-09-07  Tuure Vartiainen <tuure.vartiainen@tut.fi>
+
+	* scripts/initialize_ebtables.sh: Lisattiin ebtablesin
+	alustus-scripti ja paivitettiin learn address -hook scriptin kautta
+	ajettavaa modify_ebtables.sh scriptia.
+
+2009-09-07  Tuure Vartiainen <tuure.vartiainen@tut.fi>
+
+	* templates/openvpn_conf/client.conf: Lisattiin client.conf client
+	configuraation templaten pohjaksi.
+
+2009-08-31  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* media/style_base2.css,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/models/network.py,
+	openvpnweb/openvpn_userinterface/models/server.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	scripts/learn_address.py, templates/openvpn_conf/server.ovpn,
+	templates/openvpn_userinterface/manage_network.html,
+	templates/openvpn_userinterface/manage_profile.html,
+	templates/openvpn_userinterface/manage_server.html: implemented
+	profile attribute form and server config generation
+
+2009-08-31  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views/order.py: client cas now
+	created
+
+2009-08-28  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/mkca.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/client.py,
+	openvpnweb/openvpn_userinterface/forms/group.py,
+	openvpnweb/openvpn_userinterface/forms/select.py,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/ca.py,
+	openvpnweb/openvpn_userinterface/models/certificates.py,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/models/org.py,
+	openvpnweb/openvpn_userinterface/models/siteconfig.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/helpers.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/order.py,
+	openvpnweb/openvpn_userinterface/views/setup.py, reinit.sh,
+	scripts/learn_address.py,
+	templates/openvpn_userinterface/add_client_to_admin_group.html,
+	templates/openvpn_userinterface/add_org_to_client.html,
+	templates/openvpn_userinterface/create_admin_group.html,
+	templates/openvpn_userinterface/manage_admin_group.html,
+	templates/openvpn_userinterface/manage_client.html,
+	templates/openvpn_userinterface/manage_group.html,
+	templates/openvpn_userinterface/manage_network.html,
+	templates/openvpn_userinterface/manage_org.html: (untested, broken) management interface work, bug fixes
+
+2009-08-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/access_control.py: fixed 'Cant
+	adapt' in non-logged-in situations
+
+2009-08-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/openssl.py: more python 2.5 compatibility stuff in
+	openssl.py
+
+2009-08-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/openssl.py: temporary fix in openssl.py for python 2.5
+
+2009-08-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/settings.py.dist: ugly
+
+2009-08-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/reinit_soft.py, openvpnweb/certificate_manager.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/client.py,
+	openvpnweb/openvpn_userinterface/forms/network.py,
+	openvpnweb/openvpn_userinterface/forms/select.py,
+	openvpnweb/openvpn_userinterface/forms/server.py,
+	openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/order.py,
+	openvpnweb/openvpn_userinterface/views/revoke.py,
+	scripts/__init__.py, scripts/alusta_openvpn_tun_verkko.sh,
+	scripts/alusta_silta1.sh, scripts/alusta_vde.sh,
+	scripts/generate_crl.sh, scripts/learn_address.py,
+	scripts/modify_ebtables.sh,
+	scripts/openvpn_auth-user-pass-verify.sh,
+	scripts/openvpn_functions.sh,
+	scripts/openvpn_initialize_network.sh, scripts/openvpn_verkko.conf,
+	scripts/verkkojarjestelyt.txt,
+	templates/openvpn_userinterface/inherit_profile.html,
+	templates/openvpn_userinterface/manage.html,
+	templates/openvpn_userinterface/manage_client.html,
+	templates/openvpn_userinterface/manage_network.html,
+	templates/openvpn_userinterface/manage_org.html,
+	templates/openvpn_userinterface/manage_profile.html,
+	templates/openvpn_userinterface/manage_server.html,
+	templates/openvpn_userinterface/trivial_form.html: management
+	interface work and python 2.5 compatibility
+
+2009-08-24  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/select.py,
+	openvpnweb/openvpn_userinterface/forms/server.py,
+	openvpnweb/openvpn_userinterface/models/certificates.py,
+	openvpnweb/openvpn_userinterface/models/network.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/add_network_to_server.html,
+	templates/openvpn_userinterface/add_server_to_network.html,
+	templates/openvpn_userinterface/client_link.html,
+	templates/openvpn_userinterface/create_network.html,
+	templates/openvpn_userinterface/create_server.html,
+	templates/openvpn_userinterface/manage_group.html,
+	templates/openvpn_userinterface/manage_network.html,
+	templates/openvpn_userinterface/manage_org.html,
+	templates/openvpn_userinterface/manage_server.html: management
+	interface work
+
+2009-08-21  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* STYLE, bin/add_relevant_files_to_version_control.sh,
+	certlib/helpers.py, media/style_base2.css,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/select.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/add_admin_group_to_org.html,
+	templates/openvpn_userinterface/add_client_to_org.html,
+	templates/openvpn_userinterface/add_network_to_org.html,
+	templates/openvpn_userinterface/manage.html,
+	templates/openvpn_userinterface/manage_client.html,
+	templates/openvpn_userinterface/manage_org.html: management
+	interface work
+
+2009-08-20  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* media/style_base2.css,
+	openvpnweb/openvpn_userinterface/access_control.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/search.py,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/create.html,
+	templates/openvpn_userinterface/create_client.html,
+	templates/openvpn_userinterface/create_org.html,
+	templates/openvpn_userinterface/manage.html,
+	templates/openvpn_userinterface/manage_org.html: increased the
+	functionality of the management interface
+
+2009-08-19  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/reinit_soft.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/client.py,
+	openvpnweb/openvpn_userinterface/forms/group.py,
+	openvpnweb/openvpn_userinterface/forms/org.py,
+	openvpnweb/openvpn_userinterface/forms/search.py,
+	openvpnweb/openvpn_userinterface/forms/server.py,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/models/logging.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/manage_org.html: (untested) management interface work
+
+2009-08-19  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* .gitignore, certlib/openssl_service.proto: .gitignore and stuff
+
+2009-08-18  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/reinit_hard.py, bin/reinit_soft.py,
+	openvpnweb/openvpn_userinterface/models/siteconfig.py,
+	openvpnweb/openvpn_userinterface/views/setup.py, reinit.sh,
+	reinit_hard.py, reinit_soft.py: setup works
+
+2009-08-18  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* fixtures/initial_data.json, openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/access_control.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/client.py,
+	openvpnweb/openvpn_userinterface/forms/network.py,
+	openvpnweb/openvpn_userinterface/forms/org.py,
+	openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/models/org.py,
+	openvpnweb/openvpn_userinterface/models/siteconfig.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/helpers.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/logs.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/setup.py, reinit.py,
+	reinit.sh, reinit_hard.py, reinit_soft.py,
+	templates/openvpn_userinterface/create.html,
+	templates/openvpn_userinterface/create_client.html,
+	templates/openvpn_userinterface/create_org.html,
+	templates/openvpn_userinterface/login.html,
+	templates/openvpn_userinterface/manage_org.html,
+	templates/openvpn_userinterface/setup_complete.html: refactoring,
+	setup work reinit_soft.py is a work in progress.
+
+2009-08-13  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* .project, .pydevproject, media/style_base2.css,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/network.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/manage.html: Organization management
+	interface
+
+2009-08-11  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models/network.py: docstrings and
+	comments
+
+2009-08-11  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/network_attribute_types.py, bin/test_network_profiles.py: 
+	chmod the scripts to 755
+
+2009-08-11  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/network_attribute_types.py, bin/test_network_profiles.py,
+	fixtures/initial_data.json,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/network.py: Implemented the
+	algorithm for flattening net profiles.
+
+2009-08-10  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/models/network.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/setup.py,
+	templates/openvpn_userinterface/setup.html,
+	templates/openvpn_userinterface/setupwizard.html: CA setup now works
+
+2009-08-04  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* reinit.sh: It is also beneficial to chmod the CA dir.
+
+2009-08-04  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/data.py, certlib/mkca.py,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/ca.py, reinit.py, reinit.sh: 
+	implemented create_ca and fixed a statbug There was a statistical bug in mkca that caused it to fail with the
+	probability of 1-(1-1/16)^2. Two random numbers each run were
+	generated that OpenSSL did not accept if they were within [0x0,
+	0xfffffff] due to some ASN.1 formatting rules. Now they are padded
+	with zeroes to the length of 8 hexadecimal digits.
+
+2009-08-04  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* media/style_base.css, media/style_base2.css,
+	openvpnweb/openvpn_userinterface/views/logs.py,
+	openvpnweb/openvpn_userinterface/views/revoke.py,
+	templates/openvpn_userinterface/manage_log.html: a few fixes to
+	logging
+
+2009-08-03  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* STYLE, openvpnweb/openvpn_userinterface/logging.py,
+	openvpnweb/openvpn_userinterface/models/certificates.py,
+	openvpnweb/openvpn_userinterface/models/logging.py,
+	openvpnweb/openvpn_userinterface/templatetags/__init__.py,
+	openvpnweb/openvpn_userinterface/templatetags/ovpn_tags.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/logs.py,
+	openvpnweb/openvpn_userinterface/views/revoke.py,
+	templates/openvpn_userinterface/manage_log.html: logging facilities
+	ready
+
+2009-07-31  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/models/__init__.py,
+	openvpnweb/openvpn_userinterface/models/ca.py,
+	openvpnweb/openvpn_userinterface/models/certificates.py,
+	openvpnweb/openvpn_userinterface/models/client.py,
+	openvpnweb/openvpn_userinterface/models/logging.py,
+	openvpnweb/openvpn_userinterface/models/network.py,
+	openvpnweb/openvpn_userinterface/models/org.py,
+	openvpnweb/openvpn_userinterface/models/org_map.py,
+	openvpnweb/openvpn_userinterface/models/server.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/logs.py,
+	openvpnweb/openvpn_userinterface/views/main.py,
+	openvpnweb/openvpn_userinterface/views/order.py,
+	openvpnweb/openvpn_userinterface/views/revoke.py,
+	openvpnweb/openvpn_userinterface/views/setup.py,
+	templates/openvpn_userinterface/manage_log.html: (broken) split models into several files, hilarity ensued
+
+2009-07-30  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/views/setup.py: setup stuff
+
+2009-07-28  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/setup.py,
+	openvpnweb/urls.py,
+	templates/openvpn_userinterface/setupwizard.html: (untested, broken) setup process fundamentals
+
+2009-07-23  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/forms/__init__.py,
+	openvpnweb/openvpn_userinterface/forms/setup.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/setup.py,
+	templates/openvpn_userinterface/setupwizard.html: basis for the
+	setup wizard
+
+2009-07-23  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views.py,
+	openvpnweb/openvpn_userinterface/views/__init__.py,
+	openvpnweb/openvpn_userinterface/views/helpers.py,
+	openvpnweb/openvpn_userinterface/views/loginout.py,
+	openvpnweb/openvpn_userinterface/views/main.py,
+	openvpnweb/openvpn_userinterface/views/manage.py,
+	openvpnweb/openvpn_userinterface/views/order.py,
+	openvpnweb/openvpn_userinterface/views/revoke.py,
+	openvpnweb/openvpn_userinterface/views/setup.py, reinit.py: split
+	views.py into several files in their own package
+
+2009-07-23  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/urls.py, templates/base/base.html: 
+	getting ready for setup
+
+2009-07-22  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/urls.py: wrong line commented out
+
+2009-07-22  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	openvpnweb/tut_org_map.py,
+	templates/openvpn_userinterface/main_page.html,
+	templates/openvpn_userinterface/manage.html: management interface
+
+2009-07-20  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* env.sh, openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	openvpnweb/tut_org_map.py, reinit.py, templates/base/base.html,
+	templates/openvpn_userinterface/manage.html: asymptotically better
+	version of update_group_membership
+
+2009-07-16  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/helpers.py, openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py, reinit.py: initial
+	implementation for org mapping
+
+2009-07-16  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/tut_org_map.py, templates/base/base.html: re-indented
+	and cleaned the base template
+
+2009-07-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views.py,
+	templates/base/base.html: logout_page now only logs out with POST
+
+2009-07-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* STYLE, openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views.py, reinit.py,
+	templates/openvpn_userinterface/main_page.html,
+	templates/openvpn_userinterface/manage.html: rewrote main_page
+
+2009-07-13  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/openssl.py, openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py, reinit.py, reinit.sh: 
+	fixed PKCS#12
+
+2009-07-10  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py: okay, now I've more or
+	less fixed what I've been breaking all the week ;)
+
+2009-07-09  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py: model stuff still
+
+2009-07-08  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/helpers.py, certlib/mkca.py, certlib/openssl.py,
+	openvpnweb/openvpn_userinterface/models.py: fixed a small typo in
+	create_pkcs12
+
+2009-07-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views.py: broken revision: oops,
+	forgot that file
+
+2009-07-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* env.sh, openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	templates/openvpn_userinterface/manage.html: broken revision: model
+	changes underway
+
+2009-07-06  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/access_control.py,
+	openvpnweb/openvpn_userinterface/views.py: access control stub
+
+2009-07-01  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/urls.py: moved the main page to
+	/openvpn and login page to /openvpn/login. Django makes changes like
+	this delightfully easy - it was three lines <3
+
+2009-07-01  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	templates/openvpn_userinterface/confirmation.html,
+	templates/openvpn_userinterface/main_page.html: download_page is no
+	more, and order_page and revoke_page have been rewritten not warn if
+	they are accessed with GET.
+
+2009-06-30  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	templates/openvpn_userinterface/main_page.html: The session data
+	handling is somewhat difficult to get right and I'm about to rewrite
+	revoke_page to convey some information using the URL instead of the
+	session data.
+
+2009-06-29  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	templates/openvpn_userinterface/main_page.html: model changes
+	implemented in views. there's a problem with NetworkProfile MTM
+	reference that prevents me from using the admin form to manage them,
+	which I'm hoping to solve tomorrow.
+
+2009-06-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models.py: model changes underway
+
+2009-06-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/models.py: newline
+
+2009-06-24  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/mkca.py, certlib/openssl.py,
+	openvpnweb/openvpn_userinterface/models.py: those collisions aren't
+	that rare after all
+
+2009-06-24  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/mkca.py, certlib/openssl.py: oops, fixed
+
+2009-06-24  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/mkca, certlib/helpers.py, certlib/mkca.py,
+	certlib/openssl.py, env.sh,
+	openvpnweb/openvpn_userinterface/models.py: some refactoring,
+	documentation and indentation fixes
+
+2009-06-22  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* TODO: TODO
+
+2009-06-22  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/data.py, certlib/mkca.py, certlib/openssl.py,
+	openvpnweb/certificate_manager.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	templates/certlib/openssl.cnf,
+	templates/openvpn_userinterface/main_page.html: existing
+	functionality now works with new-style CAs
+
+2009-06-17  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/admin.py,
+	openvpnweb/openvpn_userinterface/models.py: Network_attribute
+	renamed to NetworkAttribute as recommended for classes by PEP-8
+
+2009-06-17  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/openssl.py, openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	templates/openvpn_userinterface/login.html,
+	templates/openvpn_userinterface/main_page.html: fixed more hardcoded
+	urls; conversion to discrete CAs mostly done, untested
+
+2009-06-17  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views.py, openvpnweb/urls.py,
+	openvpnweb/views.py: de-hardcoded some redirect pathen
+
+2009-06-15  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/openvpn_userinterface/views.py: put some XXX
+	annotations near unspecified try-excepts
+
+2009-06-15  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* openvpnweb/certificate_manager.py,
+	openvpnweb/openvpn_userinterface/admin.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views.py, openvpnweb/urls.py: 
+	numerous fixes
+
+2009-06-15  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/mkca, certlib/helpers.py, certlib/mkca.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/views.py: preliminary model changes
+	for discrete CAs
+
+2009-06-11  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/openssl.py: fixed mkca -s use-ca
+
+2009-06-11  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/mkca.py, certlib/openssl.py,
+	openvpnweb/certificate_manager.py: mkca feature-complete... I think.
+
+2009-06-10  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/cnf.py, certlib/openssl.py: dn construction stuff in
+	progress in mkca.py
+
+2009-06-10  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* bin/mkca, certlib/cnf.py, certlib/mkca.py: cnf
+
+2009-06-10  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* TODO, bin/mkca: whoops-a-daisy, forgot bin/mkca
+
+2009-06-09  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/data.py, certlib/helpers.py, certlib/mkca.cnf,
+	certlib/mkca.py, certlib/openssl.py, certlib/openssl_data.py: fixes
+	and minor reorg
+
+2009-06-08  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* certlib/mkca.py, certlib/openssl.py,
+	openvpnweb/openvpn_userinterface/models.py: now creates CA keys, too
+	(not tested yet). next up: attributes and extensions for newly
+	created CAs
+
+2009-06-05  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* BUGS, BUGS.txt, README, __init__.py, certificate_manager.py,
+	certlib/__init__.py, certlib/enums.py, certlib/helpers.py,
+	certlib/keygen.py, certlib/mkca.py, certlib/openssl_data.py,
+	helper_functions.py, manage.py, openvpn_userinterface/__init__.py,
+	openvpn_userinterface/admin.py, openvpn_userinterface/models.py,
+	openvpn_userinterface/urls.py, openvpn_userinterface/views.py,
+	openvpnweb/__init__.py, openvpnweb/certificate_manager.py,
+	openvpnweb/helper_functions.py, openvpnweb/manage.py,
+	openvpnweb/openvpn_userinterface/__init__.py,
+	openvpnweb/openvpn_userinterface/admin.py,
+	openvpnweb/openvpn_userinterface/models.py,
+	openvpnweb/openvpn_userinterface/urls.py,
+	openvpnweb/openvpn_userinterface/views.py,
+	openvpnweb/settings.py.dist, openvpnweb/urls.py,
+	openvpnweb/views.py, settings.py.dist, setup.py,
+	templates/certlib/openssl.cnf, urls.py, views.py: massive reorg
+
+2009-06-05  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* BUGS.txt: BUGS
+
+2009-06-02  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* initial import of the web interface ported to django 1.0.2
+

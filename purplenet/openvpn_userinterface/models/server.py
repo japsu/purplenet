@@ -46,6 +46,8 @@ class Server(models.Model):
     mode = models.CharField(max_length=30, choices=MODE_CHOICES) 
     certificate = models.OneToOneField("ServerCertificate",
         related_name="user")
+    
+    config_template = models.CharField(max_length=30)
 
     # REVERSE: network_set = ManyToMany(Network)
     
@@ -75,7 +77,7 @@ class Server(models.Model):
     
     @property
     def server_config(self):
-        return render_to_string("openvpn_conf/server.conf", self._config_vars)
+        return render_to_string(self.template, self._config_vars)
     
     def __unicode__(self):
         return self.name

@@ -90,16 +90,47 @@ Installation
 3. Copy purplenet/settings.py.dist to purplenet/settings.py and edit it to
    match your installation.
 
-4. Configure the web server (see configuration examples below)
+4. Source "env.sh" and run "manage syncdb".
 
-5. Point your browser to http://path/to/purplenet/setup and fill in the
+5. Configure the web server (see configuration examples below)
+
+6. Prepare a directory that is writable by your web server. This directory will
+   contain the Certificate Authorities of your installation.
+
+7. Point your browser to http://path/to/purplenet/setup and fill in the
    setup form.
 
-6. Log in as a superuser and create at least one organization, network and
+8. Log in as a superuser and create at least one organization, network and
    server.
    
-7. Download the OpenVPN server configuration from your PurpleNet portal and
+9. Download the OpenVPN server configuration from your PurpleNet portal and
    use it to deploy the OpenVPN server.
+
+Configuration example
+=====================
+
+This configuration example is for Apache 2.2, Django 1.0.2 and mod_python.
+Paths will need to be adjusted for your installation.
+
+/etc/apache2/sites-available/default:
+
+    <Location /purplenet>
+            SetHandler python-program
+            PythonHandler django.core.handlers.modpython
+            SetEnv DJANGO_SETTINGS_MODULE purplenet.settings
+            PythonOption django.root /purplenet
+            PythonDebug On
+            PythonAutoReload On
+            PythonPath "['/path/to/purplenet'] + sys.path"
+            PythonInterpreter purplenet
+    </Location>
+
+    Alias "/public_demo/media/admin" "/usr/lib/python2.5/site-packages/Django-1.0.2_final-py2.5.egg/django/contrib/admin/media"
+    Alias "/public_demo/media" "/path/to/purplenet/media"
+
+    <Location /purplenet/media>
+            SetHandler None
+    </Location>
 
 Authors and acknowledgements
 ============================

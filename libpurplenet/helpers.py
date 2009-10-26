@@ -27,7 +27,9 @@ Useful helper functions that are used in several places in PurpleNet.
 from __future__ import with_statement, absolute_import
 
 from django.template.loader import render_to_string
+from django.conf import settings
 from functools import wraps
+from glob import glob
 
 import sys, os
 import logging
@@ -182,6 +184,11 @@ def sanitize_name(name):
     # think of a better way to handle values that get reduced ad absurdum, go
     # ahead.
     sanitized_name = "".join(i for i in name if i.isalnum()).lower()
+
+    # Django might give us Unicode input.
+    if type(sanitized_name) is unicode:
+        sanitized_name = sanitized_name.encode("UTF-8")
+
     if sanitized_name:
         return sanitized_name
     else:
@@ -200,3 +207,16 @@ def zip_write_file(zip, filename, contents, mode=0666):
     info = zipfile.ZipInfo(filename)
     info.external_attr = mode << 16L
     zip.writestr(info, contents)
+
+def get_config_templates(config_type="server"):
+    # XXX kludge
+    templates = set()
+    for base in settings.TEMPLATE_DIRS:
+        template_files = glob(os.path.join(base, "openvpn_conf/%s/*" % config_type))
+        for filename in template_files:
+            if filename.startswith(base):
+                filename = filename[len(base):]
+            if filename.startswith("/"):
+                filename = filename[1:]
+            templates.add((filename, filename)) 
+    return list(templates)
