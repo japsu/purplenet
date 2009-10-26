@@ -24,12 +24,19 @@
 The management interface of PurpleNet.
 """
 
+from __future__ import with_statement
+
 from ..access_control import (manager_required, superuser_required,
     require_standalone, require_shibboleth)
 from purplenet.openvpn_userinterface.forms import *
 from purplenet.openvpn_userinterface.models import *
 from .helpers import create_view, post_confirmation_page, redirect
 from .setup import create_ca
+from libpurplenet.helpers import zip_write_file, read_file
+from libpurplenet import openssl
+from contextlib import closing
+
+import zipfile
 
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -435,8 +442,33 @@ def manage_server_page(request, server_id):
 @require_GET
 def download_server_config_page(request, server_id):
     server = get_object_or_404(Server, id=int(server_id))
-    response = HttpResponse(mimetype="text/plain")
-    response.write(server.server_config)
+    site_config = SiteConfig.objects.get()
+    sanitized_name = server.sanitized_name
+    
+    # TODO encapsulate this
+    
+    response = HttpResponse(mimetype="application/zip")
+    response['Content-Disposition'] = 'filename=%s.zip' % sanitized_name 
+    
+    server_config = server.server_config
+    key = server.certificate.key
+    certificate = server.certificate.certificate
+    ca_crt_path = site_config.client_ca.get_ca_certificate_path()
+
+    # FIXME
+#    pkcs12 = openssl.create_pkcs12(
+#        crt=certificate,
+#        key=key,
+#        chain_dir=site_config.copies_dir,
+#        extra_crt_path=ca_crt_path
+#    )
+    
+    with closing(zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)) as zip:
+        zip_write_file(zip, "%s.conf" % sanitized_name, server_config, mode=0644)
+        zip_write_file(zip, "server.key", key, mode=0400)
+        zip_write_file(zip, "server.crt", certificate, mode=0444)
+        zip_write_file(zip, "ca.crt", read_file(ca_crt_path), mode=0444)
+    
     return response
 
 @superuser_required

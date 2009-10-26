@@ -28,6 +28,8 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.core.urlresolvers import reverse
 
+from libpurplenet.helpers import sanitize_name
+
 class Server(models.Model):
     name = models.CharField(max_length=30)
     address = models.IPAddressField()
@@ -84,6 +86,10 @@ class Server(models.Model):
     @property
     def manage_url(self):
         return reverse("manage_server_page", kwargs={"server_id":self.id})
+
+    @property
+    def sanitized_name(self):
+        return sanitize_name(self.name)
 
     class Admin: pass
 

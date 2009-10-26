@@ -31,6 +31,7 @@ from functools import wraps
 
 import sys, os
 import logging
+import zipfile
 
 log = logging.getLogger()
 
@@ -94,6 +95,10 @@ def write_file(filename, contents, force=False, mode=0644):
         f.write(contents)
 
     os.chmod(filename, mode)
+
+def read_file(filename):
+    with open(filename, "r") as f:
+        return f.read()
 
 def render_to_file(filename, template_name, context, force):
     write_file(filename, render_to_string(template_name, context), force)
@@ -184,3 +189,14 @@ def sanitize_name(name):
         hasher = md5()
         hasher.update(name)
         return hasher.hexdigest()[12:20]
+    
+def zip_write_file(zip, filename, contents, mode=0666):
+    """zip_write_file(zip, filename, contents, mode=0666)
+    
+    Writes a file into a ZipFile. Also sets the mode of the file, which
+    a plain zip.writestr won't do (resulting in mode=0000).
+    """
+    
+    info = zipfile.ZipInfo(filename)
+    info.external_attr = mode << 16L
+    zip.writestr(info, contents)

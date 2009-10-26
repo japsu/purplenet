@@ -40,11 +40,7 @@ from cStringIO import StringIO
 from contextlib import closing
 
 import zipfile
-
-def _zip_write_file(zip, filename, contents, mode=0666):
-    info = zipfile.ZipInfo(filename)
-    info.external_attr = mode << 16L
-    zip.writestr(info, contents)
+from libpurplenet.helpers import zip_write_file
 
 @login_required
 def order_page(request, org_id, network_id):
@@ -124,10 +120,10 @@ def order_page(request, org_id, network_id):
 
         # Write config and key files into the zip file
         with closing(zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)) as zip:
-            _zip_write_file(zip, keys_filename, pkcs12)
+            zip_write_file(zip, keys_filename, pkcs12)
             
             for config_filename in config_filenames:
-                _zip_write_file(zip, config_filename, client_config)
+                zip_write_file(zip, config_filename, client_config)
             
         return response
 
