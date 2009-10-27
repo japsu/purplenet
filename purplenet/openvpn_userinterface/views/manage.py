@@ -477,9 +477,9 @@ def download_server_config_page(request, server_id):
     
     with closing(zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)) as zip:
         zip_write_file(zip, "%s.conf" % sanitized_name, server_config, mode=0644)
-        zip_write_file(zip, "server.key", key, mode=0400)
-        zip_write_file(zip, "server.crt", certificate, mode=0444)
-        zip_write_file(zip, "ca.crt", read_file(ca_crt_path), mode=0444)
+        zip_write_file(zip, "%s.key" % sanitized_name, key, mode=0400)
+        zip_write_file(zip, "%s.crt" % sanitized_name, certificate, mode=0444)
+        zip_write_file(zip, "%s_client_ca.crt" % sanitized_name, read_file(ca_crt_path), mode=0444)
     
     return response
 

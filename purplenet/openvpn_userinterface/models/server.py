@@ -55,7 +55,7 @@ class Server(models.Model):
              
     @property
     def _config_vars(self):
-        vars = dict()
+        vars = dict(sanitized_name=self.sanitized_name)
         
         # Export some fields to the configuration
         for field_name in Server.EXPORT_FIELDS:
