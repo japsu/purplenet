@@ -1,10 +1,50 @@
 2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
+	* purplenet/openvpn_userinterface/forms/group.py,
+	purplenet/openvpn_userinterface/views/manage.py,
+	templates/openvpn_userinterface/add_org_to_admin_group.html,
+	templates/openvpn_userinterface/manage_admin_group.html: implemented
+	changing group names
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* purplenet/openvpn_userinterface/views/__init__.py: fixed an import
+	in views
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* purplenet/openvpn_userinterface/urls.py,
+	purplenet/openvpn_userinterface/views/manage.py: fixed? manage_group
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* purplenet/openvpn_userinterface/models/server.py: another stupid
+	exception fixed in models.server
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* purplenet/openvpn_userinterface/models/org_map.py: fixed a stupid
+	bug in load_org_map
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : commit 7c3891497a589e8a4369b4453b97ec57ea3c9ea0 Merge:
+	1141c89... ce0a419...  Author: Santtu Pajukanta
+	<santtu.pajukanta@tut.fi> Date:   Mon Oct 26 17:47:45 2009 +0200
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : commit 17da47ac46e0bd584f22e6648b498d5c043da83d Author: Santtu
+	Pajukanta <santtu.pajukanta@tut.fi> Date:   Mon Oct 26 16:08:13 2009
+	+0200
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
 	* : config template selection
 
 2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
-	* ChangeLog: add ChangeLog, release 0.6.0
+	* ChangeLog: ChangeLog update
 
 2009-10-14  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
@@ -227,9 +267,9 @@
 
 2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
-	* : commit badbe90f6a8a6295e9bd43fbf3cac042163e95fa Merge: df8509e
-	9983eb4 Author: Santtu Pajukanta <santtu.pajukanta@tut.fi> Date:
-	Mon Sep 7 20:07:00 2009 +0300
+	* : commit badbe90f6a8a6295e9bd43fbf3cac042163e95fa Merge:
+	df8509e... 9983eb4...  Author: Santtu Pajukanta
+	<santtu.pajukanta@tut.fi> Date:   Mon Sep 7 20:07:00 2009 +0300
 
 2009-09-07  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
