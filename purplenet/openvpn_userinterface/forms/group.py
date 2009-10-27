@@ -26,6 +26,7 @@ Forms related to the Group model in the Django authentication framework.
 from django import forms
 from django.contrib.auth.models import Group
 
+# XXX rename
 class CreateGroupForm(forms.ModelForm):
     class Meta:
         model = Group

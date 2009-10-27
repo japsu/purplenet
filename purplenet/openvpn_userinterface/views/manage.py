@@ -493,6 +493,7 @@ def create_admin_group_page(request, form):
     return redirect("manage_admin_group_page", admin_group_id=admin_group.id)
 
 @manager_required
+@require_http_methods(["GET","POST"])
 def manage_admin_group_page(request, admin_group_id):
     client = request.session["client"]
     admin_group = get_object_or_404(AdminGroup, id=int(admin_group_id))
@@ -501,7 +502,16 @@ def manage_admin_group_page(request, admin_group_id):
     for org in admin_group.managed_org_set.all():
         orgs.append((org, org.may_be_managed_by(client)))
 
+    if request.method == "POST":
+        form = CreateGroupForm(request.POST, instance=admin_group.group)
+        if form.is_valid():
+            form.save()
+
+    else:
+        form = CreateGroupForm(instance=admin_group.group)
+
     vars = {
+        "form" : form,
         "orgs" : orgs,
         "client" : client,
         "admin_group" : admin_group,
