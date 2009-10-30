@@ -1,3 +1,20 @@
+2009-10-27  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* : commit 40c5f455011cf3a626134bc401f71191b422b40d Merge:
+	d374502... aeb84c3...  Author: Santtu Pajukanta
+	<santtu.pajukanta@tut.fi> Date:   Tue Oct 27 15:26:57 2009 +0200
+
+2009-10-27  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* purplenet/openvpn_userinterface/models/server.py,
+	purplenet/openvpn_userinterface/views/manage.py,
+	templates/openvpn_conf/server/basic.conf: named all files in server
+	config according to the server name Fixes: 0000005
+
+2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
+
+	* ChangeLog: ChangeLog for 0.7.1
+
 2009-10-26  Santtu Pajukanta <santtu.pajukanta@tut.fi>
 
 	* purplenet/openvpn_userinterface/forms/group.py,
